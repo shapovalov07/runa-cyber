@@ -1,0 +1,15 @@
+services:
+  runa-cyber-club:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: runa-cyber-club
+    ports:
+      - "3030:3030"
+    env_file:
+      - .env.local
+    environment:
+      NODE_ENV: production
+      PORT: 3030
+      HOSTNAME: 0.0.0.0
+    restart: unless-stopped
