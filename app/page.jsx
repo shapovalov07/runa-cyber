@@ -1,5 +1,8 @@
 import Link from 'next/link';
 import ClubPhotosSection from '@/components/ClubPhotosSection';
+import NewsSection from '@/components/NewsSection';
+
+export const dynamic = 'force-dynamic';
 
 export default function HomePage() {
   return (
@@ -53,21 +56,25 @@ export default function HomePage() {
             Из описания и раздела HARDWARE: мониторы 380Hz и 540Hz, процессоры i5-14600KF / 7600X3D, периферия Logitech,
             кресла Anda Seat Kaiser 3XL, отдельные комнаты и продуманная атмосфера.
           </p>
-          <div className="grid grid-2">
-            <article className="card reveal">
-              <span className="badge">Железо</span>
-              <h3>FPS-конфигурации</h3>
-              <ul>
+          <div className="grid grid-2 feature-grid">
+            <article className="card reveal feature-card">
+              <div className="feature-head">
+                <h3>FPS-конфигурации</h3>
+                <span className="feature-badge">Железо</span>
+              </div>
+              <ul className="feature-list">
                 <li>RTX 5060 Ti и RTX 5070 Ti</li>
                 <li>DDR5 32 GB</li>
                 <li>RUNA Tech 27&quot; (380/540Hz)</li>
                 <li>Logitech G Pro / Superlight 2</li>
               </ul>
             </article>
-            <article className="card reveal">
-              <span className="badge">Комфорт</span>
-              <h3>Форматы игры и отдыха</h3>
-              <ul>
+            <article className="card reveal feature-card">
+              <div className="feature-head">
+                <h3>Форматы игры и отдыха</h3>
+                <span className="feature-badge">Комфорт</span>
+              </div>
+              <ul className="feature-list">
                 <li>Solo / Duo / Trio комнаты</li>
                 <li>PS5 ROOMS 4K 86&quot;</li>
                 <li>Кинотеатр Dolby Atmos</li>
@@ -77,6 +84,8 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      <NewsSection limit={4} showAllButton />
 
       <ClubPhotosSection />
 

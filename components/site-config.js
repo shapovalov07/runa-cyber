@@ -4,6 +4,7 @@ export const navLinks = [
   { href: '/tournaments', label: 'Кибертурниры' },
   { href: '/franchise', label: 'Франшизы' },
   { href: '/contacts', label: 'Контакты' },
+  { href: '/admin', label: 'Админка' },
 ];
 
 export const contactLinks = [

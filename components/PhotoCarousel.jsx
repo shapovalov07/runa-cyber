@@ -1,48 +1,77 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 export default function PhotoCarousel({ items }) {
   const viewportRef = useRef(null);
   const trackRef = useRef(null);
-  const [canPrev, setCanPrev] = useState(false);
-  const [canNext, setCanNext] = useState(true);
+  const activePageRef = useRef(0);
+  const pageCountRef = useRef(1);
+  const [activePage, setActivePage] = useState(0);
+  const [pageCount, setPageCount] = useState(1);
 
   const safeItems = useMemo(() => items ?? [], [items]);
+
+  useEffect(() => {
+    activePageRef.current = activePage;
+  }, [activePage]);
+
+  useEffect(() => {
+    pageCountRef.current = pageCount;
+  }, [pageCount]);
 
   useEffect(() => {
     const viewport = viewportRef.current;
     const track = trackRef.current;
     if (!viewport || !track) return;
 
-    const getStep = () => {
+    const getMetrics = () => {
       const firstItem = track.querySelector('.carousel-item');
-      if (!firstItem) return viewport.clientWidth;
+      if (!firstItem) {
+        return {
+          step: viewport.clientWidth,
+          maxPage: 0,
+          pages: 1,
+        };
+      }
+
       const styles = window.getComputedStyle(track);
       const gap = parseFloat(styles.columnGap || styles.gap || '0');
-      return firstItem.getBoundingClientRect().width + gap;
+      const itemWidth = firstItem.getBoundingClientRect().width;
+      const step = itemWidth + gap;
+      const visibleCount = Math.max(1, Math.round((viewport.clientWidth + gap) / step));
+      const maxPage = Math.max(0, safeItems.length - visibleCount);
+
+      return {
+        step,
+        maxPage,
+        pages: maxPage + 1,
+      };
     };
 
-    const updateButtons = () => {
-      const maxScroll = viewport.scrollWidth - viewport.clientWidth - 1;
-      setCanPrev(viewport.scrollLeft > 1);
-      setCanNext(viewport.scrollLeft < maxScroll);
+    const updateCarouselState = () => {
+      const { step, maxPage, pages } = getMetrics();
+      const nextPage = step > 0 ? Math.round(viewport.scrollLeft / step) : 0;
+      const clampedPage = Math.min(maxPage, Math.max(0, nextPage));
+
+      setPageCount(pages);
+      setActivePage(clampedPage);
     };
 
-    const onScroll = () => window.requestAnimationFrame(updateButtons);
+    const onScroll = () => window.requestAnimationFrame(updateCarouselState);
 
     viewport.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', updateButtons);
+    window.addEventListener('resize', updateCarouselState);
 
-    updateButtons();
+    updateCarouselState();
 
     return () => {
       viewport.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', updateButtons);
+      window.removeEventListener('resize', updateCarouselState);
     };
   }, [safeItems.length]);
 
-  const shift = (direction) => {
+  const goToPage = useCallback((page) => {
     const viewport = viewportRef.current;
     const track = trackRef.current;
     if (!viewport || !track) return;
@@ -50,43 +79,56 @@ export default function PhotoCarousel({ items }) {
     const firstItem = track.querySelector('.carousel-item');
     const styles = window.getComputedStyle(track);
     const gap = parseFloat(styles.columnGap || styles.gap || '0');
-    const base = firstItem ? firstItem.getBoundingClientRect().width + gap : viewport.clientWidth;
+    const itemWidth = firstItem ? firstItem.getBoundingClientRect().width : viewport.clientWidth;
+    const step = itemWidth + gap;
+    const visibleCount = Math.max(1, Math.round((viewport.clientWidth + gap) / step));
+    const maxPage = Math.max(0, safeItems.length - visibleCount);
+    const targetPage = Math.min(maxPage, Math.max(0, page));
 
-    viewport.scrollBy({ left: direction * base, behavior: 'smooth' });
-  };
+    viewport.scrollTo({ left: targetPage * step, behavior: 'smooth' });
+    setActivePage(targetPage);
+  }, [safeItems.length]);
+
+  useEffect(() => {
+    if (safeItems.length < 2) return;
+
+    const intervalId = window.setInterval(() => {
+      const totalPages = pageCountRef.current;
+      if (totalPages <= 1) return;
+
+      const nextPage = (activePageRef.current + 1) % totalPages;
+      goToPage(nextPage);
+    }, 5000);
+
+    return () => window.clearInterval(intervalId);
+  }, [goToPage, safeItems.length]);
 
   return (
     <div className="carousel reveal" aria-label="Карусель фото клуба">
-      <button
-        className="carousel-btn prev"
-        type="button"
-        aria-label="Предыдущее фото"
-        onClick={() => shift(-1)}
-        disabled={!canPrev}
-      >
-        ‹
-      </button>
-
       <div className="carousel-viewport" ref={viewportRef}>
         <div className="carousel-track" ref={trackRef}>
           {safeItems.map((item) => (
-            <figure className="media-card carousel-item" key={item.src}>
+            <figure className="photo-slide carousel-item" key={item.src}>
               <img src={item.src} alt={item.alt} loading="lazy" />
-              <figcaption>{item.caption}</figcaption>
             </figure>
           ))}
         </div>
       </div>
 
-      <button
-        className="carousel-btn next"
-        type="button"
-        aria-label="Следующее фото"
-        onClick={() => shift(1)}
-        disabled={!canNext}
-      >
-        ›
-      </button>
+      {pageCount > 1 && (
+        <div className="carousel-dots" aria-label="Навигация по галерее">
+          {Array.from({ length: pageCount }, (_, index) => (
+            <button
+              key={index}
+              type="button"
+              className={`carousel-dot ${index === activePage ? 'is-active' : ''}`}
+              onClick={() => goToPage(index)}
+              aria-label={`Перейти к фото ${index + 1}`}
+              aria-current={index === activePage ? 'true' : undefined}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

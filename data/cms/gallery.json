@@ -1,0 +1,32 @@
+[
+  {
+    "id": "gallery-bear",
+    "src": "/images/decor-bear.jpg",
+    "alt": "Декор в зоне бара и отдыха",
+    "createdAt": "2026-03-01T08:20:00.000Z"
+  },
+  {
+    "id": "gallery-art",
+    "src": "/images/decor-art.jpg",
+    "alt": "Арт-элементы в интерьере RUNA",
+    "createdAt": "2026-03-01T08:15:00.000Z"
+  },
+  {
+    "id": "gallery-people",
+    "src": "/images/club-people.jpg",
+    "alt": "Игровая атмосфера RUNA",
+    "createdAt": "2026-03-01T08:10:00.000Z"
+  },
+  {
+    "id": "gallery-runa-sign",
+    "src": "/images/runa-sign.jpg",
+    "alt": "Входная вывеска RUNA Cyber Club",
+    "createdAt": "2026-03-01T08:05:00.000Z"
+  },
+  {
+    "id": "gallery-lounge",
+    "src": "/images/lounge.jpg",
+    "alt": "Неоновая зона клуба",
+    "createdAt": "2026-03-01T08:00:00.000Z"
+  }
+]

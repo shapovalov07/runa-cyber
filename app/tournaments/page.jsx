@@ -69,17 +69,14 @@ export default function TournamentsPage() {
 
       <section className="section">
         <div className="container grid grid-3">
-          <figure className="media-card reveal">
+          <figure className="photo-tile reveal">
             <img src="/images/fc26-cup.jpg" alt="Турнир FC 26 в RUNA" loading="lazy" />
-            <figcaption>Кубок по FC 26: еженедельный соревновательный формат.</figcaption>
           </figure>
-          <figure className="media-card reveal">
+          <figure className="photo-tile reveal">
             <img src="/images/promo.jpg" alt="Промо активности RUNA" loading="lazy" />
-            <figcaption>Актуальные офферы и промоакции для гостей клуба.</figcaption>
           </figure>
-          <figure className="media-card reveal">
+          <figure className="photo-tile reveal">
             <img src="/images/price.jpg" alt="Прайс и бонусы RUNA" loading="lazy" />
-            <figcaption>Бонусы на пополнение и спецусловия из PRICE.</figcaption>
           </figure>
         </div>
       </section>

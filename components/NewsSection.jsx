@@ -1,0 +1,68 @@
+import { getNewsList } from '@/lib/cms-storage';
+import Link from 'next/link';
+
+const dateFormatter = new Intl.DateTimeFormat('ru-RU', {
+  day: '2-digit',
+  month: 'long',
+  year: 'numeric',
+});
+
+export default async function NewsSection({
+  title = 'Новости клуба',
+  lead = 'Актуальные анонсы, обновления расписания и события RUNA Cyber Club.',
+  limit,
+  showAllButton = false,
+} = {}) {
+  const news = await getNewsList();
+  const normalizedLimit = Number.isInteger(limit) && limit > 0 ? limit : null;
+  const visibleNews = normalizedLimit ? news.slice(0, normalizedLimit) : news;
+  const shouldShowAllButton = showAllButton && news.length > 0;
+
+  return (
+    <section className="section">
+      <div className="container">
+        <h2 className="section-title">{title}</h2>
+        <p className="section-lead">{lead}</p>
+
+        <div className="news-list">
+          {news.length === 0 && (
+            <article className="card reveal">
+              <h3>Пока нет публикаций</h3>
+              <p>Добавьте первую новость через админ-панель, чтобы она появилась на сайте.</p>
+            </article>
+          )}
+
+          {visibleNews.map((item) => (
+            <article className="card news-card reveal" key={item.id}>
+              <div className="news-media">
+                <img src={item.imageSrc || '/images/fc26-news.jpg'} alt={item.imageAlt || item.title} loading="lazy" />
+              </div>
+              <div className="news-content">
+                <div className="news-topline">
+                  <span className="news-date">{dateFormatter.format(new Date(item.publishedAt))}</span>
+                  <span className="news-badge">Обновление</span>
+                </div>
+                <h3>{item.title}</h3>
+                <p className="news-summary">{item.summary}</p>
+                {item.content && <p className="news-extra">{item.content}</p>}
+                {item.sourceUrl && (
+                  <a className="news-link" href={item.sourceUrl} target="_blank" rel="noopener noreferrer">
+                    Источник
+                  </a>
+                )}
+              </div>
+            </article>
+          ))}
+        </div>
+
+        {shouldShowAllButton && (
+          <div className="news-actions">
+            <Link className="btn btn-outline" href="/news">
+              Смотреть все новости
+            </Link>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}

@@ -1,5 +1,7 @@
 import ClubPhotosSection from '@/components/ClubPhotosSection';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   title: 'Наши клубы',
   description: 'Наши клубы и игровые зоны RUNA в Ростове-на-Дону: адреса, железо, форматы залов, тарифы и фото.',
