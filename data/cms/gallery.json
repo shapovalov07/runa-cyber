@@ -1,32 +1,58 @@
 [
   {
+    "id": "56d6b2e2-bde5-4b90-9778-d679a7657c48",
+    "src": "/uploads/gallery/1773694981907-c6905c67-ae59-4ba3-b7a9-7bfd148bf894.jpg",
+    "alt": "Фото клуба RUNA",
+    "section": "tournaments",
+    "createdAt": "2026-03-16T21:03:01.909Z"
+  },
+  {
+    "id": "32c3a2f0-1193-44e7-84f4-35b2fae36a74",
+    "src": "/uploads/gallery/1773692533065-fced6276-6308-4b90-987a-3ba61d92b99c.jpg",
+    "alt": "Фото клуба RUNA",
+    "section": "clubs",
+    "createdAt": "2026-03-16T20:22:13.067Z"
+  },
+  {
+    "id": "308b4a14-f932-424a-9002-6c0874e4411b",
+    "src": "/uploads/gallery/1773496557718-019a7bd4-ef84-453e-bc15-32942d554762.jpg",
+    "alt": "Фото клуба RUNA",
+    "section": "home",
+    "createdAt": "2026-03-14T13:55:57.722Z"
+  },
+  {
     "id": "gallery-bear",
     "src": "/images/decor-bear.jpg",
     "alt": "Декор в зоне бара и отдыха",
+    "section": "home",
     "createdAt": "2026-03-01T08:20:00.000Z"
   },
   {
     "id": "gallery-art",
     "src": "/images/decor-art.jpg",
     "alt": "Арт-элементы в интерьере RUNA",
+    "section": "home",
     "createdAt": "2026-03-01T08:15:00.000Z"
   },
   {
     "id": "gallery-people",
     "src": "/images/club-people.jpg",
     "alt": "Игровая атмосфера RUNA",
+    "section": "home",
     "createdAt": "2026-03-01T08:10:00.000Z"
   },
   {
     "id": "gallery-runa-sign",
     "src": "/images/runa-sign.jpg",
     "alt": "Входная вывеска RUNA Cyber Club",
+    "section": "home",
     "createdAt": "2026-03-01T08:05:00.000Z"
   },
   {
     "id": "gallery-lounge",
     "src": "/images/lounge.jpg",
     "alt": "Неоновая зона клуба",
+    "section": "home",
     "createdAt": "2026-03-01T08:00:00.000Z"
   }
 ]

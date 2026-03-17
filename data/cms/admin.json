@@ -4,7 +4,59 @@
       "login": "admin",
       "password": "123456789",
       "firstName": "Админ",
-      "lastName": "RUNA"
+      "lastName": "RUNA",
+      "role": "owner",
+      "createdAt": "2026-03-16T19:58:14.197Z"
+    },
+    {
+      "login": "admin_1",
+      "password": "123456789",
+      "firstName": "test",
+      "lastName": "test",
+      "role": "admin",
+      "createdAt": "2026-03-16T20:21:19.359Z"
+    }
+  ],
+  "history": [
+    {
+      "id": "c8b4a47d-e44f-467e-991b-29303f7d31f2",
+      "action": "tournament-event.create",
+      "actorLogin": "admin_1",
+      "actorRole": "admin",
+      "targetType": "tournament-event",
+      "targetId": "cca9420b-8cfc-4ca5-bca4-f2e45b1dc2a5",
+      "summary": "test",
+      "createdAt": "2026-03-16T21:20:00.817Z"
+    },
+    {
+      "id": "4cad9898-5f21-453c-a4cd-12c0332a257f",
+      "action": "gallery.create",
+      "actorLogin": "admin_1",
+      "actorRole": "admin",
+      "targetType": "gallery-photo",
+      "targetId": "56d6b2e2-bde5-4b90-9778-d679a7657c48",
+      "summary": "Добавлено фото в раздел tournaments.",
+      "createdAt": "2026-03-16T21:03:01.911Z"
+    },
+    {
+      "id": "992d56b0-eaa3-4965-b4c6-5bbabaf7683a",
+      "action": "gallery.create",
+      "actorLogin": "admin_1",
+      "actorRole": "admin",
+      "targetType": "gallery-photo",
+      "targetId": "32c3a2f0-1193-44e7-84f4-35b2fae36a74",
+      "summary": "Добавлено фото в раздел clubs.",
+      "createdAt": "2026-03-16T20:22:13.070Z"
+    },
+    {
+      "id": "dccbcb2e-8fae-45f7-b8fe-07639b1b1420",
+      "action": "admin.create",
+      "actorLogin": "admin",
+      "actorRole": "owner",
+      "targetType": "admin-user",
+      "targetId": "admin_1",
+      "summary": "Создан пользователь admin_1 (admin).",
+      "createdAt": "2026-03-16T20:21:19.363Z"
     }
   ]
 }

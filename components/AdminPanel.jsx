@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 const dateFormatter = new Intl.DateTimeFormat('ru-RU', {
   day: '2-digit',
@@ -17,6 +17,60 @@ const dateTimeFormatter = new Intl.DateTimeFormat('ru-RU', {
 });
 
 const getText = (value) => (typeof value === 'string' ? value.trim() : '');
+const USER_ROLE_OPTIONS = [
+  { value: 'admin', label: 'Администратор' },
+  { value: 'owner', label: 'Владелец' },
+];
+const USER_ROLE_VALUES = new Set(USER_ROLE_OPTIONS.map((option) => option.value));
+const GALLERY_SECTION_OPTIONS = [
+  { value: 'home', label: 'Главная' },
+  { value: 'clubs', label: 'Наши клубы' },
+  { value: 'tournaments', label: 'Кибертурниры' },
+];
+const GALLERY_SECTION_VALUES = new Set(GALLERY_SECTION_OPTIONS.map((option) => option.value));
+
+const normalizeGallerySection = (value) => {
+  const section = getText(value).toLowerCase();
+  return GALLERY_SECTION_VALUES.has(section) ? section : 'home';
+};
+
+const normalizeUserRole = (value) => {
+  const role = getText(value).toLowerCase();
+  return USER_ROLE_VALUES.has(role) ? role : 'admin';
+};
+
+const getUserRoleLabel = (value) =>
+  USER_ROLE_OPTIONS.find((option) => option.value === normalizeUserRole(value))?.label || 'Администратор';
+
+const getGallerySectionLabel = (value) =>
+  GALLERY_SECTION_OPTIONS.find((option) => option.value === normalizeGallerySection(value))?.label || 'Главная';
+
+const HISTORY_ACTION_LABELS = {
+  'profile.update': 'Профиль',
+  'admin.create': 'Создание администратора',
+  'admin.delete': 'Удаление администратора',
+  'admin.password_reset': 'Сброс пароля администратора',
+  'tournament-event.create': 'Создание мероприятия',
+  'tournament-event.delete': 'Удаление мероприятия',
+  'news.create': 'Создание новости',
+  'news.update': 'Редактирование новости',
+  'news.delete': 'Удаление новости',
+  'gallery.create': 'Добавление фото',
+  'gallery.delete': 'Удаление фото',
+};
+const sortAdminUsers = (list) =>
+  [...list].sort((a, b) => {
+    const leftRole = normalizeUserRole(a?.role);
+    const rightRole = normalizeUserRole(b?.role);
+
+    if (leftRole !== rightRole) {
+      return leftRole === 'owner' ? -1 : 1;
+    }
+
+    return getText(a?.login).localeCompare(getText(b?.login), 'ru');
+  });
+
+const getHistoryActionLabel = (action) => HISTORY_ACTION_LABELS[getText(action)] || getText(action) || 'Изменение';
 
 const toDateTimeLocal = (value) => {
   const date = value ? new Date(value) : new Date();
@@ -36,10 +90,54 @@ const createInitialNewsForm = () => ({
   publishedAt: toDateTimeLocal(),
 });
 
-const createInitialGalleryForm = () => ({
-  alt: '',
-  src: '',
+const createInitialNewsEditForm = () => ({
+  title: '',
+  summary: '',
+  content: '',
+  sourceUrl: '',
+  publishedAt: toDateTimeLocal(),
 });
+
+const createNewsEditForm = (item) => ({
+  title: getText(item?.title),
+  summary: getText(item?.summary),
+  content: getText(item?.content),
+  sourceUrl: getText(item?.sourceUrl),
+  publishedAt: toDateTimeLocal(item?.publishedAt),
+});
+
+const createInitialGalleryForm = () => ({
+  section: 'home',
+  alt: '',
+});
+
+const createInitialTournamentEventForm = () => ({
+  title: '',
+  summary: '',
+  imageSrc: '',
+  imageAlt: '',
+});
+
+const createInitialProfileForm = () => ({
+  firstName: '',
+  lastName: '',
+});
+
+const createInitialAdminUserForm = () => ({
+  login: '',
+  password: '',
+  firstName: '',
+  lastName: '',
+  role: 'admin',
+});
+
+const ADMIN_PANEL_SECTION_OPTIONS = [
+  { value: 'profile', label: 'Профиль' },
+  { value: 'news', label: 'Новости' },
+  { value: 'gallery', label: 'Фото клуба' },
+  { value: 'tournament-events', label: 'Мероприятия' },
+  { value: 'history', label: 'История', ownerOnly: true },
+];
 
 const formatDate = (value) => {
   const date = new Date(value);
@@ -58,30 +156,98 @@ const readResponse = async (response) => {
   return payload ?? {};
 };
 
+const ADMIN_SESSION_KEY = 'runa-admin-session';
+
+const readStoredAdminSession = () => {
+  if (typeof window === 'undefined') return null;
+
+  try {
+    const raw = window.localStorage.getItem(ADMIN_SESSION_KEY);
+    if (!raw) return null;
+
+    const parsed = JSON.parse(raw);
+    const login = getText(parsed?.login);
+    const password = getText(parsed?.password);
+
+    if (!login || !password) return null;
+
+    return {
+      login,
+      password,
+    };
+  } catch {
+    return null;
+  }
+};
+
+const saveAdminSession = (session) => {
+  if (typeof window === 'undefined') return;
+
+  const login = getText(session?.login);
+  const password = getText(session?.password);
+
+  if (!login || !password) return;
+
+  window.localStorage.setItem(
+    ADMIN_SESSION_KEY,
+    JSON.stringify({
+      login,
+      password,
+    })
+  );
+};
+
+const clearAdminSession = () => {
+  if (typeof window === 'undefined') return;
+  window.localStorage.removeItem(ADMIN_SESSION_KEY);
+};
+
 export default function AdminPanel() {
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
   const [currentUser, setCurrentUser] = useState(null);
   const [newsForm, setNewsForm] = useState(createInitialNewsForm);
   const [newsFile, setNewsFile] = useState(null);
+  const [editingNewsId, setEditingNewsId] = useState('');
+  const [editNewsForm, setEditNewsForm] = useState(createInitialNewsEditForm);
+  const [editNewsFile, setEditNewsFile] = useState(null);
   const [galleryForm, setGalleryForm] = useState(createInitialGalleryForm);
   const [galleryFile, setGalleryFile] = useState(null);
+  const [tournamentEventForm, setTournamentEventForm] = useState(createInitialTournamentEventForm);
+  const [tournamentEventFile, setTournamentEventFile] = useState(null);
+  const [profileForm, setProfileForm] = useState(createInitialProfileForm);
+  const [adminUserForm, setAdminUserForm] = useState(createInitialAdminUserForm);
   const newsFileInputRef = useRef(null);
+  const editNewsFileInputRef = useRef(null);
   const galleryFileInputRef = useRef(null);
+  const tournamentEventFileInputRef = useRef(null);
 
   const [news, setNews] = useState([]);
   const [photos, setPhotos] = useState([]);
+  const [tournamentEvents, setTournamentEvents] = useState([]);
+  const [adminUsers, setAdminUsers] = useState([]);
+  const [adminHistory, setAdminHistory] = useState([]);
+  const [galleryViewSection, setGalleryViewSection] = useState('home');
+  const [activeAdminSection, setActiveAdminSection] = useState('news');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [restoringSession, setRestoringSession] = useState(true);
   const [loading, setLoading] = useState(false);
   const [authBusy, setAuthBusy] = useState(false);
   const [authError, setAuthError] = useState('');
   const [refreshing, setRefreshing] = useState(false);
+  const [profileBusy, setProfileBusy] = useState(false);
   const [newsBusy, setNewsBusy] = useState(false);
   const [galleryBusy, setGalleryBusy] = useState(false);
+  const [tournamentEventsBusy, setTournamentEventsBusy] = useState(false);
+  const [adminUsersBusy, setAdminUsersBusy] = useState(false);
+  const [adminHistoryBusy, setAdminHistoryBusy] = useState(false);
 
   const [loadError, setLoadError] = useState('');
+  const [profileMessage, setProfileMessage] = useState('');
   const [newsMessage, setNewsMessage] = useState('');
   const [galleryMessage, setGalleryMessage] = useState('');
+  const [tournamentEventsMessage, setTournamentEventsMessage] = useState('');
+  const [adminUsersMessage, setAdminUsersMessage] = useState('');
 
   const authHeaders = useMemo(
     () => ({
@@ -102,17 +268,53 @@ export default function AdminPanel() {
     if (loginName) return loginName;
     return 'администратор';
   }, [currentUser, login]);
+  const isOwner = normalizeUserRole(currentUser?.role) === 'owner';
+  const availableAdminSections = useMemo(
+    () => ADMIN_PANEL_SECTION_OPTIONS.filter((section) => !section.ownerOnly || isOwner),
+    [isOwner]
+  );
 
-  const fetchContent = async () => {
+  const visiblePhotos = useMemo(
+    () => photos.filter((item) => normalizeGallerySection(item?.section) === galleryViewSection),
+    [galleryViewSection, photos]
+  );
+
+  useEffect(() => {
+    if (availableAdminSections.some((section) => section.value === activeAdminSection)) return;
+    setActiveAdminSection(availableAdminSections[0]?.value || 'news');
+  }, [activeAdminSection, availableAdminSections]);
+
+  const applyAuthorizedUser = (user, loginValue, passwordValue) => {
+    setLogin(loginValue);
+    setPassword(passwordValue);
+    setCurrentUser(user);
+    setProfileForm({
+      firstName: user.firstName,
+      lastName: user.lastName,
+    });
+    setProfileMessage('');
+    setAuthError('');
+    setIsAuthenticated(true);
+  };
+
+  const fetchContent = async (
+    sessionUser = currentUser,
+    sessionCredentials = { login: getText(login), password: getText(password) }
+  ) => {
     setLoadError('');
 
     try {
-      const [newsResponse, galleryResponse] = await Promise.all([
+      const [newsResponse, galleryResponse, tournamentEventsResponse] = await Promise.all([
         fetch('/api/news', { cache: 'no-store' }),
         fetch('/api/gallery', { cache: 'no-store' }),
+        fetch('/api/tournament-events', { cache: 'no-store' }),
       ]);
 
-      const [newsPayload, galleryPayload] = await Promise.all([readResponse(newsResponse), readResponse(galleryResponse)]);
+      const [newsPayload, galleryPayload, tournamentEventsPayload] = await Promise.all([
+        readResponse(newsResponse),
+        readResponse(galleryResponse),
+        readResponse(tournamentEventsResponse),
+      ]);
 
       if (!newsResponse.ok || !newsPayload.ok) {
         throw new Error(newsPayload.error || 'Не удалось получить новости.');
@@ -121,9 +323,57 @@ export default function AdminPanel() {
       if (!galleryResponse.ok || !galleryPayload.ok) {
         throw new Error(galleryPayload.error || 'Не удалось получить фото галереи.');
       }
+      if (!tournamentEventsResponse.ok || !tournamentEventsPayload.ok) {
+        throw new Error(tournamentEventsPayload.error || 'Не удалось получить мероприятия турниров.');
+      }
 
       setNews(Array.isArray(newsPayload.news) ? newsPayload.news : []);
       setPhotos(Array.isArray(galleryPayload.photos) ? galleryPayload.photos : []);
+      setTournamentEvents(Array.isArray(tournamentEventsPayload.items) ? tournamentEventsPayload.items : []);
+
+      if (normalizeUserRole(sessionUser?.role) === 'owner') {
+        setAdminHistoryBusy(true);
+        try {
+          const [usersResponse, historyResponse] = await Promise.all([
+            fetch('/api/admin/users', {
+              cache: 'no-store',
+              headers: {
+                'x-admin-login': getText(sessionCredentials?.login),
+                'x-admin-password': getText(sessionCredentials?.password),
+              },
+            }),
+            fetch('/api/admin/history?limit=200', {
+              cache: 'no-store',
+              headers: {
+                'x-admin-login': getText(sessionCredentials?.login),
+                'x-admin-password': getText(sessionCredentials?.password),
+              },
+            }),
+          ]);
+
+          const [usersPayload, historyPayload] = await Promise.all([
+            readResponse(usersResponse),
+            readResponse(historyResponse),
+          ]);
+
+          if (!usersResponse.ok || !usersPayload.ok) {
+            throw new Error(usersPayload.error || 'Не удалось получить список администраторов.');
+          }
+
+          if (!historyResponse.ok || !historyPayload.ok) {
+            throw new Error(historyPayload.error || 'Не удалось получить историю изменений.');
+          }
+
+          setAdminUsers(sortAdminUsers(Array.isArray(usersPayload.users) ? usersPayload.users : []));
+          setAdminHistory(Array.isArray(historyPayload.history) ? historyPayload.history : []);
+        } finally {
+          setAdminHistoryBusy(false);
+        }
+      } else {
+        setAdminUsers([]);
+        setAdminHistory([]);
+        setAdminHistoryBusy(false);
+      }
     } catch (error) {
       setLoadError(error.message || 'Не удалось загрузить данные CMS.');
     } finally {
@@ -131,6 +381,77 @@ export default function AdminPanel() {
       setRefreshing(false);
     }
   };
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const restoreSession = async () => {
+      const saved = readStoredAdminSession();
+
+      if (!saved) {
+        setRestoringSession(false);
+        return;
+      }
+
+      try {
+        setAuthBusy(true);
+
+        const response = await fetch('/api/admin/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(saved),
+        });
+
+        const payload = await readResponse(response);
+
+        if (!response.ok || !payload.ok) {
+          throw new Error(payload.error || 'Сохраненная сессия недействительна.');
+        }
+
+        if (cancelled) return;
+
+        const user = {
+          login: getText(payload?.user?.login) || saved.login,
+          firstName: getText(payload?.user?.firstName),
+          lastName: getText(payload?.user?.lastName),
+          role: normalizeUserRole(payload?.user?.role),
+        };
+
+        applyAuthorizedUser(user, saved.login, saved.password);
+        saveAdminSession({
+          login: saved.login,
+          password: saved.password,
+        });
+
+        setLoading(true);
+        await fetchContent(user, {
+          login: saved.login,
+          password: saved.password,
+        });
+      } catch {
+        clearAdminSession();
+
+        if (cancelled) return;
+
+        setIsAuthenticated(false);
+        setCurrentUser(null);
+        setLogin('');
+        setPassword('');
+      } finally {
+        if (cancelled) return;
+        setAuthBusy(false);
+        setRestoringSession(false);
+      }
+    };
+
+    restoreSession();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const submitLogin = async (event) => {
     event.preventDefault();
@@ -168,12 +489,19 @@ export default function AdminPanel() {
         login: getText(payload?.user?.login) || loginValue,
         firstName: getText(payload?.user?.firstName),
         lastName: getText(payload?.user?.lastName),
+        role: normalizeUserRole(payload?.user?.role),
       };
 
-      setCurrentUser(user);
-      setIsAuthenticated(true);
+      applyAuthorizedUser(user, loginValue, passwordValue);
+      saveAdminSession({
+        login: loginValue,
+        password: passwordValue,
+      });
       setLoading(true);
-      await fetchContent();
+      await fetchContent(user, {
+        login: loginValue,
+        password: passwordValue,
+      });
     } catch (error) {
       setAuthError(error.message || 'Ошибка входа в админку.');
     } finally {
@@ -182,23 +510,109 @@ export default function AdminPanel() {
   };
 
   const logout = () => {
+    clearAdminSession();
     setIsAuthenticated(false);
     setCurrentUser(null);
     setLogin('');
     setPassword('');
     setNews([]);
     setPhotos([]);
+    setTournamentEvents([]);
+    setAdminUsers([]);
+    setAdminHistory([]);
     setLoadError('');
+    setProfileMessage('');
     setNewsMessage('');
     setGalleryMessage('');
+    setTournamentEventsMessage('');
+    setAdminUsersMessage('');
+    setEditingNewsId('');
+    setEditNewsForm(createInitialNewsEditForm);
+    setEditNewsFile(null);
+    setTournamentEventForm(createInitialTournamentEventForm);
+    setTournamentEventFile(null);
+    setProfileForm(createInitialProfileForm);
+    setAdminUserForm(createInitialAdminUserForm);
+    setGalleryViewSection('home');
+    setActiveAdminSection('news');
+    if (tournamentEventFileInputRef.current) {
+      tournamentEventFileInputRef.current.value = '';
+    }
+    setAdminUsersBusy(false);
+    setAdminHistoryBusy(false);
+    setTournamentEventsBusy(false);
     setRefreshing(false);
     setLoading(false);
+  };
+
+  const submitProfile = async (event) => {
+    event.preventDefault();
+    setProfileMessage('');
+
+    if (!(isAuthenticated && getText(login) && getText(password))) {
+      setProfileMessage('Сначала войдите в админку.');
+      return;
+    }
+
+    const firstName = getText(profileForm.firstName);
+    const lastName = getText(profileForm.lastName);
+
+    if (!firstName || !lastName) {
+      setProfileMessage('Введите имя и фамилию.');
+      return;
+    }
+
+    try {
+      setProfileBusy(true);
+
+      const response = await fetch('/api/admin/profile', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          login: getText(login),
+          password: getText(password),
+          firstName,
+          lastName,
+        }),
+      });
+
+      const payload = await readResponse(response);
+
+      if (!response.ok || !payload.ok) {
+        throw new Error(payload.error || 'Не удалось обновить профиль.');
+      }
+
+      const updatedUser = {
+        login: getText(payload?.user?.login) || getText(login),
+        firstName: getText(payload?.user?.firstName),
+        lastName: getText(payload?.user?.lastName),
+        role: normalizeUserRole(payload?.user?.role),
+      };
+
+      setCurrentUser(updatedUser);
+      saveAdminSession({
+        login: getText(login),
+        password: getText(password),
+      });
+      setProfileForm({
+        firstName: updatedUser.firstName,
+        lastName: updatedUser.lastName,
+      });
+      setProfileMessage('Профиль обновлен.');
+    } catch (error) {
+      setProfileMessage(error.message || 'Ошибка обновления профиля.');
+    } finally {
+      setProfileBusy(false);
+    }
   };
 
   const ensureCredentials = () => {
     if (isAuthenticated && getText(login) && getText(password)) return true;
     setNewsMessage('Сначала войдите в админку.');
     setGalleryMessage('Сначала войдите в админку.');
+    setTournamentEventsMessage('Сначала войдите в админку.');
     return false;
   };
 
@@ -284,13 +698,85 @@ export default function AdminPanel() {
     }
   };
 
+  const openNewsEdit = (item) => {
+    setNewsMessage('');
+    setEditingNewsId(item.id);
+    setEditNewsForm(createNewsEditForm(item));
+    setEditNewsFile(null);
+    if (editNewsFileInputRef.current) {
+      editNewsFileInputRef.current.value = '';
+    }
+  };
+
+  const cancelNewsEdit = () => {
+    setEditingNewsId('');
+    setEditNewsForm(createInitialNewsEditForm);
+    setEditNewsFile(null);
+    if (editNewsFileInputRef.current) {
+      editNewsFileInputRef.current.value = '';
+    }
+  };
+
+  const submitEditedNews = async (event, id) => {
+    event.preventDefault();
+    setNewsMessage('');
+
+    if (!ensureCredentials()) return;
+    if (!id || editingNewsId !== id) return;
+    if (!getText(editNewsForm.title) || !getText(editNewsForm.summary)) {
+      setNewsMessage('Для новости обязательно заполните заголовок и короткое описание.');
+      return;
+    }
+
+    try {
+      setNewsBusy(true);
+
+      const formData = new FormData();
+      formData.set('login', getText(login));
+      formData.set('password', getText(password));
+      formData.set('title', getText(editNewsForm.title));
+      formData.set('summary', getText(editNewsForm.summary));
+      formData.set('content', getText(editNewsForm.content));
+      formData.set('sourceUrl', getText(editNewsForm.sourceUrl));
+      formData.set('publishedAt', getText(editNewsForm.publishedAt));
+
+      if (editNewsFile) {
+        formData.set('photo', editNewsFile);
+      }
+
+      const response = await fetch(`/api/news/${encodeURIComponent(id)}`, {
+        method: 'PATCH',
+        body: formData,
+      });
+
+      const payload = await readResponse(response);
+
+      if (!response.ok || !payload.ok) {
+        throw new Error(payload.error || 'Не удалось обновить новость.');
+      }
+
+      setNews((prev) => {
+        const next = prev.map((item) => (item.id === id ? payload.item : item));
+        next.sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
+        return next;
+      });
+      cancelNewsEdit();
+      setNewsMessage('Новость обновлена.');
+    } catch (error) {
+      setNewsMessage(error.message || 'Ошибка обновления новости.');
+    } finally {
+      setNewsBusy(false);
+    }
+  };
+
   const submitPhoto = async (event) => {
     event.preventDefault();
     setGalleryMessage('');
 
     if (!ensureCredentials()) return;
-    if (!galleryFile && !getText(galleryForm.src)) {
-      setGalleryMessage('Добавьте файл изображения или ссылку на фото.');
+    const targetSection = normalizeGallerySection(galleryForm.section);
+    if (!galleryFile) {
+      setGalleryMessage('Добавьте файл изображения.');
       return;
     }
 
@@ -300,12 +786,9 @@ export default function AdminPanel() {
       const formData = new FormData();
       formData.set('login', getText(login));
       formData.set('password', getText(password));
+      formData.set('section', targetSection);
       formData.set('alt', getText(galleryForm.alt));
-      formData.set('src', getText(galleryForm.src));
-
-      if (galleryFile) {
-        formData.set('photo', galleryFile);
-      }
+      formData.set('photo', galleryFile);
 
       const response = await fetch('/api/gallery', {
         method: 'POST',
@@ -319,12 +802,16 @@ export default function AdminPanel() {
       }
 
       setPhotos((prev) => [payload.item, ...prev]);
-      setGalleryForm(createInitialGalleryForm);
+      setGalleryViewSection(targetSection);
+      setGalleryForm({
+        ...createInitialGalleryForm(),
+        section: targetSection,
+      });
       setGalleryFile(null);
       if (galleryFileInputRef.current) {
         galleryFileInputRef.current.value = '';
       }
-      setGalleryMessage('Фото добавлено в галерею.');
+      setGalleryMessage(`Фото добавлено в раздел «${getGallerySectionLabel(targetSection)}».`);
     } catch (error) {
       setGalleryMessage(error.message || 'Ошибка загрузки фото.');
     } finally {
@@ -361,11 +848,273 @@ export default function AdminPanel() {
     }
   };
 
+  const submitTournamentEvent = async (event) => {
+    event.preventDefault();
+    setTournamentEventsMessage('');
+
+    if (!ensureCredentials()) return;
+    if (!getText(tournamentEventForm.title) || !getText(tournamentEventForm.summary)) {
+      setTournamentEventsMessage('Заполните название и краткое описание мероприятия.');
+      return;
+    }
+    if (!tournamentEventFile && !getText(tournamentEventForm.imageSrc)) {
+      setTournamentEventsMessage('Добавьте изображение файлом или укажите ссылку.');
+      return;
+    }
+
+    try {
+      setTournamentEventsBusy(true);
+
+      const formData = new FormData();
+      formData.set('login', getText(login));
+      formData.set('password', getText(password));
+      formData.set('title', getText(tournamentEventForm.title));
+      formData.set('summary', getText(tournamentEventForm.summary));
+      formData.set('imageSrc', getText(tournamentEventForm.imageSrc));
+      formData.set('imageAlt', getText(tournamentEventForm.imageAlt));
+
+      if (tournamentEventFile) {
+        formData.set('photo', tournamentEventFile);
+      }
+
+      const response = await fetch('/api/tournament-events', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const payload = await readResponse(response);
+
+      if (!response.ok || !payload.ok) {
+        throw new Error(payload.error || 'Не удалось добавить мероприятие.');
+      }
+
+      setTournamentEvents((prev) => [payload.item, ...prev.filter((item) => item.id !== payload.item.id)]);
+      setTournamentEventForm(createInitialTournamentEventForm);
+      setTournamentEventFile(null);
+      if (tournamentEventFileInputRef.current) {
+        tournamentEventFileInputRef.current.value = '';
+      }
+      setTournamentEventsMessage('Мероприятие добавлено.');
+    } catch (error) {
+      setTournamentEventsMessage(error.message || 'Ошибка добавления мероприятия.');
+    } finally {
+      setTournamentEventsBusy(false);
+    }
+  };
+
+  const removeTournamentEvent = async (id) => {
+    setTournamentEventsMessage('');
+
+    if (!ensureCredentials()) return;
+    if (!id) return;
+    if (!window.confirm('Удалить это мероприятие?')) return;
+
+    try {
+      setTournamentEventsBusy(true);
+
+      const response = await fetch(`/api/tournament-events/${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+        headers: authHeaders,
+      });
+
+      const payload = await readResponse(response);
+
+      if (!response.ok || !payload.ok) {
+        throw new Error(payload.error || 'Не удалось удалить мероприятие.');
+      }
+
+      setTournamentEvents((prev) => prev.filter((item) => item.id !== id));
+      setTournamentEventsMessage('Мероприятие удалено.');
+    } catch (error) {
+      setTournamentEventsMessage(error.message || 'Ошибка удаления мероприятия.');
+    } finally {
+      setTournamentEventsBusy(false);
+    }
+  };
+
+  const submitAdminUser = async (event) => {
+    event.preventDefault();
+    setAdminUsersMessage('');
+
+    if (!ensureCredentials()) return;
+    if (!isOwner) {
+      setAdminUsersMessage('Доступно только владельцу.');
+      return;
+    }
+
+    const payload = {
+      login: getText(adminUserForm.login),
+      password: getText(adminUserForm.password),
+      firstName: getText(adminUserForm.firstName),
+      lastName: getText(adminUserForm.lastName),
+      role: normalizeUserRole(adminUserForm.role),
+    };
+
+    if (!payload.login || !payload.password || !payload.firstName || !payload.lastName) {
+      setAdminUsersMessage('Заполните все поля нового пользователя.');
+      return;
+    }
+
+    try {
+      setAdminUsersBusy(true);
+
+      const response = await fetch('/api/admin/users', {
+        method: 'POST',
+        headers: {
+          ...authHeaders,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await readResponse(response);
+
+      if (!response.ok || !result.ok) {
+        throw new Error(result.error || 'Не удалось создать пользователя.');
+      }
+
+      setAdminUsers((prev) => sortAdminUsers([result.user, ...prev.filter((item) => item.login !== result.user.login)]));
+      setAdminUserForm(createInitialAdminUserForm);
+      setAdminUsersMessage(`Пользователь ${result.user.login} создан.`);
+      setRefreshing(true);
+      await fetchContent(currentUser, {
+        login: getText(login),
+        password: getText(password),
+      });
+    } catch (error) {
+      setAdminUsersMessage(error.message || 'Ошибка создания пользователя.');
+    } finally {
+      setAdminUsersBusy(false);
+    }
+  };
+
+  const removeAdminUser = async (targetLogin) => {
+    setAdminUsersMessage('');
+
+    if (!ensureCredentials()) return;
+    if (!isOwner) {
+      setAdminUsersMessage('Доступно только владельцу.');
+      return;
+    }
+    if (!targetLogin) return;
+    if (!window.confirm(`Удалить пользователя ${targetLogin}?`)) return;
+
+    try {
+      setAdminUsersBusy(true);
+
+      const response = await fetch(`/api/admin/users/${encodeURIComponent(targetLogin)}`, {
+        method: 'DELETE',
+        headers: authHeaders,
+      });
+
+      const result = await readResponse(response);
+
+      if (!response.ok || !result.ok) {
+        throw new Error(result.error || 'Не удалось удалить пользователя.');
+      }
+
+      setAdminUsers((prev) => prev.filter((item) => item.login !== targetLogin));
+      setAdminUsersMessage(`Пользователь ${targetLogin} удален.`);
+      setRefreshing(true);
+      await fetchContent(currentUser, {
+        login: getText(login),
+        password: getText(password),
+      });
+    } catch (error) {
+      setAdminUsersMessage(error.message || 'Ошибка удаления пользователя.');
+    } finally {
+      setAdminUsersBusy(false);
+    }
+  };
+
+  const resetAdminPassword = async (targetLogin, targetRole) => {
+    setAdminUsersMessage('');
+
+    if (!ensureCredentials()) return;
+    if (!isOwner) {
+      setAdminUsersMessage('Доступно только владельцу.');
+      return;
+    }
+    if (!targetLogin) return;
+    const isSelfPasswordChange = targetLogin === getText(currentUser?.login);
+    if (normalizeUserRole(targetRole) !== 'admin' && !isSelfPasswordChange) {
+      setAdminUsersMessage('Сброс пароля доступен для администраторов или для вашего аккаунта.');
+      return;
+    }
+
+    const enteredPassword = window.prompt(`Введите новый пароль для ${targetLogin}:`, '');
+    if (enteredPassword === null) return;
+
+    const nextPassword = getText(enteredPassword);
+    if (!nextPassword) {
+      setAdminUsersMessage('Введите новый пароль.');
+      return;
+    }
+
+    try {
+      setAdminUsersBusy(true);
+
+      const response = await fetch(`/api/admin/users/${encodeURIComponent(targetLogin)}`, {
+        method: 'PATCH',
+        headers: {
+          ...authHeaders,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          password: nextPassword,
+        }),
+      });
+
+      const result = await readResponse(response);
+
+      if (!response.ok || !result.ok) {
+        throw new Error(result.error || 'Не удалось сбросить пароль.');
+      }
+
+      const sessionLogin = getText(login);
+      const sessionPassword = isSelfPasswordChange ? nextPassword : getText(password);
+
+      if (isSelfPasswordChange) {
+        setPassword(sessionPassword);
+        saveAdminSession({
+          login: sessionLogin,
+          password: sessionPassword,
+        });
+      }
+
+      setAdminUsersMessage(`Пароль пользователя ${targetLogin} обновлен.`);
+      setRefreshing(true);
+      await fetchContent(currentUser, {
+        login: sessionLogin,
+        password: sessionPassword,
+      });
+    } catch (error) {
+      setAdminUsersMessage(error.message || 'Ошибка сброса пароля.');
+    } finally {
+      setAdminUsersBusy(false);
+    }
+  };
+
   const refreshData = async () => {
     if (!isAuthenticated) return;
     setRefreshing(true);
-    await fetchContent();
+    await fetchContent(currentUser, {
+      login: getText(login),
+      password: getText(password),
+    });
   };
+
+  if (restoringSession) {
+    return (
+      <section className="section">
+        <div className="container">
+          <div className="card admin-card">
+            <p>Проверяем сохраненную сессию...</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   if (!isAuthenticated) {
     return (
@@ -442,17 +1191,233 @@ export default function AdminPanel() {
             Админ-панель
           </h2>
           <p className="section-lead" style={{ marginBottom: 14 }}>
-            Вы вошли как <strong>{adminIdentity}</strong>.
+            Вы вошли как <strong>{adminIdentity}</strong> ({getUserRoleLabel(currentUser?.role)}).
           </p>
 
           <div className="form-actions" style={{ marginTop: 14 }}>
-            <button className="btn btn-outline" type="button" onClick={refreshData} disabled={refreshing}>
+            <button
+              className="btn btn-outline"
+              type="button"
+              onClick={refreshData}
+              disabled={
+                refreshing ||
+                profileBusy ||
+                newsBusy ||
+                galleryBusy ||
+                tournamentEventsBusy ||
+                adminUsersBusy ||
+                adminHistoryBusy
+              }
+            >
               {refreshing ? 'Обновляем...' : 'Обновить данные'}
             </button>
-            <button className="btn btn-ghost" type="button" onClick={logout} disabled={refreshing || newsBusy || galleryBusy}>
+            <button
+              className="btn btn-ghost"
+              type="button"
+              onClick={logout}
+              disabled={
+                refreshing ||
+                profileBusy ||
+                newsBusy ||
+                galleryBusy ||
+                tournamentEventsBusy ||
+                adminUsersBusy ||
+                adminHistoryBusy
+              }
+            >
               Выйти
             </button>
           </div>
+
+          <div className="form-field full" style={{ marginTop: 4 }}>
+            <span>Раздел админки</span>
+            <div className="contacts-city-buttons admin-section-buttons">
+              {availableAdminSections.map((section) => (
+                <button
+                  key={section.value}
+                  className={`clubs-picker-link ${activeAdminSection === section.value ? 'is-active' : ''}`}
+                  type="button"
+                  onClick={() => setActiveAdminSection(section.value)}
+                  aria-pressed={activeAdminSection === section.value}
+                >
+                  {section.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {activeAdminSection === 'profile' && (
+            <div className="admin-profile-box">
+            <h3>Профиль пользователя</h3>
+            <p className="admin-profile-lead">Можно изменить только имя и фамилию. Логин фиксирован для вашего аккаунта.</p>
+
+            <form className="form-grid admin-profile-form" onSubmit={submitProfile}>
+              <label className="form-field full" htmlFor="admin-profile-login">
+                <span>Логин</span>
+                <input id="admin-profile-login" name="admin-profile-login" type="text" value={getText(currentUser?.login)} readOnly />
+              </label>
+
+              <label className="form-field" htmlFor="admin-profile-first-name">
+                <span>Имя</span>
+                <input
+                  id="admin-profile-first-name"
+                  name="admin-profile-first-name"
+                  type="text"
+                  value={profileForm.firstName}
+                  onChange={(event) => setProfileForm((prev) => ({ ...prev, firstName: event.target.value }))}
+                  placeholder="Введите имя"
+                  required
+                />
+              </label>
+
+              <label className="form-field" htmlFor="admin-profile-last-name">
+                <span>Фамилия</span>
+                <input
+                  id="admin-profile-last-name"
+                  name="admin-profile-last-name"
+                  type="text"
+                  value={profileForm.lastName}
+                  onChange={(event) => setProfileForm((prev) => ({ ...prev, lastName: event.target.value }))}
+                  placeholder="Введите фамилию"
+                  required
+                />
+              </label>
+
+              <div className="form-actions">
+                <button className="btn btn-primary" type="submit" disabled={profileBusy}>
+                  {profileBusy ? 'Сохраняем...' : 'Сохранить профиль'}
+                </button>
+              </div>
+            </form>
+
+            <p className={`form-note ${profileMessage && profileMessage.includes('Ошибка') ? 'error' : ''}`} aria-live="polite">
+              {profileMessage}
+            </p>
+            </div>
+          )}
+
+          {isOwner && activeAdminSection === 'profile' && (
+            <div className="admin-profile-box">
+              <h3>Управление администраторами</h3>
+              <p className="admin-profile-lead">Только владелец может добавлять и удалять пользователей админки.</p>
+
+              <form className="form-grid admin-profile-form" onSubmit={submitAdminUser}>
+                <label className="form-field" htmlFor="new-admin-login">
+                  <span>Логин *</span>
+                  <input
+                    id="new-admin-login"
+                    name="new-admin-login"
+                    type="text"
+                    value={adminUserForm.login}
+                    onChange={(event) => setAdminUserForm((prev) => ({ ...prev, login: event.target.value }))}
+                    placeholder="new_admin"
+                    required
+                  />
+                </label>
+
+                <label className="form-field" htmlFor="new-admin-password">
+                  <span>Пароль *</span>
+                  <input
+                    id="new-admin-password"
+                    name="new-admin-password"
+                    type="text"
+                    value={adminUserForm.password}
+                    onChange={(event) => setAdminUserForm((prev) => ({ ...prev, password: event.target.value }))}
+                    placeholder="Введите пароль"
+                    required
+                  />
+                </label>
+
+                <label className="form-field" htmlFor="new-admin-first-name">
+                  <span>Имя *</span>
+                  <input
+                    id="new-admin-first-name"
+                    name="new-admin-first-name"
+                    type="text"
+                    value={adminUserForm.firstName}
+                    onChange={(event) => setAdminUserForm((prev) => ({ ...prev, firstName: event.target.value }))}
+                    placeholder="Введите имя"
+                    required
+                  />
+                </label>
+
+                <label className="form-field" htmlFor="new-admin-last-name">
+                  <span>Фамилия *</span>
+                  <input
+                    id="new-admin-last-name"
+                    name="new-admin-last-name"
+                    type="text"
+                    value={adminUserForm.lastName}
+                    onChange={(event) => setAdminUserForm((prev) => ({ ...prev, lastName: event.target.value }))}
+                    placeholder="Введите фамилию"
+                    required
+                  />
+                </label>
+
+                <label className="form-field full" htmlFor="new-admin-role">
+                  <span>Роль *</span>
+                  <select
+                    id="new-admin-role"
+                    name="new-admin-role"
+                    value={adminUserForm.role}
+                    onChange={(event) => setAdminUserForm((prev) => ({ ...prev, role: normalizeUserRole(event.target.value) }))}
+                  >
+                    {USER_ROLE_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <div className="form-actions">
+                  <button className="btn btn-primary" type="submit" disabled={adminUsersBusy}>
+                    {adminUsersBusy ? 'Сохраняем...' : 'Добавить пользователя'}
+                  </button>
+                </div>
+              </form>
+
+              <p className={`form-note ${adminUsersMessage && adminUsersMessage.includes('Ошибка') ? 'error' : ''}`} aria-live="polite">
+                {adminUsersMessage}
+              </p>
+
+              <div className="admin-list">
+                {adminUsers.length === 0 && <p className="admin-empty">Пользователи админки пока не добавлены.</p>}
+                {adminUsers.map((user) => (
+                  <article className="admin-item" key={user.login}>
+                    <div className="admin-item-head">
+                      <strong>
+                        {user.firstName} {user.lastName}
+                      </strong>
+                      <div className="admin-item-actions">
+                        <button
+                          className="btn btn-outline"
+                          type="button"
+                          onClick={() => resetAdminPassword(user.login, user.role)}
+                          disabled={
+                            adminUsersBusy ||
+                            (normalizeUserRole(user.role) !== 'admin' && user.login !== getText(currentUser?.login))
+                          }
+                        >
+                          Сбросить пароль
+                        </button>
+                        <button
+                          className="btn btn-ghost"
+                          type="button"
+                          onClick={() => removeAdminUser(user.login)}
+                          disabled={adminUsersBusy || user.login === currentUser?.login}
+                        >
+                          Удалить
+                        </button>
+                      </div>
+                    </div>
+                    <p className="admin-meta">{getUserRoleLabel(user.role)}</p>
+                    <p className="admin-path">{user.login}</p>
+                  </article>
+                ))}
+              </div>
+            </div>
+          )}
 
           {loadError && (
             <p className="form-note error" role="alert">
@@ -461,8 +1426,11 @@ export default function AdminPanel() {
           )}
         </div>
 
-        <div className="admin-grid">
-          <div className="card admin-card">
+        {(activeAdminSection === 'news' ||
+          activeAdminSection === 'gallery' ||
+          activeAdminSection === 'tournament-events') && (
+          <div className="admin-grid admin-grid-single">
+            {activeAdminSection === 'news' && <div className="card admin-card">
             <h3>Публикация новости</h3>
             <form className="form-grid" onSubmit={submitNews}>
               <label className="form-field full" htmlFor="news-title">
@@ -558,15 +1526,33 @@ export default function AdminPanel() {
             <p className={`form-note ${newsMessage && newsMessage.includes('Ошибка') ? 'error' : ''}`} aria-live="polite">
               {newsMessage}
             </p>
-          </div>
+            </div>}
 
-          <div className="card admin-card admin-gallery-card">
+            {activeAdminSection === 'gallery' && <div className="card admin-card admin-gallery-card">
             <div className="admin-gallery-head">
               <h3>Добавить фото в галерею</h3>
-              <p>Загрузите файл или укажите ссылку на изображение.</p>
+              <p>Загрузите файл изображения.</p>
             </div>
 
             <form className="form-grid gallery-form-grid" onSubmit={submitPhoto}>
+              <div className="form-field full">
+                <span>Раздел сайта *</span>
+                <div className="contacts-city-buttons gallery-section-buttons">
+                  {GALLERY_SECTION_OPTIONS.map((option) => (
+                    <button
+                      key={option.value}
+                      className={`clubs-picker-link ${normalizeGallerySection(galleryForm.section) === option.value ? 'is-active' : ''}`}
+                      type="button"
+                      onClick={() => setGalleryForm((prev) => ({ ...prev, section: option.value }))}
+                      aria-pressed={normalizeGallerySection(galleryForm.section) === option.value}
+                      disabled={galleryBusy}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <div className="form-field full gallery-upload-field">
                 <span>Файл изображения</span>
                 <div className="gallery-upload-shell">
@@ -593,22 +1579,6 @@ export default function AdminPanel() {
                 </div>
               </div>
 
-              <p className="gallery-separator" aria-hidden="true">
-                или
-              </p>
-
-              <label className="form-field full" htmlFor="gallery-src">
-                <span>Ссылка на фото</span>
-                <input
-                  id="gallery-src"
-                  name="gallery-src"
-                  type="text"
-                  value={galleryForm.src}
-                  onChange={(event) => setGalleryForm((prev) => ({ ...prev, src: event.target.value }))}
-                  placeholder="/images/lounge.jpg или https://..."
-                />
-              </label>
-
               <label className="form-field full" htmlFor="gallery-alt">
                 <span>Описание фото</span>
                 <input
@@ -634,34 +1604,259 @@ export default function AdminPanel() {
             >
               {galleryMessage}
             </p>
-          </div>
-        </div>
+            </div>}
 
-        <div className="admin-grid">
-          <div className="card admin-card">
+            {activeAdminSection === 'tournament-events' && <div className="card admin-card">
+            <h3>Добавить мероприятие кибертурниров</h3>
+            <form className="form-grid" onSubmit={submitTournamentEvent}>
+              <label className="form-field full" htmlFor="tournament-event-title">
+                <span>Название *</span>
+                <input
+                  id="tournament-event-title"
+                  name="tournament-event-title"
+                  type="text"
+                  value={tournamentEventForm.title}
+                  onChange={(event) => setTournamentEventForm((prev) => ({ ...prev, title: event.target.value }))}
+                  placeholder="Например: FC 26 WEEKLY"
+                  required
+                />
+              </label>
+
+              <label className="form-field full" htmlFor="tournament-event-summary">
+                <span>Краткое описание *</span>
+                <textarea
+                  id="tournament-event-summary"
+                  name="tournament-event-summary"
+                  value={tournamentEventForm.summary}
+                  onChange={(event) => setTournamentEventForm((prev) => ({ ...prev, summary: event.target.value }))}
+                  placeholder="1-2 предложения о формате мероприятия"
+                  required
+                />
+              </label>
+
+              <div className="form-field full">
+                <span>Изображение мероприятия</span>
+                <div className="file-picker">
+                  <input
+                    ref={tournamentEventFileInputRef}
+                    id="tournament-event-image-file"
+                    name="tournament-event-image-file"
+                    type="file"
+                    className="file-picker-input"
+                    accept="image/*"
+                    onChange={(event) => setTournamentEventFile(event.target.files?.[0] ?? null)}
+                  />
+                  <button
+                    className="btn btn-primary"
+                    type="button"
+                    onClick={() => tournamentEventFileInputRef.current?.click()}
+                    disabled={tournamentEventsBusy}
+                  >
+                    {tournamentEventFile ? 'Выбрать другой файл' : 'Выбрать файл'}
+                  </button>
+                  <p className="file-picker-name">{tournamentEventFile ? tournamentEventFile.name : 'Файл не выбран'}</p>
+                </div>
+              </div>
+
+              <label className="form-field" htmlFor="tournament-event-image-src">
+                <span>Или ссылка на изображение</span>
+                <input
+                  id="tournament-event-image-src"
+                  name="tournament-event-image-src"
+                  type="text"
+                  value={tournamentEventForm.imageSrc}
+                  onChange={(event) => setTournamentEventForm((prev) => ({ ...prev, imageSrc: event.target.value }))}
+                  placeholder="/images/fc26-cup.jpg или https://..."
+                />
+              </label>
+
+              <label className="form-field" htmlFor="tournament-event-image-alt">
+                <span>Описание изображения</span>
+                <input
+                  id="tournament-event-image-alt"
+                  name="tournament-event-image-alt"
+                  type="text"
+                  value={tournamentEventForm.imageAlt}
+                  onChange={(event) => setTournamentEventForm((prev) => ({ ...prev, imageAlt: event.target.value }))}
+                  placeholder="Турнир RUNA"
+                />
+              </label>
+
+              <div className="form-actions">
+                <button className="btn btn-primary" type="submit" disabled={tournamentEventsBusy}>
+                  {tournamentEventsBusy ? 'Сохраняем...' : 'Добавить мероприятие'}
+                </button>
+              </div>
+            </form>
+
+            <p
+              className={`form-note ${tournamentEventsMessage && tournamentEventsMessage.includes('Ошибка') ? 'error' : ''}`}
+              aria-live="polite"
+            >
+              {tournamentEventsMessage}
+            </p>
+            </div>}
+          </div>
+        )}
+
+        {(activeAdminSection === 'news' ||
+          activeAdminSection === 'gallery' ||
+          activeAdminSection === 'tournament-events' ||
+          activeAdminSection === 'history') && (
+          <div className="admin-grid admin-grid-single">
+            {activeAdminSection === 'news' && <div className="card admin-card">
             <h3>Опубликованные новости</h3>
             <div className="admin-list">
               {news.length === 0 && <p className="admin-empty">Список новостей пуст.</p>}
-              {news.map((item) => (
-                <article className="admin-item" key={item.id}>
-                  <div className="admin-item-head">
-                    <strong>{item.title}</strong>
-                    <button className="btn btn-ghost" type="button" onClick={() => removeNews(item.id)} disabled={newsBusy}>
-                      Удалить
-                    </button>
-                  </div>
-                  <p className="admin-meta">{formatDate(item.publishedAt)}</p>
-                  <p>{item.summary}</p>
-                </article>
-              ))}
-            </div>
-          </div>
+              {news.map((item) => {
+                const isEditing = editingNewsId === item.id;
 
-          <div className="card admin-card">
-            <h3>Фото в галерее</h3>
+                return (
+                  <article className="admin-item" key={item.id}>
+                    <div className="admin-item-head">
+                      <strong>{item.title}</strong>
+                      <div className="admin-item-actions">
+                        <button
+                          className="btn btn-outline"
+                          type="button"
+                          onClick={() => (isEditing ? cancelNewsEdit() : openNewsEdit(item))}
+                          disabled={newsBusy}
+                        >
+                          {isEditing ? 'Отмена' : 'Редактировать'}
+                        </button>
+                        <button
+                          className="btn btn-ghost"
+                          type="button"
+                          onClick={() => removeNews(item.id)}
+                          disabled={newsBusy}
+                        >
+                          Удалить
+                        </button>
+                      </div>
+                    </div>
+
+                    <p className="admin-meta">{formatDate(item.publishedAt)}</p>
+
+                    {isEditing ? (
+                      <form className="form-grid admin-edit-form" onSubmit={(event) => submitEditedNews(event, item.id)}>
+                        <label className="form-field full" htmlFor={`news-edit-title-${item.id}`}>
+                          <span>Заголовок *</span>
+                          <input
+                            id={`news-edit-title-${item.id}`}
+                            type="text"
+                            value={editNewsForm.title}
+                            onChange={(event) => setEditNewsForm((prev) => ({ ...prev, title: event.target.value }))}
+                            required
+                          />
+                        </label>
+
+                        <label className="form-field full" htmlFor={`news-edit-summary-${item.id}`}>
+                          <span>Короткое описание *</span>
+                          <textarea
+                            id={`news-edit-summary-${item.id}`}
+                            value={editNewsForm.summary}
+                            onChange={(event) => setEditNewsForm((prev) => ({ ...prev, summary: event.target.value }))}
+                            required
+                          />
+                        </label>
+
+                        <label className="form-field full" htmlFor={`news-edit-content-${item.id}`}>
+                          <span>Дополнительный текст</span>
+                          <textarea
+                            id={`news-edit-content-${item.id}`}
+                            value={editNewsForm.content}
+                            onChange={(event) => setEditNewsForm((prev) => ({ ...prev, content: event.target.value }))}
+                          />
+                        </label>
+
+                        <div className="form-field full">
+                          <span>Заменить изображение</span>
+                          <div className="file-picker">
+                            <input
+                              ref={editNewsFileInputRef}
+                              id={`news-edit-image-file-${item.id}`}
+                              type="file"
+                              className="file-picker-input"
+                              accept="image/*"
+                              onChange={(event) => setEditNewsFile(event.target.files?.[0] ?? null)}
+                            />
+                            <button
+                              className="btn btn-outline"
+                              type="button"
+                              onClick={() => editNewsFileInputRef.current?.click()}
+                              disabled={newsBusy}
+                            >
+                              {editNewsFile ? 'Выбрать другое изображение' : 'Выбрать изображение'}
+                            </button>
+                            <p className="file-picker-name">{editNewsFile ? editNewsFile.name : 'Оставить текущее изображение'}</p>
+                          </div>
+                        </div>
+
+                        <label className="form-field" htmlFor={`news-edit-source-url-${item.id}`}>
+                          <span>Ссылка на источник</span>
+                          <input
+                            id={`news-edit-source-url-${item.id}`}
+                            type="url"
+                            value={editNewsForm.sourceUrl}
+                            onChange={(event) => setEditNewsForm((prev) => ({ ...prev, sourceUrl: event.target.value }))}
+                            placeholder="https://vk.com/..."
+                          />
+                        </label>
+
+                        <label className="form-field" htmlFor={`news-edit-published-at-${item.id}`}>
+                          <span>Дата публикации</span>
+                          <input
+                            id={`news-edit-published-at-${item.id}`}
+                            type="datetime-local"
+                            value={editNewsForm.publishedAt}
+                            onChange={(event) => setEditNewsForm((prev) => ({ ...prev, publishedAt: event.target.value }))}
+                          />
+                        </label>
+
+                        <div className="form-actions">
+                          <button className="btn btn-primary" type="submit" disabled={newsBusy}>
+                            {newsBusy ? 'Сохраняем...' : 'Сохранить'}
+                          </button>
+                          <button className="btn btn-ghost" type="button" onClick={cancelNewsEdit} disabled={newsBusy}>
+                            Отмена
+                          </button>
+                        </div>
+                      </form>
+                    ) : (
+                      <>
+                        <p>{item.summary}</p>
+                        {item.content ? <p>{item.content}</p> : null}
+                      </>
+                    )}
+                  </article>
+                );
+              })}
+            </div>
+            </div>}
+
+            {activeAdminSection === 'gallery' && <div className="card admin-card">
+            <h3>Фото в галереях</h3>
+            <div className="form-field full" style={{ marginBottom: 12 }}>
+              <span>Показать раздел</span>
+              <div className="contacts-city-buttons gallery-section-buttons">
+                {GALLERY_SECTION_OPTIONS.map((option) => (
+                  <button
+                    key={option.value}
+                    className={`clubs-picker-link ${galleryViewSection === option.value ? 'is-active' : ''}`}
+                    type="button"
+                    onClick={() => setGalleryViewSection(option.value)}
+                    aria-pressed={galleryViewSection === option.value}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </div>
             <div className="admin-list">
-              {photos.length === 0 && <p className="admin-empty">В галерее пока нет фото.</p>}
-              {photos.map((item) => (
+              {visiblePhotos.length === 0 && (
+                <p className="admin-empty">В разделе «{getGallerySectionLabel(galleryViewSection)}» пока нет фото.</p>
+              )}
+              {visiblePhotos.map((item) => (
                 <article className="admin-item admin-item-photo" key={item.id}>
                   <img src={item.src} alt={item.alt} loading="lazy" />
                   <div>
@@ -676,14 +1871,68 @@ export default function AdminPanel() {
                         Удалить
                       </button>
                     </div>
-                    <p className="admin-meta">{formatDateTime(item.createdAt)}</p>
+                    <p className="admin-meta">
+                      {getGallerySectionLabel(item.section)} · {formatDateTime(item.createdAt)}
+                    </p>
                     <p className="admin-path">{item.src}</p>
                   </div>
                 </article>
               ))}
             </div>
+            </div>}
+
+            {activeAdminSection === 'tournament-events' && <div className="card admin-card">
+            <h3>Мероприятия кибертурниров</h3>
+            <div className="admin-list">
+              {tournamentEvents.length === 0 && <p className="admin-empty">Список мероприятий пока пуст.</p>}
+              {tournamentEvents.map((item) => (
+                <article className="admin-item admin-item-photo" key={item.id}>
+                  <img src={item.imageSrc} alt={item.imageAlt || item.title} loading="lazy" />
+                  <div>
+                    <div className="admin-item-head">
+                      <strong>{item.title}</strong>
+                      <button
+                        className="btn btn-ghost"
+                        type="button"
+                        onClick={() => removeTournamentEvent(item.id)}
+                        disabled={tournamentEventsBusy}
+                      >
+                        Удалить
+                      </button>
+                    </div>
+                    <p className="admin-meta">{formatDateTime(item.createdAt)}</p>
+                    <p>{item.summary}</p>
+                    <p className="admin-path">{item.imageSrc}</p>
+                  </div>
+                </article>
+              ))}
+            </div>
+            </div>}
+
+            {isOwner && activeAdminSection === 'history' && (
+              <div className="card admin-card">
+              <h3>История изменений</h3>
+              {adminHistoryBusy ? <p className="admin-empty">Загружаем историю...</p> : null}
+              <div className="admin-list">
+                {adminHistory.length === 0 && <p className="admin-empty">История изменений пока пустая.</p>}
+                {adminHistory.map((entry) => (
+                  <article className="admin-item" key={entry.id}>
+                    <div className="admin-item-head">
+                      <strong>{getHistoryActionLabel(entry.action)}</strong>
+                    </div>
+                    <p className="admin-meta">{formatDateTime(entry.createdAt)}</p>
+                    <p>
+                      Исполнитель: {entry.actorLogin} ({getUserRoleLabel(entry.actorRole)})
+                    </p>
+                    <p>{entry.summary || 'Изменение без описания.'}</p>
+                    {entry.targetId ? <p className="admin-path">{entry.targetId}</p> : null}
+                  </article>
+                ))}
+              </div>
+              </div>
+            )}
           </div>
-        </div>
+        )}
       </div>
     </section>
   );

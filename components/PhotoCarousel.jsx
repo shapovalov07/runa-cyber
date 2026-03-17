@@ -1,16 +1,26 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 export default function PhotoCarousel({ items }) {
   const viewportRef = useRef(null);
   const trackRef = useRef(null);
+  const metricsRef = useRef({ step: 1, maxPage: 0, pages: 1 });
   const activePageRef = useRef(0);
   const pageCountRef = useRef(1);
   const [activePage, setActivePage] = useState(0);
   const [pageCount, setPageCount] = useState(1);
+  const [lightboxIndex, setLightboxIndex] = useState(-1);
+  const [mounted, setMounted] = useState(false);
 
   const safeItems = useMemo(() => items ?? [], [items]);
+  const isLightboxOpen = lightboxIndex >= 0 && lightboxIndex < safeItems.length;
+  const lightboxItem = isLightboxOpen ? safeItems[lightboxIndex] : null;
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     activePageRef.current = activePage;
@@ -25,32 +35,34 @@ export default function PhotoCarousel({ items }) {
     const track = trackRef.current;
     if (!viewport || !track) return;
 
-    const getMetrics = () => {
+    const updateMetrics = () => {
       const firstItem = track.querySelector('.carousel-item');
       if (!firstItem) {
-        return {
+        const fallback = {
           step: viewport.clientWidth,
           maxPage: 0,
           pages: 1,
         };
+        metricsRef.current = fallback;
+        setPageCount(1);
+        setActivePage(0);
+        return;
       }
 
       const styles = window.getComputedStyle(track);
       const gap = parseFloat(styles.columnGap || styles.gap || '0');
       const itemWidth = firstItem.getBoundingClientRect().width;
-      const step = itemWidth + gap;
+      const step = Math.max(1, itemWidth + gap);
       const visibleCount = Math.max(1, Math.round((viewport.clientWidth + gap) / step));
       const maxPage = Math.max(0, safeItems.length - visibleCount);
+      const pages = maxPage + 1;
 
-      return {
+      metricsRef.current = {
         step,
         maxPage,
-        pages: maxPage + 1,
+        pages,
       };
-    };
 
-    const updateCarouselState = () => {
-      const { step, maxPage, pages } = getMetrics();
       const nextPage = step > 0 ? Math.round(viewport.scrollLeft / step) : 0;
       const clampedPage = Math.min(maxPage, Math.max(0, nextPage));
 
@@ -58,39 +70,83 @@ export default function PhotoCarousel({ items }) {
       setActivePage(clampedPage);
     };
 
-    const onScroll = () => window.requestAnimationFrame(updateCarouselState);
+    let rafId = 0;
+    const onScroll = () => {
+      if (rafId) return;
+      rafId = window.requestAnimationFrame(() => {
+        rafId = 0;
+        const { step, maxPage } = metricsRef.current;
+        const nextPage = step > 0 ? Math.round(viewport.scrollLeft / step) : 0;
+        const clampedPage = Math.min(maxPage, Math.max(0, nextPage));
+        if (clampedPage !== activePageRef.current) {
+          setActivePage(clampedPage);
+        }
+      });
+    };
 
     viewport.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', updateCarouselState);
+    window.addEventListener('resize', updateMetrics);
 
-    updateCarouselState();
+    updateMetrics();
 
     return () => {
       viewport.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', updateCarouselState);
+      window.removeEventListener('resize', updateMetrics);
+      if (rafId) window.cancelAnimationFrame(rafId);
     };
   }, [safeItems.length]);
 
   const goToPage = useCallback((page) => {
     const viewport = viewportRef.current;
-    const track = trackRef.current;
-    if (!viewport || !track) return;
+    if (!viewport) return;
 
-    const firstItem = track.querySelector('.carousel-item');
-    const styles = window.getComputedStyle(track);
-    const gap = parseFloat(styles.columnGap || styles.gap || '0');
-    const itemWidth = firstItem ? firstItem.getBoundingClientRect().width : viewport.clientWidth;
-    const step = itemWidth + gap;
-    const visibleCount = Math.max(1, Math.round((viewport.clientWidth + gap) / step));
-    const maxPage = Math.max(0, safeItems.length - visibleCount);
+    const { step, maxPage } = metricsRef.current;
     const targetPage = Math.min(maxPage, Math.max(0, page));
+    const targetLeft = targetPage * step;
 
-    viewport.scrollTo({ left: targetPage * step, behavior: 'smooth' });
-    setActivePage(targetPage);
+    viewport.scrollTo({ left: targetLeft, behavior: 'smooth' });
+  }, []);
+
+  const closeLightbox = useCallback(() => {
+    setLightboxIndex(-1);
+  }, []);
+
+  const showPrevInLightbox = useCallback(() => {
+    if (!safeItems.length) return;
+    setLightboxIndex((prev) => (prev <= 0 ? safeItems.length - 1 : prev - 1));
+  }, [safeItems.length]);
+
+  const showNextInLightbox = useCallback(() => {
+    if (!safeItems.length) return;
+    setLightboxIndex((prev) => (prev + 1) % safeItems.length);
   }, [safeItems.length]);
 
   useEffect(() => {
-    if (safeItems.length < 2) return;
+    if (!isLightboxOpen) return undefined;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        closeLightbox();
+      } else if (event.key === 'ArrowLeft') {
+        showPrevInLightbox();
+      } else if (event.key === 'ArrowRight') {
+        showNextInLightbox();
+      }
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', onKeyDown);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [closeLightbox, isLightboxOpen, showNextInLightbox, showPrevInLightbox]);
+
+  useEffect(() => {
+    if (safeItems.length < 2 || isLightboxOpen) return;
 
     const intervalId = window.setInterval(() => {
       const totalPages = pageCountRef.current;
@@ -101,15 +157,22 @@ export default function PhotoCarousel({ items }) {
     }, 5000);
 
     return () => window.clearInterval(intervalId);
-  }, [goToPage, safeItems.length]);
+  }, [goToPage, isLightboxOpen, safeItems.length]);
 
   return (
     <div className="carousel reveal" aria-label="Карусель фото клуба">
       <div className="carousel-viewport" ref={viewportRef}>
         <div className="carousel-track" ref={trackRef}>
-          {safeItems.map((item) => (
+          {safeItems.map((item, index) => (
             <figure className="photo-slide carousel-item" key={item.src}>
-              <img src={item.src} alt={item.alt} loading="lazy" />
+              <button
+                className="carousel-photo-trigger"
+                type="button"
+                onClick={() => setLightboxIndex(index)}
+                aria-label={`Открыть фото ${index + 1} во весь экран`}
+              >
+                <img src={item.src} alt={item.alt} loading="lazy" />
+              </button>
             </figure>
           ))}
         </div>
@@ -129,6 +192,53 @@ export default function PhotoCarousel({ items }) {
           ))}
         </div>
       )}
+
+      {mounted &&
+        isLightboxOpen &&
+        lightboxItem &&
+        createPortal(
+          <div className="photo-lightbox" role="dialog" aria-modal="true" aria-label="Просмотр фото">
+            <button className="photo-lightbox-backdrop" type="button" onClick={closeLightbox} aria-label="Закрыть просмотр" />
+
+            <div className="photo-lightbox-shell">
+              <button className="photo-lightbox-close" type="button" onClick={closeLightbox} aria-label="Закрыть">
+                ×
+              </button>
+
+              {safeItems.length > 1 && (
+                <>
+                  <button
+                    className="photo-lightbox-arrow is-prev"
+                    type="button"
+                    onClick={showPrevInLightbox}
+                    aria-label="Предыдущее фото"
+                  >
+                    ‹
+                  </button>
+                  <button
+                    className="photo-lightbox-arrow is-next"
+                    type="button"
+                    onClick={showNextInLightbox}
+                    aria-label="Следующее фото"
+                  >
+                    ›
+                  </button>
+                </>
+              )}
+
+              <figure className="photo-lightbox-figure">
+                <img src={lightboxItem.src} alt={lightboxItem.alt} draggable={false} />
+                <figcaption className="photo-lightbox-caption">
+                  <span>{lightboxItem.alt}</span>
+                  <span>
+                    {lightboxIndex + 1} / {safeItems.length}
+                  </span>
+                </figcaption>
+              </figure>
+            </div>
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }

@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="236 178 552 472" role="img" aria-labelledby="title">
+  <title id="title">RUNA Logo Icon</title>
+  <defs>
+    <filter id="lineGlowIcon" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="1.1" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <clipPath id="innerTriangleIcon">
+      <polygon points="512,242 294,615 730,615"/>
+    </clipPath>
+    <clipPath id="keyboardClipIcon">
+      <polygon points="382,502 642,502 680,585 344,585"/>
+    </clipPath>
+  </defs>
+
+  <g fill="none" stroke="#d8cec2" stroke-linecap="round" stroke-linejoin="round" filter="url(#lineGlowIcon)">
+    <polygon points="512,178 236,650 788,650" stroke-width="6"/>
+    <polygon points="512,242 294,615 730,615" stroke-width="5"/>
+
+    <g clip-path="url(#innerTriangleIcon)" stroke-width="4" opacity="0.95">
+      <line x1="512" y1="252" x2="312" y2="620"/>
+      <line x1="512" y1="252" x2="346" y2="620"/>
+      <line x1="512" y1="252" x2="380" y2="620"/>
+      <line x1="512" y1="252" x2="414" y2="620"/>
+      <line x1="512" y1="252" x2="448" y2="620"/>
+      <line x1="512" y1="252" x2="482" y2="620"/>
+      <line x1="512" y1="252" x2="516" y2="620"/>
+      <line x1="512" y1="252" x2="550" y2="620"/>
+      <line x1="512" y1="252" x2="584" y2="620"/>
+      <line x1="512" y1="252" x2="618" y2="620"/>
+      <line x1="512" y1="252" x2="652" y2="620"/>
+      <line x1="512" y1="252" x2="686" y2="620"/>
+      <line x1="512" y1="252" x2="720" y2="620"/>
+    </g>
+
+    <circle cx="512" cy="428" r="52" fill="none" stroke-width="5"/>
+    <path d="M431 405a81 81 0 0 1 162 0" stroke-width="6"/>
+    <path d="M397 445a115 115 0 0 1 230 0" stroke-width="6"/>
+
+    <rect x="405" y="430" width="28" height="40" rx="14" fill="#d8cec2" stroke="none"/>
+    <rect x="591" y="430" width="28" height="40" rx="14" fill="#d8cec2" stroke="none"/>
+
+    <polygon points="512,368 539,396 532,435 510,451 482,442 474,404" fill="#d8cec2" fill-opacity="0.24" stroke-width="3.4"/>
+    <path d="M512 368 510 451M482 442 539 396M474 404 532 435M482 442 474 404 512 368 539 396 532 435 510 451Z" stroke-width="2.2"/>
+
+    <polygon points="382,502 642,502 680,585 344,585" fill="none" stroke-width="6"/>
+
+    <g clip-path="url(#keyboardClipIcon)" stroke-width="3.8">
+      <line x1="352" y1="525" x2="672" y2="525"/>
+      <line x1="348" y1="548" x2="676" y2="548"/>
+      <line x1="345" y1="571" x2="679" y2="571"/>
+
+      <line x1="376" y1="500" x2="360" y2="585"/>
+      <line x1="413" y1="500" x2="397" y2="585"/>
+      <line x1="450" y1="500" x2="434" y2="585"/>
+      <line x1="487" y1="500" x2="471" y2="585"/>
+      <line x1="524" y1="500" x2="508" y2="585"/>
+      <line x1="561" y1="500" x2="545" y2="585"/>
+      <line x1="598" y1="500" x2="582" y2="585"/>
+      <line x1="635" y1="500" x2="619" y2="585"/>
+    </g>
+  </g>
+</svg>

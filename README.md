@@ -27,6 +27,7 @@ cp .env.example .env.local
 - `password` - пароль администратора
 - `firstName` - имя администратора
 - `lastName` - фамилия администратора
+- `role` - роль пользователя (`owner` или `admin`)
 
 5. Запустить dev-сервер:
 
@@ -54,20 +55,31 @@ npm run dev
 
 - `POST /api/franchise` - принимает JSON формы и отправляет сообщение в Telegram
 - `POST /api/admin/login` - проверка логина и пароля администратора
+- `PATCH /api/admin/profile` - обновить профиль текущего пользователя
+- `GET /api/admin/users` - список пользователей админки (только `owner`)
+- `POST /api/admin/users` - создать пользователя админки (только `owner`)
+- `PATCH /api/admin/users/:login` - сбросить пароль администратора или сменить пароль своего owner-аккаунта (только `owner`)
+- `DELETE /api/admin/users/:login` - удалить пользователя админки (только `owner`)
+- `GET /api/admin/history` - история изменений администраторов (только `owner`)
 - `GET /api/news` - получить список новостей
 - `POST /api/news` - создать новость (нужны `x-admin-login` и `x-admin-password` или поля `login/password` в `multipart/form-data`)
 - `DELETE /api/news/:id` - удалить новость (нужны заголовки `x-admin-login` и `x-admin-password`)
-- `GET /api/gallery` - получить фото галереи
-- `POST /api/gallery` - добавить фото (форма `multipart/form-data`, поля `login` и `password`)
+- `GET /api/gallery` - получить фото галереи (опционально `?section=home|clubs|tournaments`)
+- `POST /api/gallery` - добавить фото (форма `multipart/form-data`, поля `login`, `password`, `section`)
 - `DELETE /api/gallery/:id` - удалить фото (нужны заголовки `x-admin-login` и `x-admin-password`)
+- `GET /api/tournament-events` - получить список мероприятий раздела «Кибертурниры»
+- `POST /api/tournament-events` - создать мероприятие (доступно `admin` и `owner`)
+- `DELETE /api/tournament-events/:id` - удалить мероприятие (доступно `admin` и `owner`)
 
 ## CMS хранилище
 
 - Новости: `data/cms/news.json`
 - Галерея: `data/cms/gallery.json`
-- Админ-доступ: `data/cms/admin.json`
+- Мероприятия кибертурниров: `data/cms/tournament-events.json`
+- Админ-доступ + роли + история действий: `data/cms/admin.json`
 - Загруженные фото новостей: `public/uploads/news/`
 - Загруженные фото галереи: `public/uploads/gallery/`
+- Загруженные фото мероприятий: `public/uploads/tournament-events/`
 
 ## Docker (порт 3030)
 

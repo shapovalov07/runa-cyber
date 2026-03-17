@@ -1,21 +1,22 @@
 import { NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import {
-  addNewsItem,
-  getNewsList,
-  isManagedNewsUpload,
-  removeManagedNewsUpload,
-  saveNewsUpload,
+  addTournamentEvent,
+  getTournamentEvents,
+  isManagedTournamentEventUpload,
+  removeManagedTournamentEventUpload,
+  saveTournamentEventUpload,
 } from '@/lib/cms-storage';
 import { appendAdminHistory, getAdminCredentialsFromRequest, verifyAdminCredentials } from '@/lib/admin-auth';
 
 export const runtime = 'nodejs';
+
 const MAX_UPLOAD_SIZE_BYTES = 8 * 1024 * 1024;
 const getText = (value) => (typeof value === 'string' ? value.trim() : '');
 
 export async function GET() {
-  const news = await getNewsList();
-  return NextResponse.json({ ok: true, news });
+  const items = await getTournamentEvents();
+  return NextResponse.json({ ok: true, items });
 }
 
 export async function POST(request) {
@@ -46,11 +47,8 @@ export async function POST(request) {
     payload = {
       title: getText(formData.get('title')),
       summary: getText(formData.get('summary')),
-      content: getText(formData.get('content')),
       imageSrc: getText(formData.get('imageSrc')),
       imageAlt: getText(formData.get('imageAlt')),
-      sourceUrl: getText(formData.get('sourceUrl')),
-      publishedAt: getText(formData.get('publishedAt')),
     };
 
     const file = formData.get('photo');
@@ -63,7 +61,7 @@ export async function POST(request) {
         return NextResponse.json({ ok: false, error: 'Файл слишком большой. Лимит: 8 МБ.' }, { status: 400 });
       }
 
-      uploadedImageSrc = await saveNewsUpload(file);
+      uploadedImageSrc = await saveTournamentEventUpload(file);
       payload.imageSrc = uploadedImageSrc;
     }
   } else {
@@ -81,22 +79,20 @@ export async function POST(request) {
   }
 
   try {
-    const item = await addNewsItem(payload);
+    const item = await addTournamentEvent(payload);
     await appendAdminHistory({
       actor,
-      action: 'news.create',
-      targetType: 'news',
+      action: 'tournament-event.create',
+      targetType: 'tournament-event',
       targetId: item.id,
-      summary: item.title || 'Создана новость.',
+      summary: item.title || 'Создано мероприятие турниров.',
     });
-    revalidatePath('/');
-    revalidatePath('/news');
-    revalidatePath(`/news/${item.id}`);
+    revalidatePath('/tournaments');
     return NextResponse.json({ ok: true, item }, { status: 201 });
   } catch (error) {
-    if (uploadedImageSrc && isManagedNewsUpload(uploadedImageSrc)) {
-      await removeManagedNewsUpload(uploadedImageSrc);
+    if (uploadedImageSrc && isManagedTournamentEventUpload(uploadedImageSrc)) {
+      await removeManagedTournamentEventUpload(uploadedImageSrc);
     }
-    return NextResponse.json({ ok: false, error: error.message || 'Ошибка создания новости.' }, { status: 400 });
+    return NextResponse.json({ ok: false, error: error.message || 'Ошибка создания мероприятия.' }, { status: 400 });
   }
 }

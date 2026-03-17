@@ -34,6 +34,11 @@ export default async function NewsSection({
 
           {visibleNews.map((item) => (
             <article className="card news-card reveal" key={item.id}>
+              <Link
+                className="news-card-overlay"
+                href={`/news/${encodeURIComponent(item.id)}`}
+                aria-label={`Открыть новость «${item.title}»`}
+              />
               <div className="news-media">
                 <img src={item.imageSrc || '/images/fc26-news.jpg'} alt={item.imageAlt || item.title} loading="lazy" />
               </div>
@@ -46,9 +51,16 @@ export default async function NewsSection({
                 <p className="news-summary">{item.summary}</p>
                 {item.content && <p className="news-extra">{item.content}</p>}
                 {item.sourceUrl && (
-                  <a className="news-link" href={item.sourceUrl} target="_blank" rel="noopener noreferrer">
-                    Источник
-                  </a>
+                  <div className="news-links">
+                    <a
+                      className="news-link news-link-source"
+                      href={item.sourceUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Источник
+                    </a>
+                  </div>
                 )}
               </div>
             </article>
@@ -57,7 +69,7 @@ export default async function NewsSection({
 
         {shouldShowAllButton && (
           <div className="news-actions">
-            <Link className="btn btn-outline" href="/news">
+            <Link className="btn btn-primary" href="/news">
               Смотреть все новости
             </Link>
           </div>

@@ -10,8 +10,7 @@ export default function SiteFooter() {
         <div className="footer-top">
           <div className="footer-brand-block">
             <Link className="footer-brand" href="/" aria-label="На главную">
-              <span className="brand-mark" aria-hidden="true"></span>
-              <span>RUNA CYBER CLUB</span>
+              <img className="footer-brand-logo" src="/images/runa-logo-provided-crop.png" alt="RUNA Cyber Club" />
             </Link>
             <p>{footerDescription}</p>
           </div>
@@ -46,12 +45,7 @@ export default function SiteFooter() {
 
         <div className="footer-bottom">
           <div>© {year} RUNA Cyber Club.</div>
-          <div className="footer-source">
-            Источник данных:{' '}
-            <a href="https://vk.com/runarostov" target="_blank" rel="noopener noreferrer">
-              официальное сообщество VK
-            </a>
-          </div>
+          <div className="footer-source">RUNA Cyber Club</div>
         </div>
       </div>
     </footer>

@@ -163,7 +163,7 @@ export default function FranchiseForm() {
             id="phone"
             name="phone"
             type="tel"
-            placeholder="+7 (...) ...-..-.."
+            placeholder="+7 (999) 123-45-67"
             autoComplete="tel"
             inputMode="numeric"
             pattern="\+7 \(\d{3}\) \d{3}-\d{2}-\d{2}"

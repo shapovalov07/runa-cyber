@@ -17,8 +17,7 @@ export default function SiteHeader() {
     <header className="site-header">
       <div className="container header-row">
         <Link className="brand" href="/" aria-label="На главную">
-          <span className="brand-mark" aria-hidden="true"></span>
-          <span>RUNA CYBER CLUB</span>
+          <img className="brand-logo" src="/images/runa-logo-header-wordmark.png" alt="RUNA Cyber Club" />
         </Link>
 
         <button

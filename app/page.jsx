@@ -1,19 +1,33 @@
 import Link from 'next/link';
 import ClubPhotosSection from '@/components/ClubPhotosSection';
 import NewsSection from '@/components/NewsSection';
+import { totalCities, totalClubs } from '@/data/clubs';
 
 export const dynamic = 'force-dynamic';
 
 export default function HomePage() {
   return (
     <main>
-      <section className="page-hero" style={{ '--hero-image': "url('/images/hero-home-alt.jpg')" }}>
+      <section className="page-hero page-hero-video">
+        <video
+          className="page-hero-media"
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          poster="/images/hero-home-alt.jpg"
+          aria-hidden="true"
+        >
+          <source src="/videos/hero-home.mp4" type="video/mp4" />
+        </video>
+        <div className="page-hero-overlay" aria-hidden="true" />
         <div className="container">
-          <p className="kicker">Ростов-на-Дону</p>
-          <h1>RUNA Cyber Club: премиальный киберклуб без лишнего шума</h1>
+          <p className="kicker">Сеть RUNA Cyber Club</p>
+          <h1>Киберклубы RUNA: единый стандарт игры в разных городах</h1>
           <p>
-            550 м² киберпространства, топовое железо, PS5 rooms 4K 86&quot;, кинотеатр Dolby Atmos и регулярные игровые
-            активности. Вся информация собрана из официального сообщества RUNA в VK.
+            {totalClubs} клубов в {totalCities} городах: high-FPS конфигурации, PS5-зоны, турниры и комфортные пространства
+            для тренировок, игры и отдыха.
           </p>
           <div className="hero-actions">
             <Link className="btn btn-primary" href="/clubs">
@@ -27,34 +41,28 @@ export default function HomePage() {
       </section>
 
       <section className="section">
-        <div className="container grid grid-3">
+        <div className="container grid grid-3 stats-grid">
           <article className="card stat reveal">
-            <strong>550 м²</strong>
-            <p>площадь игрового пространства по данным сообщества.</p>
+            <strong className="stat-value">{totalClubs}</strong>
+            <p>действующих клубов в сети RUNA</p>
           </article>
           <article className="card stat reveal">
-            <strong>5 зон + PS5</strong>
-            <p>STANDART PREMIUM, OLYMP DEAD, SQUAD ZONE, KILLER FPS, HYPE, PS5 ROOMS.</p>
+            <strong className="stat-value">{totalCities}</strong>
+            <p>города присутствия и расширения сети</p>
           </article>
-          <article className="card stat reveal">
-            <strong>800+</strong>
-            <p>
-              подписчиков в VK:{' '}
-              <a href="https://vk.com/runarostov" target="_blank" rel="noopener noreferrer">
-                vk.com/runarostov
-              </a>
-              .
-            </p>
+          <article className="card stat stat-mixed reveal">
+            <strong className="stat-value">PC + PS5</strong>
+            <p>форматы для ranked-игры, командных сессий и турниров</p>
           </article>
         </div>
       </section>
 
       <section className="section">
         <div className="container">
-          <h2 className="section-title">Что внутри клуба</h2>
+          <h2 className="section-title">Что внутри клубов RUNA</h2>
           <p className="section-lead">
-            Из описания и раздела HARDWARE: мониторы 380Hz и 540Hz, процессоры i5-14600KF / 7600X3D, периферия Logitech,
-            кресла Anda Seat Kaiser 3XL, отдельные комнаты и продуманная атмосфера.
+            Во всех локациях RUNA делается акцент на производительность, удобство и атмосферу: быстрые сборки, продуманная
+            периферия, отдельные зоны и комфортный сервис.
           </p>
           <div className="grid grid-2 feature-grid">
             <article className="card reveal feature-card">
@@ -87,29 +95,7 @@ export default function HomePage() {
 
       <NewsSection limit={4} showAllButton />
 
-      <ClubPhotosSection />
-
-      <section className="section">
-        <div className="container info-strip reveal">
-          Источники:{' '}
-          <a href="https://vk.com/runarostov" target="_blank" rel="noopener noreferrer">
-            VK RUNA Ростов
-          </a>
-          ,{' '}
-          <a href="https://vk.com/@runarostov-zhelezo-i-devaisy" target="_blank" rel="noopener noreferrer">
-            HARDWARE
-          </a>
-          ,{' '}
-          <a href="https://vk.com/@runarostov-price" target="_blank" rel="noopener noreferrer">
-            PRICE
-          </a>
-          ,{' '}
-          <a href="https://vk.com/@runarostov-akcii" target="_blank" rel="noopener noreferrer">
-            PROMO
-          </a>
-          .
-        </div>
-      </section>
+      <ClubPhotosSection section="home" />
     </main>
   );
 }
