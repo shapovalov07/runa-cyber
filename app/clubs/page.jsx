@@ -1,6 +1,6 @@
-import ClubPhotosSection from '@/components/ClubPhotosSection';
 import ClubsSelector from '@/components/ClubsSelector';
 import { clubCities, totalCities, totalClubs } from '@/data/clubs';
+import { getGalleryPhotos } from '@/lib/cms-storage';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,7 +10,9 @@ export const metadata = {
     'Клубы RUNA в Воронеже, Саратове, Челябинске и Ростове-на-Дону: адреса, телефоны, игровые зоны и конфигурации оборудования.',
 };
 
-export default function ClubsPage() {
+export default async function ClubsPage() {
+  const cityPhotos = await getGalleryPhotos('clubs');
+
   return (
     <main>
       <section className="page-hero" style={{ '--hero-image': "url('/images/hero-clubs-lounge.jpg')" }}>
@@ -49,9 +51,7 @@ export default function ClubsPage() {
         </div>
       </section>
 
-      <ClubsSelector cities={clubCities} />
-
-      <ClubPhotosSection section="clubs" />
+      <ClubsSelector cities={clubCities} cityPhotos={cityPhotos} />
     </main>
   );
 }

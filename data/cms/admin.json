@@ -19,6 +19,66 @@
   ],
   "history": [
     {
+      "id": "1b6f710a-098b-46c8-b6f2-912f501bf5a4",
+      "action": "news.delete",
+      "actorLogin": "admin",
+      "actorRole": "owner",
+      "targetType": "news",
+      "targetId": "22f27931-fab6-4fc3-b586-778af424a4fa",
+      "summary": "🔥 CRL SEASON 2 🔥 \"IT-куб\" × RUNA",
+      "createdAt": "2026-03-17T19:06:06.359Z"
+    },
+    {
+      "id": "402aa8be-5ad4-4edf-9243-fc94cd71dcae",
+      "action": "news.create",
+      "actorLogin": "admin",
+      "actorRole": "owner",
+      "targetType": "news",
+      "targetId": "c36cd8a8-eef1-40c0-b14c-c881cc245589",
+      "summary": "🔥 CRL SEASON 2 🔥 \"IT-куб\" × RUNA",
+      "createdAt": "2026-03-17T18:58:40.353Z"
+    },
+    {
+      "id": "126a886a-825f-4c1e-97fa-d9e5a00c2da5",
+      "action": "news.delete",
+      "actorLogin": "admin",
+      "actorRole": "owner",
+      "targetType": "news",
+      "targetId": "news-opening",
+      "summary": "Открыт набор на любительские турниры",
+      "createdAt": "2026-03-17T18:08:46.735Z"
+    },
+    {
+      "id": "e9c28f76-2ac9-43b8-addb-39af4cb1a326",
+      "action": "news.delete",
+      "actorLogin": "admin",
+      "actorRole": "owner",
+      "targetType": "news",
+      "targetId": "d85f7a3e-5ce1-4648-a4f5-07f64d493724",
+      "summary": "jhgfdfghjkjhgfdsdfghj",
+      "createdAt": "2026-03-17T18:08:44.417Z"
+    },
+    {
+      "id": "e1569fa6-08ce-48e5-a871-99c287cd3f0e",
+      "action": "news.create",
+      "actorLogin": "admin",
+      "actorRole": "owner",
+      "targetType": "news",
+      "targetId": "22f27931-fab6-4fc3-b586-778af424a4fa",
+      "summary": "🔥 CRL SEASON 2 🔥 \"IT-куб\" × RUNA",
+      "createdAt": "2026-03-17T18:07:59.153Z"
+    },
+    {
+      "id": "9cbb143c-6aff-4190-8165-696308852dbf",
+      "action": "gallery.create",
+      "actorLogin": "admin",
+      "actorRole": "owner",
+      "targetType": "gallery-photo",
+      "targetId": "2044f306-76bd-4111-a76f-65b462a0d5f3",
+      "summary": "Добавлено фото в раздел clubs (город: voronezh).",
+      "createdAt": "2026-03-17T17:35:33.345Z"
+    },
+    {
       "id": "c8b4a47d-e44f-467e-991b-29303f7d31f2",
       "action": "tournament-event.create",
       "actorLogin": "admin_1",

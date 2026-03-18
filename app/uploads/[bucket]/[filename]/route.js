@@ -12,6 +12,13 @@ const MIME_BY_EXT = {
   '.gif': 'image/gif',
   '.svg': 'image/svg+xml',
   '.avif': 'image/avif',
+  '.mp4': 'video/mp4',
+  '.webm': 'video/webm',
+  '.mov': 'video/quicktime',
+  '.m4v': 'video/x-m4v',
+  '.avi': 'video/x-msvideo',
+  '.mkv': 'video/x-matroska',
+  '.ogv': 'video/ogg',
 };
 
 const getText = (value) => (typeof value === 'string' ? value.trim() : '');

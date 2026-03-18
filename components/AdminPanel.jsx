@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { clubCities } from '@/data/clubs';
+import { isVideoMediaSrc } from '@/lib/media';
 
 const dateFormatter = new Intl.DateTimeFormat('ru-RU', {
   day: '2-digit',
@@ -28,10 +30,26 @@ const GALLERY_SECTION_OPTIONS = [
   { value: 'tournaments', label: 'Кибертурниры' },
 ];
 const GALLERY_SECTION_VALUES = new Set(GALLERY_SECTION_OPTIONS.map((option) => option.value));
+const CLUB_CITY_OPTIONS = [
+  { value: '', label: 'Все города' },
+  ...clubCities.map((city) => ({
+    value: getText(city?.slug).toLowerCase(),
+    label: getText(city?.city) || getText(city?.slug),
+  })),
+].filter((option) => option.value === '' || option.value);
+const CLUB_CITY_VALUES = new Set(CLUB_CITY_OPTIONS.map((option) => option.value).filter(Boolean));
 
 const normalizeGallerySection = (value) => {
   const section = getText(value).toLowerCase();
   return GALLERY_SECTION_VALUES.has(section) ? section : 'home';
+};
+const normalizeGalleryCitySlug = (value, section = 'clubs') => {
+  if (normalizeGallerySection(section) !== 'clubs') return '';
+
+  const slug = getText(value).toLowerCase();
+  if (!slug) return '';
+
+  return CLUB_CITY_VALUES.has(slug) ? slug : '';
 };
 
 const normalizeUserRole = (value) => {
@@ -44,6 +62,11 @@ const getUserRoleLabel = (value) =>
 
 const getGallerySectionLabel = (value) =>
   GALLERY_SECTION_OPTIONS.find((option) => option.value === normalizeGallerySection(value))?.label || 'Главная';
+const getGalleryCityLabel = (value) => {
+  const slug = normalizeGalleryCitySlug(value);
+  const selected = CLUB_CITY_OPTIONS.find((option) => option.value === slug);
+  return selected?.label || 'Все города';
+};
 
 const HISTORY_ACTION_LABELS = {
   'profile.update': 'Профиль',
@@ -94,6 +117,8 @@ const createInitialNewsEditForm = () => ({
   title: '',
   summary: '',
   content: '',
+  imageSrc: '',
+  imageAlt: '',
   sourceUrl: '',
   publishedAt: toDateTimeLocal(),
 });
@@ -102,12 +127,15 @@ const createNewsEditForm = (item) => ({
   title: getText(item?.title),
   summary: getText(item?.summary),
   content: getText(item?.content),
+  imageSrc: getText(item?.imageSrc),
+  imageAlt: getText(item?.imageAlt),
   sourceUrl: getText(item?.sourceUrl),
   publishedAt: toDateTimeLocal(item?.publishedAt),
 });
 
 const createInitialGalleryForm = () => ({
   section: 'home',
+  citySlug: '',
   alt: '',
 });
 
@@ -154,6 +182,30 @@ const formatDateTime = (value) => {
 const readResponse = async (response) => {
   const payload = await response.json().catch(() => ({}));
   return payload ?? {};
+};
+
+const renderTournamentEventMedia = (item) => {
+  const src = getText(item?.imageSrc);
+  if (!src) return null;
+
+  const mediaLabel = getText(item?.imageAlt) || getText(item?.title) || 'Мероприятие RUNA';
+  if (isVideoMediaSrc(src)) {
+    return <video src={src} aria-label={mediaLabel} controls preload="metadata" playsInline />;
+  }
+
+  return <img src={src} alt={mediaLabel} loading="lazy" />;
+};
+
+const renderNewsMedia = (item) => {
+  const src = getText(item?.imageSrc);
+  if (!src) return null;
+
+  const mediaLabel = getText(item?.imageAlt) || getText(item?.title) || 'Новость RUNA';
+  if (isVideoMediaSrc(src)) {
+    return <video src={src} aria-label={mediaLabel} controls preload="metadata" playsInline />;
+  }
+
+  return <img src={src} alt={mediaLabel} loading="lazy" />;
 };
 
 const ADMIN_SESSION_KEY = 'runa-admin-session';
@@ -228,6 +280,7 @@ export default function AdminPanel() {
   const [adminUsers, setAdminUsers] = useState([]);
   const [adminHistory, setAdminHistory] = useState([]);
   const [galleryViewSection, setGalleryViewSection] = useState('home');
+  const [galleryViewCitySlug, setGalleryViewCitySlug] = useState('');
   const [activeAdminSection, setActiveAdminSection] = useState('news');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [restoringSession, setRestoringSession] = useState(true);
@@ -275,14 +328,30 @@ export default function AdminPanel() {
   );
 
   const visiblePhotos = useMemo(
-    () => photos.filter((item) => normalizeGallerySection(item?.section) === galleryViewSection),
-    [galleryViewSection, photos]
+    () => {
+      const section = normalizeGallerySection(galleryViewSection);
+      const bySection = photos.filter((item) => normalizeGallerySection(item?.section) === section);
+
+      if (section !== 'clubs') return bySection;
+
+      const targetCitySlug = normalizeGalleryCitySlug(galleryViewCitySlug, 'clubs');
+      if (!targetCitySlug) return bySection;
+
+      return bySection.filter((item) => normalizeGalleryCitySlug(item?.citySlug, 'clubs') === targetCitySlug);
+    },
+    [galleryViewCitySlug, galleryViewSection, photos]
   );
 
   useEffect(() => {
     if (availableAdminSections.some((section) => section.value === activeAdminSection)) return;
     setActiveAdminSection(availableAdminSections[0]?.value || 'news');
   }, [activeAdminSection, availableAdminSections]);
+
+  useEffect(() => {
+    if (normalizeGallerySection(galleryViewSection) === 'clubs') return;
+    if (!galleryViewCitySlug) return;
+    setGalleryViewCitySlug('');
+  }, [galleryViewCitySlug, galleryViewSection]);
 
   const applyAuthorizedUser = (user, loginValue, passwordValue) => {
     setLogin(loginValue);
@@ -529,12 +598,18 @@ export default function AdminPanel() {
     setEditingNewsId('');
     setEditNewsForm(createInitialNewsEditForm);
     setEditNewsFile(null);
+    setGalleryForm(createInitialGalleryForm);
+    setGalleryFile(null);
     setTournamentEventForm(createInitialTournamentEventForm);
     setTournamentEventFile(null);
     setProfileForm(createInitialProfileForm);
     setAdminUserForm(createInitialAdminUserForm);
     setGalleryViewSection('home');
+    setGalleryViewCitySlug('');
     setActiveAdminSection('news');
+    if (galleryFileInputRef.current) {
+      galleryFileInputRef.current.value = '';
+    }
     if (tournamentEventFileInputRef.current) {
       tournamentEventFileInputRef.current.value = '';
     }
@@ -737,6 +812,8 @@ export default function AdminPanel() {
       formData.set('title', getText(editNewsForm.title));
       formData.set('summary', getText(editNewsForm.summary));
       formData.set('content', getText(editNewsForm.content));
+      formData.set('imageSrc', getText(editNewsForm.imageSrc));
+      formData.set('imageAlt', getText(editNewsForm.imageAlt));
       formData.set('sourceUrl', getText(editNewsForm.sourceUrl));
       formData.set('publishedAt', getText(editNewsForm.publishedAt));
 
@@ -775,6 +852,11 @@ export default function AdminPanel() {
 
     if (!ensureCredentials()) return;
     const targetSection = normalizeGallerySection(galleryForm.section);
+    const targetCitySlug = normalizeGalleryCitySlug(galleryForm.citySlug, targetSection);
+    if (targetSection === 'clubs' && getText(galleryForm.citySlug) && !targetCitySlug) {
+      setGalleryMessage('Выберите корректный город для раздела «Наши клубы».');
+      return;
+    }
     if (!galleryFile) {
       setGalleryMessage('Добавьте файл изображения.');
       return;
@@ -787,6 +869,7 @@ export default function AdminPanel() {
       formData.set('login', getText(login));
       formData.set('password', getText(password));
       formData.set('section', targetSection);
+      formData.set('citySlug', targetCitySlug);
       formData.set('alt', getText(galleryForm.alt));
       formData.set('photo', galleryFile);
 
@@ -803,15 +886,18 @@ export default function AdminPanel() {
 
       setPhotos((prev) => [payload.item, ...prev]);
       setGalleryViewSection(targetSection);
+      setGalleryViewCitySlug(targetSection === 'clubs' ? targetCitySlug : '');
       setGalleryForm({
         ...createInitialGalleryForm(),
         section: targetSection,
+        citySlug: targetSection === 'clubs' ? targetCitySlug : '',
       });
       setGalleryFile(null);
       if (galleryFileInputRef.current) {
         galleryFileInputRef.current.value = '';
       }
-      setGalleryMessage(`Фото добавлено в раздел «${getGallerySectionLabel(targetSection)}».`);
+      const cityMessage = targetSection === 'clubs' ? `, город «${getGalleryCityLabel(targetCitySlug)}»` : '';
+      setGalleryMessage(`Фото добавлено в раздел «${getGallerySectionLabel(targetSection)}»${cityMessage}.`);
     } catch (error) {
       setGalleryMessage(error.message || 'Ошибка загрузки фото.');
     } finally {
@@ -858,7 +944,7 @@ export default function AdminPanel() {
       return;
     }
     if (!tournamentEventFile && !getText(tournamentEventForm.imageSrc)) {
-      setTournamentEventsMessage('Добавьте изображение файлом или укажите ссылку.');
+      setTournamentEventsMessage('Добавьте медиафайл (фото/GIF/видео) или укажите ссылку.');
       return;
     }
 
@@ -1470,7 +1556,7 @@ export default function AdminPanel() {
               </label>
 
               <div className="form-field full">
-                <span>Изображение новости</span>
+                <span>Медиа новости (фото, GIF, видео)</span>
                 <div className="file-picker">
                   <input
                     ref={newsFileInputRef}
@@ -1478,7 +1564,7 @@ export default function AdminPanel() {
                     name="news-image-file"
                     type="file"
                     className="file-picker-input"
-                    accept="image/*"
+                    accept="image/*,video/*,.gif"
                     onChange={(event) => setNewsFile(event.target.files?.[0] ?? null)}
                   />
                   <button
@@ -1487,11 +1573,35 @@ export default function AdminPanel() {
                     onClick={() => newsFileInputRef.current?.click()}
                     disabled={newsBusy}
                   >
-                    {newsFile ? 'Выбрать другое изображение' : 'Выбрать изображение'}
+                    {newsFile ? 'Выбрать другой файл' : 'Выбрать файл'}
                   </button>
                   <p className="file-picker-name">{newsFile ? newsFile.name : 'Файл не выбран'}</p>
                 </div>
               </div>
+
+              <label className="form-field" htmlFor="news-image-src">
+                <span>Или ссылка на медиа</span>
+                <input
+                  id="news-image-src"
+                  name="news-image-src"
+                  type="text"
+                  value={newsForm.imageSrc}
+                  onChange={(event) => setNewsForm((prev) => ({ ...prev, imageSrc: event.target.value }))}
+                  placeholder="/uploads/news/clip.mp4 или https://..."
+                />
+              </label>
+
+              <label className="form-field" htmlFor="news-image-alt">
+                <span>Описание медиа</span>
+                <input
+                  id="news-image-alt"
+                  name="news-image-alt"
+                  type="text"
+                  value={newsForm.imageAlt}
+                  onChange={(event) => setNewsForm((prev) => ({ ...prev, imageAlt: event.target.value }))}
+                  placeholder="Новость RUNA"
+                />
+              </label>
 
               <label className="form-field" htmlFor="news-source-url">
                 <span>Ссылка на источник</span>
@@ -1543,7 +1653,13 @@ export default function AdminPanel() {
                       key={option.value}
                       className={`clubs-picker-link ${normalizeGallerySection(galleryForm.section) === option.value ? 'is-active' : ''}`}
                       type="button"
-                      onClick={() => setGalleryForm((prev) => ({ ...prev, section: option.value }))}
+                      onClick={() =>
+                        setGalleryForm((prev) => ({
+                          ...prev,
+                          section: option.value,
+                          citySlug: option.value === 'clubs' ? prev.citySlug : '',
+                        }))
+                      }
                       aria-pressed={normalizeGallerySection(galleryForm.section) === option.value}
                       disabled={galleryBusy}
                     >
@@ -1552,6 +1668,29 @@ export default function AdminPanel() {
                   ))}
                 </div>
               </div>
+
+              {normalizeGallerySection(galleryForm.section) === 'clubs' && (
+                <div className="form-field full">
+                  <span>Город для фото</span>
+                  <div className="contacts-city-buttons gallery-city-buttons">
+                    {CLUB_CITY_OPTIONS.map((option) => (
+                      <button
+                        key={option.value || 'all-cities'}
+                        className={`clubs-picker-link ${
+                          normalizeGalleryCitySlug(galleryForm.citySlug, 'clubs') === option.value ? 'is-active' : ''
+                        }`}
+                        type="button"
+                        onClick={() => setGalleryForm((prev) => ({ ...prev, citySlug: option.value }))}
+                        aria-pressed={normalizeGalleryCitySlug(galleryForm.citySlug, 'clubs') === option.value}
+                        disabled={galleryBusy}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                  <p className="form-note">Если фото универсальное, оставьте «Все города».</p>
+                </div>
+              )}
 
               <div className="form-field full gallery-upload-field">
                 <span>Файл изображения</span>
@@ -1635,7 +1774,7 @@ export default function AdminPanel() {
               </label>
 
               <div className="form-field full">
-                <span>Изображение мероприятия</span>
+                <span>Медиа мероприятия (фото, GIF, видео)</span>
                 <div className="file-picker">
                   <input
                     ref={tournamentEventFileInputRef}
@@ -1643,7 +1782,7 @@ export default function AdminPanel() {
                     name="tournament-event-image-file"
                     type="file"
                     className="file-picker-input"
-                    accept="image/*"
+                    accept="image/*,video/*,.gif"
                     onChange={(event) => setTournamentEventFile(event.target.files?.[0] ?? null)}
                   />
                   <button
@@ -1659,19 +1798,19 @@ export default function AdminPanel() {
               </div>
 
               <label className="form-field" htmlFor="tournament-event-image-src">
-                <span>Или ссылка на изображение</span>
+                <span>Или ссылка на медиа</span>
                 <input
                   id="tournament-event-image-src"
                   name="tournament-event-image-src"
                   type="text"
                   value={tournamentEventForm.imageSrc}
                   onChange={(event) => setTournamentEventForm((prev) => ({ ...prev, imageSrc: event.target.value }))}
-                  placeholder="/images/fc26-cup.jpg или https://..."
+                  placeholder="/uploads/tournament-events/clip.mp4 или https://..."
                 />
               </label>
 
               <label className="form-field" htmlFor="tournament-event-image-alt">
-                <span>Описание изображения</span>
+                <span>Описание медиа</span>
                 <input
                   id="tournament-event-image-alt"
                   name="tournament-event-image-alt"
@@ -1770,14 +1909,14 @@ export default function AdminPanel() {
                         </label>
 
                         <div className="form-field full">
-                          <span>Заменить изображение</span>
+                          <span>Заменить медиа (фото, GIF, видео)</span>
                           <div className="file-picker">
                             <input
                               ref={editNewsFileInputRef}
                               id={`news-edit-image-file-${item.id}`}
                               type="file"
                               className="file-picker-input"
-                              accept="image/*"
+                              accept="image/*,video/*,.gif"
                               onChange={(event) => setEditNewsFile(event.target.files?.[0] ?? null)}
                             />
                             <button
@@ -1786,11 +1925,33 @@ export default function AdminPanel() {
                               onClick={() => editNewsFileInputRef.current?.click()}
                               disabled={newsBusy}
                             >
-                              {editNewsFile ? 'Выбрать другое изображение' : 'Выбрать изображение'}
+                              {editNewsFile ? 'Выбрать другой файл' : 'Выбрать файл'}
                             </button>
-                            <p className="file-picker-name">{editNewsFile ? editNewsFile.name : 'Оставить текущее изображение'}</p>
+                            <p className="file-picker-name">{editNewsFile ? editNewsFile.name : 'Оставить текущее медиа'}</p>
                           </div>
                         </div>
+
+                        <label className="form-field" htmlFor={`news-edit-image-src-${item.id}`}>
+                          <span>Или ссылка на медиа</span>
+                          <input
+                            id={`news-edit-image-src-${item.id}`}
+                            type="text"
+                            value={editNewsForm.imageSrc}
+                            onChange={(event) => setEditNewsForm((prev) => ({ ...prev, imageSrc: event.target.value }))}
+                            placeholder="/uploads/news/clip.mp4 или https://..."
+                          />
+                        </label>
+
+                        <label className="form-field" htmlFor={`news-edit-image-alt-${item.id}`}>
+                          <span>Описание медиа</span>
+                          <input
+                            id={`news-edit-image-alt-${item.id}`}
+                            type="text"
+                            value={editNewsForm.imageAlt}
+                            onChange={(event) => setEditNewsForm((prev) => ({ ...prev, imageAlt: event.target.value }))}
+                            placeholder="Новость RUNA"
+                          />
+                        </label>
 
                         <label className="form-field" htmlFor={`news-edit-source-url-${item.id}`}>
                           <span>Ссылка на источник</span>
@@ -1824,8 +1985,12 @@ export default function AdminPanel() {
                       </form>
                     ) : (
                       <>
-                        <p>{item.summary}</p>
-                        {item.content ? <p>{item.content}</p> : null}
+                        {item.imageSrc ? <div className="admin-news-media-preview">{renderNewsMedia(item)}</div> : null}
+                        <div>
+                          <p>{item.summary}</p>
+                          {item.content ? <p>{item.content}</p> : null}
+                          <p className="admin-path">{item.imageSrc || 'Медиа не указано'}</p>
+                        </div>
                       </>
                     )}
                   </article>
@@ -1852,9 +2017,35 @@ export default function AdminPanel() {
                 ))}
               </div>
             </div>
+            {normalizeGallerySection(galleryViewSection) === 'clubs' && (
+              <div className="form-field full" style={{ marginBottom: 12 }}>
+                <span>Фильтр по городу</span>
+                <div className="contacts-city-buttons gallery-city-buttons">
+                  {CLUB_CITY_OPTIONS.map((option) => (
+                    <button
+                      key={option.value || 'all-cities-filter'}
+                      className={`clubs-picker-link ${
+                        normalizeGalleryCitySlug(galleryViewCitySlug, 'clubs') === option.value ? 'is-active' : ''
+                      }`}
+                      type="button"
+                      onClick={() => setGalleryViewCitySlug(option.value)}
+                      aria-pressed={normalizeGalleryCitySlug(galleryViewCitySlug, 'clubs') === option.value}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
             <div className="admin-list">
               {visiblePhotos.length === 0 && (
-                <p className="admin-empty">В разделе «{getGallerySectionLabel(galleryViewSection)}» пока нет фото.</p>
+                <p className="admin-empty">
+                  {normalizeGallerySection(galleryViewSection) === 'clubs' && normalizeGalleryCitySlug(galleryViewCitySlug)
+                    ? `В городе «${getGalleryCityLabel(
+                        galleryViewCitySlug
+                      )}» пока нет фото в разделе «${getGallerySectionLabel(galleryViewSection)}».`
+                    : `В разделе «${getGallerySectionLabel(galleryViewSection)}» пока нет фото.`}
+                </p>
               )}
               {visiblePhotos.map((item) => (
                 <article className="admin-item admin-item-photo" key={item.id}>
@@ -1872,7 +2063,9 @@ export default function AdminPanel() {
                       </button>
                     </div>
                     <p className="admin-meta">
-                      {getGallerySectionLabel(item.section)} · {formatDateTime(item.createdAt)}
+                      {getGallerySectionLabel(item.section)}
+                      {normalizeGallerySection(item.section) === 'clubs' ? ` · ${getGalleryCityLabel(item.citySlug)}` : ''}
+                      {` · ${formatDateTime(item.createdAt)}`}
                     </p>
                     <p className="admin-path">{item.src}</p>
                   </div>
@@ -1887,7 +2080,7 @@ export default function AdminPanel() {
               {tournamentEvents.length === 0 && <p className="admin-empty">Список мероприятий пока пуст.</p>}
               {tournamentEvents.map((item) => (
                 <article className="admin-item admin-item-photo" key={item.id}>
-                  <img src={item.imageSrc} alt={item.imageAlt || item.title} loading="lazy" />
+                  {renderTournamentEventMedia(item)}
                   <div>
                     <div className="admin-item-head">
                       <strong>{item.title}</strong>

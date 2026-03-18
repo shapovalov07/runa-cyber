@@ -607,6 +607,10 @@ img {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.gallery-city-buttons {
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+}
+
 .contacts-city-layout {
   display: grid;
   gap: 14px;
@@ -685,6 +689,11 @@ img {
   margin: 0;
   font-size: 1.05rem;
   line-height: 1.25;
+}
+
+.club-city-gallery-card h3 {
+  margin: 0;
+  font-size: 1.15rem;
 }
 
 .club-vk-link {
@@ -887,6 +896,19 @@ img {
   border: 0;
   background: transparent;
   cursor: zoom-in;
+}
+
+.carousel-photo-trigger.is-disabled,
+.carousel-photo-trigger:disabled {
+  cursor: default;
+}
+
+.carousel-empty {
+  margin: 0;
+  padding: 16px 18px;
+  border: 1px dashed rgba(255, 255, 255, 0.18);
+  border-radius: 14px;
+  color: var(--muted);
 }
 
 .carousel-dots {
@@ -1105,21 +1127,56 @@ img {
 }
 
 .tournament-event-card {
+  position: relative;
   padding: 0;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   min-height: 100%;
+  cursor: pointer;
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
 }
 
-.tournament-event-card img {
+.tournament-event-card img,
+.tournament-event-card video {
+  position: relative;
+  z-index: 1;
+  display: block;
   width: 100%;
   aspect-ratio: 16 / 10;
   object-fit: cover;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  transition: transform 0.45s ease, filter 0.32s ease;
+}
+
+.tournament-event-card:hover,
+.tournament-event-card:focus-within {
+  transform: translateY(-2px);
+  border-color: rgba(255, 197, 77, 0.45);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+}
+
+.tournament-event-card:hover img,
+.tournament-event-card:hover video {
+  transform: scale(1.04);
+  filter: saturate(1.08);
+}
+
+.tournament-event-card-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+}
+
+.tournament-event-card-overlay:focus-visible {
+  outline: 2px solid rgba(49, 216, 255, 0.88);
+  outline-offset: -2px;
 }
 
 .tournament-event-content {
+  position: relative;
+  z-index: 1;
   padding: 16px 18px 18px;
   display: grid;
   gap: 8px;
@@ -1185,14 +1242,16 @@ img {
   overflow: hidden;
 }
 
-.news-media img {
+.news-media img,
+.news-media video {
   width: 100%;
   height: 100%;
   object-fit: cover;
   transition: transform 0.45s ease, filter 0.32s ease;
 }
 
-.news-card:hover .news-media img {
+.news-card:hover .news-media img,
+.news-card:hover .news-media video {
   transform: scale(1.04);
   filter: saturate(1.08);
 }
@@ -1324,7 +1383,8 @@ img {
   background: rgba(10, 15, 24, 0.92);
 }
 
-.news-detail-cover img {
+.news-detail-cover img,
+.news-detail-cover video {
   display: block;
   width: 100%;
   max-height: min(70vh, 760px);
@@ -1685,6 +1745,52 @@ img {
   white-space: pre-wrap;
 }
 
+.submit-success-popup {
+  position: fixed;
+  inset: 0;
+  z-index: 1500;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+}
+
+.submit-success-popup-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(3, 6, 12, 0.9);
+  backdrop-filter: blur(4px);
+}
+
+.submit-success-popup-card {
+  position: relative;
+  width: min(440px, 92vw);
+  padding: 22px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background:
+    radial-gradient(520px 200px at 0% 0%, rgba(49, 216, 255, 0.1), transparent 66%),
+    radial-gradient(420px 180px at 100% 100%, rgba(255, 106, 0, 0.12), transparent 70%),
+    linear-gradient(170deg, rgba(10, 15, 27, 0.97), rgba(8, 13, 24, 0.96));
+  box-shadow: 0 28px 64px rgba(0, 0, 0, 0.48);
+  display: grid;
+  gap: 10px;
+}
+
+.submit-success-popup-card h3 {
+  margin: 0;
+  font-size: 1.34rem;
+}
+
+.submit-success-popup-card p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.submit-success-popup-card .btn {
+  justify-self: start;
+}
+
 .admin-layout {
   display: grid;
   gap: 16px;
@@ -1887,9 +1993,23 @@ img {
   gap: 12px;
 }
 
-.admin-item-photo img {
+.admin-item-photo img,
+.admin-item-photo video {
   width: 100%;
   aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.admin-news-media-preview {
+  width: min(220px, 100%);
+}
+
+.admin-news-media-preview img,
+.admin-news-media-preview video {
+  width: 100%;
+  aspect-ratio: 16 / 10;
   object-fit: cover;
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.14);

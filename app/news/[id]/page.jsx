@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getNewsItemById } from '@/lib/cms-storage';
+import { isVideoMediaSrc } from '@/lib/media';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,6 +29,17 @@ const splitParagraphs = (value) =>
     .split(/\n+/)
     .map((line) => line.trim())
     .filter(Boolean);
+
+const renderNewsMedia = (item) => {
+  const mediaSrc = getText(item?.imageSrc) || '/images/fc26-news.jpg';
+  const mediaLabel = getText(item?.imageAlt) || getText(item?.title) || 'Новость RUNA';
+
+  if (isVideoMediaSrc(mediaSrc)) {
+    return <video src={mediaSrc} aria-label={mediaLabel} controls preload="metadata" playsInline />;
+  }
+
+  return <img src={mediaSrc} alt={mediaLabel} />;
+};
 
 export async function generateMetadata({ params }) {
   const routeParams = await params;
@@ -87,9 +99,7 @@ export default async function NewsDetailPage({ params }) {
               <span className="news-badge">Обновление</span>
             </div>
 
-            <div className="news-detail-cover">
-              <img src={item.imageSrc || '/images/fc26-news.jpg'} alt={item.imageAlt || item.title} />
-            </div>
+            <div className="news-detail-cover">{renderNewsMedia(item)}</div>
 
             <div className="news-detail-body">
               <p className="news-detail-summary">{item.summary}</p>

@@ -1,5 +1,7 @@
+import Link from 'next/link';
 import PhotoCarousel from '@/components/PhotoCarousel';
 import { getGalleryPhotos, getTournamentEvents } from '@/lib/cms-storage';
+import { isVideoMediaSrc } from '@/lib/media';
 
 export const dynamic = 'force-dynamic';
 
@@ -37,6 +39,17 @@ const fallbackTournamentEvents = [
     imageAlt: 'Клубный кубок RUNA',
   },
 ];
+
+const renderTournamentEventMedia = (item) => {
+  const mediaSrc = item?.imageSrc || '';
+  const mediaLabel = item?.imageAlt || item?.title || 'Мероприятие RUNA';
+
+  if (isVideoMediaSrc(mediaSrc)) {
+    return <video src={mediaSrc} aria-label={mediaLabel} preload="metadata" muted playsInline />;
+  }
+
+  return <img src={mediaSrc} alt={mediaLabel} loading="lazy" />;
+};
 
 export default async function TournamentsPage() {
   const galleryPhotos = await getGalleryPhotos('tournaments');
@@ -112,7 +125,14 @@ export default async function TournamentsPage() {
           <div className="grid grid-3 tournament-events-grid">
             {tournamentEvents.map((item) => (
               <article className="card tournament-event-card reveal" key={item.id || item.imageSrc}>
-                <img src={item.imageSrc} alt={item.imageAlt || item.title || 'Мероприятие RUNA'} loading="lazy" />
+                {item.id ? (
+                  <Link
+                    className="tournament-event-card-overlay"
+                    href={`/tournaments/${encodeURIComponent(item.id)}`}
+                    aria-label={`Открыть мероприятие «${item.title || 'RUNA'}»`}
+                  />
+                ) : null}
+                {renderTournamentEventMedia(item)}
                 <div className="tournament-event-content">
                   <h3>{item.title || 'Мероприятие RUNA'}</h3>
                   <p>{item.summary || 'Описание мероприятия скоро появится.'}</p>

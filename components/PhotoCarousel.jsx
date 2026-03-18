@@ -13,14 +13,33 @@ export default function PhotoCarousel({ items }) {
   const [pageCount, setPageCount] = useState(1);
   const [lightboxIndex, setLightboxIndex] = useState(-1);
   const [mounted, setMounted] = useState(false);
+  const [failedSrcSet, setFailedSrcSet] = useState(() => new Set());
 
   const safeItems = useMemo(() => items ?? [], [items]);
-  const isLightboxOpen = lightboxIndex >= 0 && lightboxIndex < safeItems.length;
-  const lightboxItem = isLightboxOpen ? safeItems[lightboxIndex] : null;
+  const itemsSignature = useMemo(
+    () => safeItems.map((item) => `${String(item?.id ?? '')}:${String(item?.src ?? '')}`).join('|'),
+    [safeItems],
+  );
+  const visibleItems = useMemo(() => {
+    if (failedSrcSet.size === 0) return safeItems;
+    return safeItems.filter((item) => !failedSrcSet.has(item?.src));
+  }, [failedSrcSet, safeItems]);
+  const isLightboxOpen = lightboxIndex >= 0 && lightboxIndex < visibleItems.length;
+  const lightboxItem = isLightboxOpen ? visibleItems[lightboxIndex] : null;
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    setFailedSrcSet(new Set());
+    setLightboxIndex(-1);
+  }, [itemsSignature]);
+
+  useEffect(() => {
+    if (visibleItems.length > 0) return;
+    setLightboxIndex(-1);
+  }, [visibleItems.length]);
 
   useEffect(() => {
     activePageRef.current = activePage;
@@ -54,7 +73,7 @@ export default function PhotoCarousel({ items }) {
       const itemWidth = firstItem.getBoundingClientRect().width;
       const step = Math.max(1, itemWidth + gap);
       const visibleCount = Math.max(1, Math.round((viewport.clientWidth + gap) / step));
-      const maxPage = Math.max(0, safeItems.length - visibleCount);
+      const maxPage = Math.max(0, visibleItems.length - visibleCount);
       const pages = maxPage + 1;
 
       metricsRef.current = {
@@ -94,7 +113,7 @@ export default function PhotoCarousel({ items }) {
       window.removeEventListener('resize', updateMetrics);
       if (rafId) window.cancelAnimationFrame(rafId);
     };
-  }, [safeItems.length]);
+  }, [visibleItems.length]);
 
   const goToPage = useCallback((page) => {
     const viewport = viewportRef.current;
@@ -112,14 +131,14 @@ export default function PhotoCarousel({ items }) {
   }, []);
 
   const showPrevInLightbox = useCallback(() => {
-    if (!safeItems.length) return;
-    setLightboxIndex((prev) => (prev <= 0 ? safeItems.length - 1 : prev - 1));
-  }, [safeItems.length]);
+    if (!visibleItems.length) return;
+    setLightboxIndex((prev) => (prev <= 0 ? visibleItems.length - 1 : prev - 1));
+  }, [visibleItems.length]);
 
   const showNextInLightbox = useCallback(() => {
-    if (!safeItems.length) return;
-    setLightboxIndex((prev) => (prev + 1) % safeItems.length);
-  }, [safeItems.length]);
+    if (!visibleItems.length) return;
+    setLightboxIndex((prev) => (prev + 1) % visibleItems.length);
+  }, [visibleItems.length]);
 
   useEffect(() => {
     if (!isLightboxOpen) return undefined;
@@ -146,7 +165,7 @@ export default function PhotoCarousel({ items }) {
   }, [closeLightbox, isLightboxOpen, showNextInLightbox, showPrevInLightbox]);
 
   useEffect(() => {
-    if (safeItems.length < 2 || isLightboxOpen) return;
+    if (visibleItems.length < 2 || isLightboxOpen) return;
 
     const intervalId = window.setInterval(() => {
       const totalPages = pageCountRef.current;
@@ -157,26 +176,52 @@ export default function PhotoCarousel({ items }) {
     }, 5000);
 
     return () => window.clearInterval(intervalId);
-  }, [goToPage, isLightboxOpen, safeItems.length]);
+  }, [goToPage, isLightboxOpen, visibleItems.length]);
+
+  const markImageFailed = useCallback((src) => {
+    if (!src) return;
+
+    setFailedSrcSet((prev) => {
+      if (prev.has(src)) return prev;
+      const next = new Set(prev);
+      next.add(src);
+      return next;
+    });
+  }, []);
 
   return (
     <div className="carousel reveal" aria-label="Карусель фото клуба">
-      <div className="carousel-viewport" ref={viewportRef}>
-        <div className="carousel-track" ref={trackRef}>
-          {safeItems.map((item, index) => (
-            <figure className="photo-slide carousel-item" key={item.src}>
-              <button
-                className="carousel-photo-trigger"
-                type="button"
-                onClick={() => setLightboxIndex(index)}
-                aria-label={`Открыть фото ${index + 1} во весь экран`}
-              >
-                <img src={item.src} alt={item.alt} loading="lazy" />
-              </button>
-            </figure>
-          ))}
+      {visibleItems.length === 0 ? (
+        <p className="carousel-empty">Фото для выбранного города пока не добавлены.</p>
+      ) : (
+        <div className="carousel-viewport" ref={viewportRef}>
+          <div className="carousel-track" ref={trackRef}>
+            {visibleItems.map((item, index) => {
+              const itemSrc = item?.src;
+              const canOpenLightbox = Boolean(itemSrc);
+
+              return (
+                <figure className="photo-slide carousel-item" key={`${item.id ?? item.src ?? index}-${index}`}>
+                  <button
+                    className={`carousel-photo-trigger${canOpenLightbox ? '' : ' is-disabled'}`}
+                    type="button"
+                    onClick={() => (canOpenLightbox ? setLightboxIndex(index) : null)}
+                    aria-label={`Открыть фото ${index + 1} во весь экран`}
+                    disabled={!canOpenLightbox}
+                  >
+                    <img
+                      src={item.src}
+                      alt={item.alt}
+                      loading="lazy"
+                      onError={() => markImageFailed(itemSrc)}
+                    />
+                  </button>
+                </figure>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
 
       {pageCount > 1 && (
         <div className="carousel-dots" aria-label="Навигация по галерее">
@@ -205,7 +250,7 @@ export default function PhotoCarousel({ items }) {
                 ×
               </button>
 
-              {safeItems.length > 1 && (
+              {visibleItems.length > 1 && (
                 <>
                   <button
                     className="photo-lightbox-arrow is-prev"
@@ -231,7 +276,7 @@ export default function PhotoCarousel({ items }) {
                 <figcaption className="photo-lightbox-caption">
                   <span>{lightboxItem.alt}</span>
                   <span>
-                    {lightboxIndex + 1} / {safeItems.length}
+                    {lightboxIndex + 1} / {visibleItems.length}
                   </span>
                 </figcaption>
               </figure>

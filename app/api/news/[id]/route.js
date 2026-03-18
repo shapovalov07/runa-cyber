@@ -10,9 +10,10 @@ import {
 import { appendAdminHistory, getAdminCredentialsFromRequest, verifyAdminCredentials } from '@/lib/admin-auth';
 
 export const runtime = 'nodejs';
-const MAX_UPLOAD_SIZE_BYTES = 8 * 1024 * 1024;
+const MAX_UPLOAD_SIZE_BYTES = 40 * 1024 * 1024;
 const getText = (value) => (typeof value === 'string' ? value.trim() : '');
 const hasOwn = (value, key) => Boolean(value) && Object.prototype.hasOwnProperty.call(value, key);
+const isNewsMediaType = (type) => type.startsWith('image/') || type.startsWith('video/');
 
 export async function PATCH(request, { params }) {
   const routeParams = await params;
@@ -51,12 +52,12 @@ export async function PATCH(request, { params }) {
 
     const file = formData.get('photo');
     if (file && typeof file === 'object' && typeof file.arrayBuffer === 'function' && file.size > 0) {
-      if (!file.type?.startsWith('image/')) {
-        return NextResponse.json({ ok: false, error: 'Можно загружать только изображения.' }, { status: 400 });
+      if (!isNewsMediaType(file.type || '')) {
+        return NextResponse.json({ ok: false, error: 'Можно загружать только фото, GIF или видео.' }, { status: 400 });
       }
 
       if (file.size > MAX_UPLOAD_SIZE_BYTES) {
-        return NextResponse.json({ ok: false, error: 'Файл слишком большой. Лимит: 8 МБ.' }, { status: 400 });
+        return NextResponse.json({ ok: false, error: 'Файл слишком большой. Лимит: 40 МБ.' }, { status: 400 });
       }
 
       uploadedImageSrc = await saveNewsUpload(file);
@@ -95,12 +96,10 @@ export async function PATCH(request, { params }) {
       return NextResponse.json({ ok: false, error: 'Новость не найдена.' }, { status: 404 });
     }
 
-    if (
-      uploadedImageSrc &&
-      isManagedNewsUpload(updated.previous?.imageSrc) &&
-      updated.previous.imageSrc !== uploadedImageSrc
-    ) {
-      await removeManagedNewsUpload(updated.previous.imageSrc);
+    const previousImageSrc = getText(updated.previous?.imageSrc);
+    const nextImageSrc = getText(updated.item?.imageSrc);
+    if (isManagedNewsUpload(previousImageSrc) && previousImageSrc !== nextImageSrc) {
+      await removeManagedNewsUpload(previousImageSrc);
     }
     await appendAdminHistory({
       actor,

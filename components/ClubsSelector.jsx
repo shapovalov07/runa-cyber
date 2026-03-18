@@ -1,9 +1,40 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import PhotoCarousel from '@/components/PhotoCarousel';
 
-export default function ClubsSelector({ cities }) {
+const getText = (value) => (typeof value === 'string' ? value.trim() : '');
+const normalizeCitySlug = (value) => getText(value).toLowerCase();
+
+const toNormalizedCityPhoto = (item, index) => ({
+  id: getText(item?.id) || `gallery-photo-${index}`,
+  src: getText(item?.src),
+  alt: getText(item?.alt) || 'Фото клуба RUNA',
+  citySlug: normalizeCitySlug(item?.citySlug),
+});
+
+const mergeUniquePhotos = (...groups) => {
+  const seen = new Set();
+  const merged = [];
+
+  groups.flat().forEach((item, index) => {
+    const src = getText(item?.src);
+    if (!src || seen.has(src)) return;
+
+    seen.add(src);
+    merged.push({
+      id: getText(item?.id) || `photo-${index}`,
+      src,
+      alt: getText(item?.alt) || 'Фото клуба RUNA',
+    });
+  });
+
+  return merged;
+};
+
+export default function ClubsSelector({ cities, cityPhotos }) {
   const safeCities = Array.isArray(cities) ? cities : [];
+  const safeCityPhotos = Array.isArray(cityPhotos) ? cityPhotos : [];
 
   const allClubs = useMemo(
     () =>
@@ -14,6 +45,10 @@ export default function ClubsSelector({ cities }) {
         })),
       ),
     [safeCities],
+  );
+  const normalizedGalleryPhotos = useMemo(
+    () => safeCityPhotos.map((item, index) => toNormalizedCityPhoto(item, index)).filter((item) => item.src),
+    [safeCityPhotos],
   );
 
   const firstClubId = allClubs[0]?.club?.id ?? '';
@@ -36,6 +71,7 @@ export default function ClubsSelector({ cities }) {
   }
 
   const { city, club } = selectedEntry;
+  const selectedCitySlug = normalizeCitySlug(city?.slug);
   const clubZones =
     Array.isArray(club.zones) && club.zones.length > 0
       ? club.zones
@@ -43,6 +79,9 @@ export default function ClubsSelector({ cities }) {
           name: 'Конфигурация',
           specs: [item],
         }));
+  const citySpecificPhotos = normalizedGalleryPhotos.filter((item) => item.citySlug === selectedCitySlug);
+  const sharedClubPhotos = normalizedGalleryPhotos.filter((item) => !item.citySlug);
+  const selectedCityPhotos = mergeUniquePhotos(citySpecificPhotos, sharedClubPhotos);
 
   return (
     <>
@@ -137,6 +176,12 @@ export default function ClubsSelector({ cities }) {
                 </ul>
               </div>
             ) : null}
+          </article>
+
+          <article className="card club-card club-city-gallery-card">
+            <p className="club-card-segment-title">Фото выбранного города</p>
+            <h3>{city.city}</h3>
+            <PhotoCarousel key={`club-city-gallery-${selectedCitySlug || 'default'}`} items={selectedCityPhotos} />
           </article>
         </div>
       </section>

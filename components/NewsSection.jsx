@@ -1,5 +1,6 @@
 import { getNewsList } from '@/lib/cms-storage';
 import Link from 'next/link';
+import NewsCardMedia from '@/components/NewsCardMedia';
 
 const dateFormatter = new Intl.DateTimeFormat('ru-RU', {
   day: '2-digit',
@@ -40,7 +41,7 @@ export default async function NewsSection({
                 aria-label={`Открыть новость «${item.title}»`}
               />
               <div className="news-media">
-                <img src={item.imageSrc || '/images/fc26-news.jpg'} alt={item.imageAlt || item.title} loading="lazy" />
+                <NewsCardMedia src={item.imageSrc} alt={item.imageAlt || item.title} />
               </div>
               <div className="news-content">
                 <div className="news-topline">

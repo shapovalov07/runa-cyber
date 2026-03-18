@@ -31,7 +31,9 @@ export async function DELETE(request, { params }) {
     action: 'gallery.delete',
     targetType: 'gallery-photo',
     targetId: removed.id,
-    summary: `Удалено фото из раздела ${removed.section || 'home'}.`,
+    summary: `Удалено фото из раздела ${removed.section || 'home'}${
+      removed.section === 'clubs' ? ` (город: ${removed.citySlug || 'все'})` : ''
+    }.`,
   });
 
   revalidatePath('/');

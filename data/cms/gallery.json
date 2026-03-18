@@ -1,9 +1,18 @@
 [
   {
+    "id": "2044f306-76bd-4111-a76f-65b462a0d5f3",
+    "src": "/uploads/gallery/1773768933338-2669eec8-fa55-4986-9255-f378a10afa16.png",
+    "alt": "Фото клуба RUNA",
+    "section": "clubs",
+    "citySlug": "voronezh",
+    "createdAt": "2026-03-17T17:35:33.343Z"
+  },
+  {
     "id": "56d6b2e2-bde5-4b90-9778-d679a7657c48",
     "src": "/uploads/gallery/1773694981907-c6905c67-ae59-4ba3-b7a9-7bfd148bf894.jpg",
     "alt": "Фото клуба RUNA",
     "section": "tournaments",
+    "citySlug": "",
     "createdAt": "2026-03-16T21:03:01.909Z"
   },
   {
@@ -11,6 +20,7 @@
     "src": "/uploads/gallery/1773692533065-fced6276-6308-4b90-987a-3ba61d92b99c.jpg",
     "alt": "Фото клуба RUNA",
     "section": "clubs",
+    "citySlug": "",
     "createdAt": "2026-03-16T20:22:13.067Z"
   },
   {
@@ -18,6 +28,7 @@
     "src": "/uploads/gallery/1773496557718-019a7bd4-ef84-453e-bc15-32942d554762.jpg",
     "alt": "Фото клуба RUNA",
     "section": "home",
+    "citySlug": "",
     "createdAt": "2026-03-14T13:55:57.722Z"
   },
   {
@@ -25,6 +36,7 @@
     "src": "/images/decor-bear.jpg",
     "alt": "Декор в зоне бара и отдыха",
     "section": "home",
+    "citySlug": "",
     "createdAt": "2026-03-01T08:20:00.000Z"
   },
   {
@@ -32,6 +44,7 @@
     "src": "/images/decor-art.jpg",
     "alt": "Арт-элементы в интерьере RUNA",
     "section": "home",
+    "citySlug": "",
     "createdAt": "2026-03-01T08:15:00.000Z"
   },
   {
@@ -39,6 +52,7 @@
     "src": "/images/club-people.jpg",
     "alt": "Игровая атмосфера RUNA",
     "section": "home",
+    "citySlug": "",
     "createdAt": "2026-03-01T08:10:00.000Z"
   },
   {
@@ -46,6 +60,7 @@
     "src": "/images/runa-sign.jpg",
     "alt": "Входная вывеска RUNA Cyber Club",
     "section": "home",
+    "citySlug": "",
     "createdAt": "2026-03-01T08:05:00.000Z"
   },
   {
@@ -53,6 +68,7 @@
     "src": "/images/lounge.jpg",
     "alt": "Неоновая зона клуба",
     "section": "home",
+    "citySlug": "",
     "createdAt": "2026-03-01T08:00:00.000Z"
   }
 ]
