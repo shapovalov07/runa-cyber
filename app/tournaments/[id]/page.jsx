@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getTournamentEventById } from '@/lib/cms-storage';
-import { isVideoMediaSrc } from '@/lib/media';
+import ExpandableMedia from '@/components/ExpandableMedia';
 
 export const dynamic = 'force-dynamic';
 
@@ -59,15 +59,11 @@ const getTournamentEvent = async (id) => {
   return getFallbackTournamentEventById(id);
 };
 
-const renderTournamentMedia = (item) => {
+const getTournamentMedia = (item) => {
   const mediaSrc = getText(item?.imageSrc);
   const mediaLabel = getText(item?.imageAlt) || getText(item?.title) || 'Мероприятие RUNA';
 
-  if (isVideoMediaSrc(mediaSrc)) {
-    return <video src={mediaSrc} aria-label={mediaLabel} controls preload="metadata" playsInline />;
-  }
-
-  return <img src={mediaSrc || '/images/promo.jpg'} alt={mediaLabel} />;
+  return { mediaSrc: mediaSrc || '/images/promo.jpg', mediaLabel };
 };
 
 export async function generateMetadata({ params }) {
@@ -99,6 +95,7 @@ export default async function TournamentEventDetailPage({ params }) {
 
   const createdAt = new Date(item.createdAt);
   const createdAtLabel = Number.isNaN(createdAt.getTime()) ? 'Актуальное мероприятие' : dateFormatter.format(createdAt);
+  const { mediaSrc, mediaLabel } = getTournamentMedia(item);
 
   return (
     <main>
@@ -125,7 +122,9 @@ export default async function TournamentEventDetailPage({ params }) {
               <span className="news-date">{createdAtLabel}</span>
               <span className="news-badge">Мероприятие</span>
             </div>
-            <div className="news-detail-cover">{renderTournamentMedia(item)}</div>
+            <div className="news-detail-cover">
+              <ExpandableMedia src={mediaSrc} alt={mediaLabel} imageLoading="eager" />
+            </div>
             <div className="news-detail-body">
               <p className="news-detail-summary">{item.summary || 'Описание мероприятия скоро появится.'}</p>
             </div>

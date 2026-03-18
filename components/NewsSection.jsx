@@ -10,7 +10,7 @@ const dateFormatter = new Intl.DateTimeFormat('ru-RU', {
 
 export default async function NewsSection({
   title = 'Новости клуба',
-  lead = 'Актуальные анонсы, обновления расписания и события RUNA Cyber Club.',
+  lead = 'Следите за пульсом RUNA: здесь появляются анонсы, обновления и события, на которые стоит успеть первыми.',
   limit,
   showAllButton = false,
 } = {}) {

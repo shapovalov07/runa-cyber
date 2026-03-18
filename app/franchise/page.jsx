@@ -13,8 +13,8 @@ export default function FranchisePage() {
           <p className="kicker">Франшиза</p>
           <h1>Франшиза RUNA: готовая бизнес-модель киберклуба</h1>
           <p>
-            Выручка от 2 млн ₽/мес, чистая прибыль от 800 000 ₽, прозрачные расходы и проверенная модель в нескольких
-            городах России.
+            Запускайте клуб с брендом, который уже собирает аудиторию: готовая операционная модель, поддержка команды и
+            сильная экономика в реальных городах.
           </p>
           <div className="hero-actions">
             <a className="btn btn-primary" href="#fr-form">
@@ -28,18 +28,24 @@ export default function FranchisePage() {
       </section>
 
       <section className="section">
-        <div className="container grid grid-3 stats-grid">
-          <article className="card stat stat-mixed reveal">
+        <div className="container grid grid-3 stats-grid home-stats-grid">
+          <article className="card stat stat-mixed home-stat home-stat-clubs reveal">
+            <span className="home-stat-kicker">Выручка</span>
             <strong className="stat-value">от 2 млн ₽</strong>
-            <p>ориентир месячной выручки</p>
+            <p>ориентир ежемесячного оборота при корректной локации и операционной модели RUNA</p>
+            <span className="home-stat-note">Финальный прогноз считается по параметрам вашего города.</span>
           </article>
-          <article className="card stat stat-mixed reveal">
+          <article className="card stat stat-mixed home-stat home-stat-cities reveal">
+            <span className="home-stat-kicker">Прибыль</span>
             <strong className="stat-value">от 800 000 ₽</strong>
-            <p>ориентир чистой прибыли</p>
+            <p>планка чистой прибыли при выстроенных процессах и стабильной загрузке клуба</p>
+            <span className="home-stat-note">Метрики, KPI и экономика прозрачны для партнера.</span>
           </article>
-          <article className="card stat stat-mixed reveal">
+          <article className="card stat stat-mixed home-stat home-stat-formats reveal">
+            <span className="home-stat-kicker">Кейс сети</span>
             <strong className="stat-value">4 города</strong>
-            <p>где уже работает сеть RUNA</p>
+            <p>где модель RUNA уже работает вживую и подтверждена ежедневной операционной практикой</p>
+            <span className="home-stat-note">От запуска до масштабирования с сопровождением команды.</span>
           </article>
         </div>
       </section>
@@ -71,7 +77,9 @@ export default function FranchisePage() {
       <section className="section" id="fr-form">
         <div className="container">
           <h2 className="section-title">Предзаявка на франшизу</h2>
-          <p className="section-lead">Форма отправляет заявку напрямую менеджеру RUNA.</p>
+          <p className="section-lead">
+            Оставьте контакт, и менеджер RUNA свяжется с вами, чтобы разобрать запуск именно под ваш город.
+          </p>
           <FranchiseForm />
         </div>
       </section>

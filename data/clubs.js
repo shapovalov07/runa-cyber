@@ -2,7 +2,7 @@ export const clubCities = [
   {
     slug: 'voronezh',
     city: 'Воронеж',
-    lead: 'Три локации с разными форматами залов: от STANDART до KILLER FPS и отдельных PS5 комнат.',
+    lead: 'Три локации, три разных вайба: от классических залов до KILLER FPS и отдельных PS5-комнат для компании.',
     clubs: [
       {
         id: 'runavrn',
@@ -179,7 +179,7 @@ export const clubCities = [
   {
     slug: 'saratov',
     city: 'Саратов',
-    lead: 'Флагманская площадка RUNA с акцентом на высокочастотные сборки и отдельные форматы отдыха.',
+    lead: 'Саратовский флагман RUNA для тех, кто хочет максимум FPS в игре и комфортный отдых между катками.',
     clubs: [
       {
         id: 'runasrtv1',
@@ -250,7 +250,7 @@ export const clubCities = [
   {
     slug: 'chelyabinsk',
     city: 'Челябинск',
-    lead: 'Городская локация RUNA с KILLER FPS-конфигурацией и отдельной PS5 комнатой.',
+    lead: 'Челябинская локация сочетает хардкорный KILLER FPS и приватную PS5-комнату для смены ритма.',
     clubs: [
       {
         id: 'runachel1',
@@ -301,7 +301,7 @@ export const clubCities = [
   {
     slug: 'rostov',
     city: 'Ростов-на-Дону',
-    lead: 'Флагман RUNA с крупной площадью, high-FPS зонами, PS5 rooms и развлекательными форматами.',
+    lead: 'Ростовский флагман RUNA про масштаб, high-FPS зоны и развлекательные форматы, где вечер легко становится событием.',
     clubs: [
       {
         id: 'runarostov',

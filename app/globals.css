@@ -432,6 +432,103 @@ img {
     inset 0 -30px 44px rgba(0, 0, 0, 0.36);
 }
 
+.home-stats-grid {
+  gap: 20px;
+}
+
+.home-stats-grid .home-stat {
+  --home-stat-accent-rgb: 255, 208, 103;
+  --home-stat-edge-rgb: 255, 186, 90;
+  min-height: 236px;
+  padding: 22px 24px 20px;
+  gap: 12px;
+  border-radius: 30px;
+  border-color: rgba(var(--home-stat-edge-rgb), 0.34);
+  background:
+    radial-gradient(460px 210px at -12% -18%, rgba(var(--home-stat-accent-rgb), 0.2), transparent 62%),
+    radial-gradient(420px 220px at 108% 112%, rgba(49, 216, 255, 0.13), transparent 64%),
+    linear-gradient(156deg, rgba(6, 14, 28, 0.98), rgba(3, 10, 23, 0.98) 56%, rgba(2, 8, 19, 1));
+}
+
+.home-stats-grid .home-stat::before {
+  background:
+    radial-gradient(210px 84px at 94% 0%, rgba(var(--home-stat-accent-rgb), 0.23), transparent 74%),
+    linear-gradient(116deg, rgba(var(--home-stat-accent-rgb), 0.13), transparent 42%);
+  opacity: 1;
+}
+
+.home-stats-grid .home-stat::after {
+  border-color: rgba(var(--home-stat-edge-rgb), 0.24);
+}
+
+.home-stat-kicker {
+  width: fit-content;
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 6px 11px;
+  font-size: 0.73rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  color: rgba(var(--home-stat-accent-rgb), 0.97);
+  border: 1px solid rgba(var(--home-stat-edge-rgb), 0.48);
+  background: rgba(var(--home-stat-accent-rgb), 0.09);
+}
+
+.home-stats-grid .home-stat .stat-value {
+  color: rgba(var(--home-stat-accent-rgb), 1);
+  text-shadow: 0 0 24px rgba(var(--home-stat-accent-rgb), 0.3);
+}
+
+.home-stats-grid .home-stat.stat-mixed .stat-value {
+  max-width: none;
+  font-size: clamp(1.94rem, 3vw, 2.62rem);
+  line-height: 1.08;
+}
+
+.home-stats-grid .home-stat p {
+  max-width: 30ch;
+  color: #dfe8fb;
+  font-size: clamp(1rem, 1.2vw, 1.12rem);
+}
+
+.home-stat-note {
+  position: relative;
+  z-index: 1;
+  color: rgba(199, 214, 240, 0.88);
+  font-size: 0.88rem;
+  line-height: 1.42;
+  max-width: 40ch;
+}
+
+.home-stat-clubs {
+  --home-stat-accent-rgb: 79, 222, 255;
+  --home-stat-edge-rgb: 93, 219, 250;
+}
+
+.home-stat-cities {
+  --home-stat-accent-rgb: 255, 208, 103;
+  --home-stat-edge-rgb: 255, 188, 92;
+}
+
+.home-stat-formats {
+  --home-stat-accent-rgb: 255, 163, 88;
+  --home-stat-edge-rgb: 255, 154, 78;
+}
+
+.home-stats-grid .home-stat:hover {
+  transform: translateY(-6px);
+  border-color: rgba(var(--home-stat-edge-rgb), 0.62);
+  box-shadow:
+    0 36px 68px rgba(0, 0, 0, 0.54),
+    0 0 34px rgba(var(--home-stat-accent-rgb), 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -28px 44px rgba(0, 0, 0, 0.38);
+}
+
 .badge {
   display: inline-flex;
   align-items: center;
@@ -1383,12 +1480,52 @@ img {
   background: rgba(10, 15, 24, 0.92);
 }
 
+.expandable-media-trigger {
+  position: relative;
+  display: block;
+  width: 100%;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  cursor: zoom-in;
+}
+
 .news-detail-cover img,
 .news-detail-cover video {
   display: block;
   width: 100%;
   max-height: min(70vh, 760px);
   object-fit: cover;
+}
+
+.news-detail-cover .expandable-media-trigger img {
+  transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+.news-detail-cover .expandable-media-trigger:hover img {
+  transform: scale(1.012);
+  filter: saturate(1.03);
+}
+
+.expandable-media-hint {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid rgba(49, 216, 255, 0.4);
+  background: rgba(7, 13, 24, 0.76);
+  color: #d8f4ff;
+  padding: 6px 12px;
+  font-size: 0.76rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-weight: 700;
+  pointer-events: none;
 }
 
 .news-detail-body {
@@ -2133,6 +2270,21 @@ img {
     grid-template-columns: 1fr;
   }
 
+  .home-stats-grid .home-stat {
+    min-height: 204px;
+    padding: 18px 18px 16px;
+    border-radius: 24px;
+  }
+
+  .home-stats-grid .home-stat p {
+    max-width: 100%;
+  }
+
+  .home-stat-note {
+    font-size: 0.8rem;
+    line-height: 1.36;
+  }
+
   .stat {
     min-height: 172px;
     padding: 22px;
@@ -2149,6 +2301,14 @@ img {
 
   .news-card {
     min-height: 0;
+  }
+
+  .expandable-media-hint {
+    right: 10px;
+    bottom: 10px;
+    padding: 5px 10px;
+    font-size: 0.68rem;
+    letter-spacing: 0.04em;
   }
 
   .page-hero {

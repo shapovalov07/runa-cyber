@@ -9,12 +9,12 @@ export const metadata = {
 export default function ContactsPage() {
   return (
     <main>
-      <section className="page-hero" style={{ '--hero-image': "url('/images/hero-contacts.jpg')" }}>
+      <section className="page-hero" style={{ '--hero-image': "url('/images/hero-contacts-vk.jpg')" }}>
         <div className="container">
           <p className="kicker">Контакты</p>
           <h1>Контакты RUNA Cyber Club по городам</h1>
           <p>
-            Выберите город ниже и получите прямые контакты конкретного клуба: телефон, адрес и ссылку на сообщения VK.
+            Выберите город и выйдите на клуб напрямую за минуту: только актуальные контакты и быстрый путь к брони.
           </p>
           <div className="hero-actions">
             <a className="btn btn-primary" href="#contacts-by-city">

@@ -64,7 +64,8 @@ export default async function TournamentsPage() {
           <p className="kicker">Кибертурниры</p>
           <h1>Турнирные активности RUNA: офлайн, online и клубные лиги</h1>
           <p>
-            Еженедельные FC 26 матчи, клубные кубки, бонусы на пополнение и специальные условия для командных составов.
+            От еженедельных матчей до клубных кубков: приходите за эмоциями, призами и атмосферой настоящего
+            киберспортивного вечера.
           </p>
           <div className="hero-actions">
             <a className="btn btn-primary" href="https://vk.com/runarostov" target="_blank" rel="noopener noreferrer">
@@ -78,18 +79,24 @@ export default async function TournamentsPage() {
       </section>
 
       <section className="section">
-        <div className="container grid grid-3 stats-grid">
-          <article className="card stat stat-mixed reveal">
+        <div className="container grid grid-3 stats-grid home-stats-grid">
+          <article className="card stat stat-mixed home-stat home-stat-clubs reveal">
+            <span className="home-stat-kicker">Расписание</span>
             <strong className="stat-value">Каждую неделю</strong>
-            <p>матчи и мини-турниры по FC 26</p>
+            <p>матчи и мини-турниры, чтобы регулярно держать форму и соревновательный тонус</p>
+            <span className="home-stat-note">FC 26 и другие форматы с открытой регистрацией.</span>
           </article>
-          <article className="card stat stat-mixed reveal">
+          <article className="card stat stat-mixed home-stat home-stat-cities reveal">
+            <span className="home-stat-kicker">Ивенты</span>
             <strong className="stat-value">Клубные кубки</strong>
-            <p>периодические офлайн-ивенты для игроков клуба</p>
+            <p>оффлайн-события с призами и атмосферой, где каждая игра чувствуется как финал</p>
+            <span className="home-stat-note">Сценарии под новичков и опытные составы.</span>
           </article>
-          <article className="card stat stat-mixed reveal">
+          <article className="card stat stat-mixed home-stat home-stat-formats reveal">
+            <span className="home-stat-kicker">Условия</span>
             <strong className="stat-value">Бонусы и акции</strong>
-            <p>дополнительные условия по картам и пополнению депозита</p>
+            <p>дополнительные условия на пополнение и пакеты для командных игровых сессий</p>
+            <span className="home-stat-note">Больше игры за тот же бюджет и удобная бронь слотов.</span>
           </article>
         </div>
       </section>
@@ -97,7 +104,9 @@ export default async function TournamentsPage() {
       <section className="section">
         <div className="container">
           <h2 className="section-title">Форматы активностей</h2>
-          <p className="section-lead">Регулярные сценарии, которые проходят в клубе для игроков разного уровня.</p>
+          <p className="section-lead">
+            Выберите сценарий под свой вайб: быстрый челлендж, командный марафон или турнир с призовым драйвом.
+          </p>
           <div className="grid grid-2">
             <article className="card reveal">
               <h3>FC 26 WEEKLY</h3>

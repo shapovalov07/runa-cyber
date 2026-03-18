@@ -25,7 +25,7 @@ export default function ContactsByCity({ cities }) {
         <div className="container">
           <article className="card reveal clubs-picker contacts-picker">
             <h2 className="section-title">Контакты по городам</h2>
-            <p className="section-lead">Выберите город, чтобы увидеть актуальные телефоны, адреса и ссылки клубов.</p>
+            <p className="section-lead">Нажмите на город и получите прямую линию к клубу: адрес, телефон и VK для быстрой записи.</p>
             <div className="contacts-city-buttons">
               {safeCities.map((city) => {
                 const isActive = city.slug === selectedCitySlug;

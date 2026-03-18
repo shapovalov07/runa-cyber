@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getNewsItemById } from '@/lib/cms-storage';
-import { isVideoMediaSrc } from '@/lib/media';
+import ExpandableMedia from '@/components/ExpandableMedia';
 
 export const dynamic = 'force-dynamic';
 
@@ -30,15 +30,11 @@ const splitParagraphs = (value) =>
     .map((line) => line.trim())
     .filter(Boolean);
 
-const renderNewsMedia = (item) => {
+const getNewsMedia = (item) => {
   const mediaSrc = getText(item?.imageSrc) || '/images/fc26-news.jpg';
   const mediaLabel = getText(item?.imageAlt) || getText(item?.title) || 'Новость RUNA';
 
-  if (isVideoMediaSrc(mediaSrc)) {
-    return <video src={mediaSrc} aria-label={mediaLabel} controls preload="metadata" playsInline />;
-  }
-
-  return <img src={mediaSrc} alt={mediaLabel} />;
+  return { mediaSrc, mediaLabel };
 };
 
 export async function generateMetadata({ params }) {
@@ -70,6 +66,7 @@ export default async function NewsDetailPage({ params }) {
 
   const contentParagraphs = splitParagraphs(item.content);
   const publishedDate = dateFormatter.format(new Date(item.publishedAt));
+  const { mediaSrc, mediaLabel } = getNewsMedia(item);
 
   return (
     <main>
@@ -99,7 +96,9 @@ export default async function NewsDetailPage({ params }) {
               <span className="news-badge">Обновление</span>
             </div>
 
-            <div className="news-detail-cover">{renderNewsMedia(item)}</div>
+            <div className="news-detail-cover">
+              <ExpandableMedia src={mediaSrc} alt={mediaLabel} imageLoading="eager" />
+            </div>
 
             <div className="news-detail-body">
               <p className="news-detail-summary">{item.summary}</p>

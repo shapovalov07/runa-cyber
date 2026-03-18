@@ -8,8 +8,6 @@ export const navLinks = [
 
 export const contactLinks = [
   { href: '/clubs', label: 'Клубы и контакты' },
-  { href: 'https://vk.com/runarostov', label: 'VK Ростов', external: true },
-  { href: 'https://vk.com/runavrn', label: 'VK Воронеж', external: true },
 ];
 
 export const footerDescription =

@@ -190,7 +190,7 @@ export default function PhotoCarousel({ items }) {
   }, []);
 
   return (
-    <div className="carousel reveal" aria-label="Карусель фото клуба">
+    <div className="carousel reveal is-visible" aria-label="Карусель фото клуба">
       {visibleItems.length === 0 ? (
         <p className="carousel-empty">Фото для выбранного города пока не добавлены.</p>
       ) : (

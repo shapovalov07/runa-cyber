@@ -89,7 +89,7 @@ export default function ClubsSelector({ cities, cityPhotos }) {
         <div className="container">
           <article className="card reveal clubs-picker">
             <h2 className="section-title">Выбор города и клуба</h2>
-            <p className="section-lead">Нажмите на клуб, и ниже покажется информация только по нему.</p>
+            <p className="section-lead">Выберите клуб, чтобы открыть его атмосферу: конфигурации, зоны и контакты в одном экране.</p>
             <div className="clubs-picker-grid">
               {safeCities.map((cityItem) => (
                 <div className="clubs-picker-city" key={cityItem.slug}>

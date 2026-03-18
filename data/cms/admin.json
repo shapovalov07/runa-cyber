@@ -19,6 +19,16 @@
   ],
   "history": [
     {
+      "id": "890922df-ca05-4273-b376-fab59355fa52",
+      "action": "gallery.delete",
+      "actorLogin": "admin",
+      "actorRole": "owner",
+      "targetType": "gallery-photo",
+      "targetId": "308b4a14-f932-424a-9002-6c0874e4411b",
+      "summary": "Удалено фото из раздела home.",
+      "createdAt": "2026-03-18T16:47:59.094Z"
+    },
+    {
       "id": "1b6f710a-098b-46c8-b6f2-912f501bf5a4",
       "action": "news.delete",
       "actorLogin": "admin",
