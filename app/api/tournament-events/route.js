@@ -48,6 +48,7 @@ export async function POST(request) {
     payload = {
       title: getText(formData.get('title')),
       summary: getText(formData.get('summary')),
+      content: getText(formData.get('content')),
       imageSrc: getText(formData.get('imageSrc')),
       imageAlt: getText(formData.get('imageAlt')),
     };
@@ -89,6 +90,7 @@ export async function POST(request) {
       summary: item.title || 'Создано мероприятие турниров.',
     });
     revalidatePath('/tournaments');
+    revalidatePath(`/tournaments/${item.id}`);
     return NextResponse.json({ ok: true, item }, { status: 201 });
   } catch (error) {
     if (uploadedImageSrc && isManagedTournamentEventUpload(uploadedImageSrc)) {

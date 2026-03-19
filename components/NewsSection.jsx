@@ -1,6 +1,7 @@
 import { getNewsList } from '@/lib/cms-storage';
 import Link from 'next/link';
 import NewsCardMedia from '@/components/NewsCardMedia';
+import RichTextContent from '@/components/RichTextContent';
 
 const dateFormatter = new Intl.DateTimeFormat('ru-RU', {
   day: '2-digit',
@@ -49,8 +50,10 @@ export default async function NewsSection({
                   <span className="news-badge">Обновление</span>
                 </div>
                 <h3>{item.title}</h3>
-                <p className="news-summary">{item.summary}</p>
-                {item.content && <p className="news-extra">{item.content}</p>}
+                <RichTextContent value={item.summary} className="news-summary rich-text rich-text-clamp" />
+                {item.content ? (
+                  <RichTextContent value={item.content} className="news-extra rich-text rich-text-clamp" />
+                ) : null}
                 {item.sourceUrl && (
                   <div className="news-links">
                     <a

@@ -2,6 +2,7 @@ import Link from 'next/link';
 import PhotoCarousel from '@/components/PhotoCarousel';
 import { getGalleryPhotos, getTournamentEvents } from '@/lib/cms-storage';
 import { isVideoMediaSrc } from '@/lib/media';
+import RichTextContent from '@/components/RichTextContent';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,6 +22,7 @@ const fallbackTournamentEvents = [
     id: 'fallback-event-fc26-weekly',
     title: 'FC 26 WEEKLY',
     summary: 'Еженедельный формат матчей и мини-турниров для игроков любого уровня.',
+    content: 'Регистрация открыта: [написать в VK](https://vk.com/runarostov).',
     imageSrc: '/images/fc26-cup.jpg',
     imageAlt: 'Турнир FC 26 в RUNA',
   },
@@ -28,6 +30,7 @@ const fallbackTournamentEvents = [
     id: 'fallback-event-squad-night',
     title: 'Командные ночи',
     summary: 'Ночные сессии для squad-состава с клубными условиями и поддержкой персонала.',
+    content: 'Соберите состав и забронируйте слоты заранее, чтобы занять удобное время.',
     imageSrc: '/images/promo.jpg',
     imageAlt: 'Командная активность RUNA',
   },
@@ -35,6 +38,7 @@ const fallbackTournamentEvents = [
     id: 'fallback-event-club-cup',
     title: 'Клубный кубок',
     summary: 'Офлайн-ивент с призами, активностями и бонусами для постоянных игроков.',
+    content: 'Подробности анонса публикуются в соцсетях клуба перед стартом этапа.',
     imageSrc: '/images/price.jpg',
     imageAlt: 'Клубный кубок RUNA',
   },
@@ -144,7 +148,13 @@ export default async function TournamentsPage() {
                 {renderTournamentEventMedia(item)}
                 <div className="tournament-event-content">
                   <h3>{item.title || 'Мероприятие RUNA'}</h3>
-                  <p>{item.summary || 'Описание мероприятия скоро появится.'}</p>
+                  <RichTextContent
+                    value={item.summary || 'Описание мероприятия скоро появится.'}
+                    className="tournament-event-summary rich-text rich-text-clamp"
+                  />
+                  {item.content ? (
+                    <RichTextContent value={item.content} className="tournament-event-extra rich-text rich-text-clamp" />
+                  ) : null}
                 </div>
               </article>
             ))}

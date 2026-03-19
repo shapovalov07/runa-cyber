@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { clubCities } from '@/data/clubs';
 import { isVideoMediaSrc } from '@/lib/media';
+import RichTextContent from '@/components/RichTextContent';
 
 const dateFormatter = new Intl.DateTimeFormat('ru-RU', {
   day: '2-digit',
@@ -74,6 +75,7 @@ const HISTORY_ACTION_LABELS = {
   'admin.delete': 'Удаление администратора',
   'admin.password_reset': 'Сброс пароля администратора',
   'tournament-event.create': 'Создание мероприятия',
+  'tournament-event.update': 'Редактирование мероприятия',
   'tournament-event.delete': 'Удаление мероприятия',
   'news.create': 'Создание новости',
   'news.update': 'Редактирование новости',
@@ -142,8 +144,25 @@ const createInitialGalleryForm = () => ({
 const createInitialTournamentEventForm = () => ({
   title: '',
   summary: '',
+  content: '',
   imageSrc: '',
   imageAlt: '',
+});
+
+const createInitialTournamentEventEditForm = () => ({
+  title: '',
+  summary: '',
+  content: '',
+  imageSrc: '',
+  imageAlt: '',
+});
+
+const createTournamentEventEditForm = (item) => ({
+  title: getText(item?.title),
+  summary: getText(item?.summary),
+  content: getText(item?.content),
+  imageSrc: getText(item?.imageSrc),
+  imageAlt: getText(item?.imageAlt),
 });
 
 const createInitialProfileForm = () => ({
@@ -166,6 +185,9 @@ const ADMIN_PANEL_SECTION_OPTIONS = [
   { value: 'tournament-events', label: 'Мероприятия' },
   { value: 'history', label: 'История', ownerOnly: true },
 ];
+
+const RICH_TEXT_FORMAT_NOTE =
+  'Поддерживаются ссылки [текст](https://...), обычные URL, **жирный**, *курсив* и `моно`.';
 
 const formatDate = (value) => {
   const date = new Date(value);
@@ -267,12 +289,16 @@ export default function AdminPanel() {
   const [galleryFile, setGalleryFile] = useState(null);
   const [tournamentEventForm, setTournamentEventForm] = useState(createInitialTournamentEventForm);
   const [tournamentEventFile, setTournamentEventFile] = useState(null);
+  const [editingTournamentEventId, setEditingTournamentEventId] = useState('');
+  const [editTournamentEventForm, setEditTournamentEventForm] = useState(createInitialTournamentEventEditForm);
+  const [editTournamentEventFile, setEditTournamentEventFile] = useState(null);
   const [profileForm, setProfileForm] = useState(createInitialProfileForm);
   const [adminUserForm, setAdminUserForm] = useState(createInitialAdminUserForm);
   const newsFileInputRef = useRef(null);
   const editNewsFileInputRef = useRef(null);
   const galleryFileInputRef = useRef(null);
   const tournamentEventFileInputRef = useRef(null);
+  const editTournamentEventFileInputRef = useRef(null);
 
   const [news, setNews] = useState([]);
   const [photos, setPhotos] = useState([]);
@@ -602,6 +628,9 @@ export default function AdminPanel() {
     setGalleryFile(null);
     setTournamentEventForm(createInitialTournamentEventForm);
     setTournamentEventFile(null);
+    setEditingTournamentEventId('');
+    setEditTournamentEventForm(createInitialTournamentEventEditForm);
+    setEditTournamentEventFile(null);
     setProfileForm(createInitialProfileForm);
     setAdminUserForm(createInitialAdminUserForm);
     setGalleryViewSection('home');
@@ -612,6 +641,9 @@ export default function AdminPanel() {
     }
     if (tournamentEventFileInputRef.current) {
       tournamentEventFileInputRef.current.value = '';
+    }
+    if (editTournamentEventFileInputRef.current) {
+      editTournamentEventFileInputRef.current.value = '';
     }
     setAdminUsersBusy(false);
     setAdminHistoryBusy(false);
@@ -956,6 +988,7 @@ export default function AdminPanel() {
       formData.set('password', getText(password));
       formData.set('title', getText(tournamentEventForm.title));
       formData.set('summary', getText(tournamentEventForm.summary));
+      formData.set('content', getText(tournamentEventForm.content));
       formData.set('imageSrc', getText(tournamentEventForm.imageSrc));
       formData.set('imageAlt', getText(tournamentEventForm.imageAlt));
 
@@ -988,6 +1021,81 @@ export default function AdminPanel() {
     }
   };
 
+  const openTournamentEventEdit = (item) => {
+    setTournamentEventsMessage('');
+    setEditingTournamentEventId(item.id);
+    setEditTournamentEventForm(createTournamentEventEditForm(item));
+    setEditTournamentEventFile(null);
+    if (editTournamentEventFileInputRef.current) {
+      editTournamentEventFileInputRef.current.value = '';
+    }
+  };
+
+  const cancelTournamentEventEdit = () => {
+    setEditingTournamentEventId('');
+    setEditTournamentEventForm(createInitialTournamentEventEditForm);
+    setEditTournamentEventFile(null);
+    if (editTournamentEventFileInputRef.current) {
+      editTournamentEventFileInputRef.current.value = '';
+    }
+  };
+
+  const submitEditedTournamentEvent = async (event, id) => {
+    event.preventDefault();
+    setTournamentEventsMessage('');
+
+    if (!ensureCredentials()) return;
+    if (!id || editingTournamentEventId !== id) return;
+    if (!getText(editTournamentEventForm.title) || !getText(editTournamentEventForm.summary)) {
+      setTournamentEventsMessage('Заполните название и краткое описание мероприятия.');
+      return;
+    }
+    if (!editTournamentEventFile && !getText(editTournamentEventForm.imageSrc)) {
+      setTournamentEventsMessage('Добавьте медиафайл (фото/GIF/видео) или укажите ссылку.');
+      return;
+    }
+
+    try {
+      setTournamentEventsBusy(true);
+
+      const formData = new FormData();
+      formData.set('login', getText(login));
+      formData.set('password', getText(password));
+      formData.set('title', getText(editTournamentEventForm.title));
+      formData.set('summary', getText(editTournamentEventForm.summary));
+      formData.set('content', getText(editTournamentEventForm.content));
+      formData.set('imageSrc', getText(editTournamentEventForm.imageSrc));
+      formData.set('imageAlt', getText(editTournamentEventForm.imageAlt));
+
+      if (editTournamentEventFile) {
+        formData.set('photo', editTournamentEventFile);
+      }
+
+      const response = await fetch(`/api/tournament-events/${encodeURIComponent(id)}`, {
+        method: 'PATCH',
+        body: formData,
+      });
+
+      const payload = await readResponse(response);
+
+      if (!response.ok || !payload.ok) {
+        throw new Error(payload.error || 'Не удалось обновить мероприятие.');
+      }
+
+      setTournamentEvents((prev) => {
+        const next = prev.map((item) => (item.id === id ? payload.item : item));
+        next.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        return next;
+      });
+      cancelTournamentEventEdit();
+      setTournamentEventsMessage('Мероприятие обновлено.');
+    } catch (error) {
+      setTournamentEventsMessage(error.message || 'Ошибка обновления мероприятия.');
+    } finally {
+      setTournamentEventsBusy(false);
+    }
+  };
+
   const removeTournamentEvent = async (id) => {
     setTournamentEventsMessage('');
 
@@ -1010,6 +1118,9 @@ export default function AdminPanel() {
       }
 
       setTournamentEvents((prev) => prev.filter((item) => item.id !== id));
+      if (editingTournamentEventId === id) {
+        cancelTournamentEventEdit();
+      }
       setTournamentEventsMessage('Мероприятие удалено.');
     } catch (error) {
       setTournamentEventsMessage(error.message || 'Ошибка удаления мероприятия.');
@@ -1551,8 +1662,9 @@ export default function AdminPanel() {
                   name="news-content"
                   value={newsForm.content}
                   onChange={(event) => setNewsForm((prev) => ({ ...prev, content: event.target.value }))}
-                  placeholder="Подробности новости"
+                  placeholder="Подробности новости, ссылки и выделения"
                 />
+                <p className="form-note">{RICH_TEXT_FORMAT_NOTE}</p>
               </label>
 
               <div className="form-field full">
@@ -1773,6 +1885,18 @@ export default function AdminPanel() {
                 />
               </label>
 
+              <label className="form-field full" htmlFor="tournament-event-content">
+                <span>Дополнительный текст</span>
+                <textarea
+                  id="tournament-event-content"
+                  name="tournament-event-content"
+                  value={tournamentEventForm.content}
+                  onChange={(event) => setTournamentEventForm((prev) => ({ ...prev, content: event.target.value }))}
+                  placeholder="Детали, ссылки на регистрацию, условия участия"
+                />
+                <p className="form-note">{RICH_TEXT_FORMAT_NOTE}</p>
+              </label>
+
               <div className="form-field full">
                 <span>Медиа мероприятия (фото, GIF, видео)</span>
                 <div className="file-picker">
@@ -1905,7 +2029,9 @@ export default function AdminPanel() {
                             id={`news-edit-content-${item.id}`}
                             value={editNewsForm.content}
                             onChange={(event) => setEditNewsForm((prev) => ({ ...prev, content: event.target.value }))}
+                            placeholder="Подробности новости, ссылки и выделения"
                           />
+                          <p className="form-note">{RICH_TEXT_FORMAT_NOTE}</p>
                         </label>
 
                         <div className="form-field full">
@@ -1987,8 +2113,8 @@ export default function AdminPanel() {
                       <>
                         {item.imageSrc ? <div className="admin-news-media-preview">{renderNewsMedia(item)}</div> : null}
                         <div>
-                          <p>{item.summary}</p>
-                          {item.content ? <p>{item.content}</p> : null}
+                          <RichTextContent value={item.summary} className="admin-rich-text rich-text" />
+                          {item.content ? <RichTextContent value={item.content} className="admin-rich-text rich-text" /> : null}
                           <p className="admin-path">{item.imageSrc || 'Медиа не указано'}</p>
                         </div>
                       </>
@@ -2078,27 +2204,155 @@ export default function AdminPanel() {
             <h3>Мероприятия кибертурниров</h3>
             <div className="admin-list">
               {tournamentEvents.length === 0 && <p className="admin-empty">Список мероприятий пока пуст.</p>}
-              {tournamentEvents.map((item) => (
-                <article className="admin-item admin-item-photo" key={item.id}>
-                  {renderTournamentEventMedia(item)}
-                  <div>
-                    <div className="admin-item-head">
-                      <strong>{item.title}</strong>
-                      <button
-                        className="btn btn-ghost"
-                        type="button"
-                        onClick={() => removeTournamentEvent(item.id)}
-                        disabled={tournamentEventsBusy}
-                      >
-                        Удалить
-                      </button>
+              {tournamentEvents.map((item) => {
+                const isEditing = editingTournamentEventId === item.id;
+
+                return (
+                  <article className="admin-item admin-item-photo" key={item.id}>
+                    {renderTournamentEventMedia(item)}
+                    <div>
+                      <div className="admin-item-head">
+                        <strong>{item.title}</strong>
+                        <div className="admin-item-actions">
+                          <button
+                            className="btn btn-outline"
+                            type="button"
+                            onClick={() => (isEditing ? cancelTournamentEventEdit() : openTournamentEventEdit(item))}
+                            disabled={tournamentEventsBusy}
+                          >
+                            {isEditing ? 'Отмена' : 'Редактировать'}
+                          </button>
+                          <button
+                            className="btn btn-ghost"
+                            type="button"
+                            onClick={() => removeTournamentEvent(item.id)}
+                            disabled={tournamentEventsBusy}
+                          >
+                            Удалить
+                          </button>
+                        </div>
+                      </div>
+                      <p className="admin-meta">{formatDateTime(item.createdAt)}</p>
+
+                      {isEditing ? (
+                        <form
+                          className="form-grid admin-edit-form"
+                          onSubmit={(event) => submitEditedTournamentEvent(event, item.id)}
+                        >
+                          <label className="form-field full" htmlFor={`tournament-event-edit-title-${item.id}`}>
+                            <span>Название *</span>
+                            <input
+                              id={`tournament-event-edit-title-${item.id}`}
+                              type="text"
+                              value={editTournamentEventForm.title}
+                              onChange={(event) =>
+                                setEditTournamentEventForm((prev) => ({ ...prev, title: event.target.value }))
+                              }
+                              required
+                            />
+                          </label>
+
+                          <label className="form-field full" htmlFor={`tournament-event-edit-summary-${item.id}`}>
+                            <span>Краткое описание *</span>
+                            <textarea
+                              id={`tournament-event-edit-summary-${item.id}`}
+                              value={editTournamentEventForm.summary}
+                              onChange={(event) =>
+                                setEditTournamentEventForm((prev) => ({ ...prev, summary: event.target.value }))
+                              }
+                              required
+                            />
+                          </label>
+
+                          <label className="form-field full" htmlFor={`tournament-event-edit-content-${item.id}`}>
+                            <span>Дополнительный текст</span>
+                            <textarea
+                              id={`tournament-event-edit-content-${item.id}`}
+                              value={editTournamentEventForm.content}
+                              onChange={(event) =>
+                                setEditTournamentEventForm((prev) => ({ ...prev, content: event.target.value }))
+                              }
+                              placeholder="Детали, ссылки на регистрацию, условия участия"
+                            />
+                            <p className="form-note">{RICH_TEXT_FORMAT_NOTE}</p>
+                          </label>
+
+                          <div className="form-field full">
+                            <span>Заменить медиа (фото, GIF, видео)</span>
+                            <div className="file-picker">
+                              <input
+                                ref={editTournamentEventFileInputRef}
+                                id={`tournament-event-edit-image-file-${item.id}`}
+                                type="file"
+                                className="file-picker-input"
+                                accept="image/*,video/*,.gif"
+                                onChange={(event) => setEditTournamentEventFile(event.target.files?.[0] ?? null)}
+                              />
+                              <button
+                                className="btn btn-outline"
+                                type="button"
+                                onClick={() => editTournamentEventFileInputRef.current?.click()}
+                                disabled={tournamentEventsBusy}
+                              >
+                                {editTournamentEventFile ? 'Выбрать другой файл' : 'Выбрать файл'}
+                              </button>
+                              <p className="file-picker-name">
+                                {editTournamentEventFile ? editTournamentEventFile.name : 'Оставить текущее медиа'}
+                              </p>
+                            </div>
+                          </div>
+
+                          <label className="form-field" htmlFor={`tournament-event-edit-image-src-${item.id}`}>
+                            <span>Или ссылка на медиа</span>
+                            <input
+                              id={`tournament-event-edit-image-src-${item.id}`}
+                              type="text"
+                              value={editTournamentEventForm.imageSrc}
+                              onChange={(event) =>
+                                setEditTournamentEventForm((prev) => ({ ...prev, imageSrc: event.target.value }))
+                              }
+                              placeholder="/uploads/tournament-events/clip.mp4 или https://..."
+                            />
+                          </label>
+
+                          <label className="form-field" htmlFor={`tournament-event-edit-image-alt-${item.id}`}>
+                            <span>Описание медиа</span>
+                            <input
+                              id={`tournament-event-edit-image-alt-${item.id}`}
+                              type="text"
+                              value={editTournamentEventForm.imageAlt}
+                              onChange={(event) =>
+                                setEditTournamentEventForm((prev) => ({ ...prev, imageAlt: event.target.value }))
+                              }
+                              placeholder="Турнир RUNA"
+                            />
+                          </label>
+
+                          <div className="form-actions">
+                            <button className="btn btn-primary" type="submit" disabled={tournamentEventsBusy}>
+                              {tournamentEventsBusy ? 'Сохраняем...' : 'Сохранить'}
+                            </button>
+                            <button
+                              className="btn btn-ghost"
+                              type="button"
+                              onClick={cancelTournamentEventEdit}
+                              disabled={tournamentEventsBusy}
+                            >
+                              Отмена
+                            </button>
+                          </div>
+                        </form>
+                      ) : (
+                        <>
+                          <RichTextContent value={item.summary} className="admin-rich-text rich-text" />
+                          {item.content ? <RichTextContent value={item.content} className="admin-rich-text rich-text" /> : null}
+                          <p className="admin-path">{item.imageSrc}</p>
+                        </>
+                      )}
                     </div>
-                    <p className="admin-meta">{formatDateTime(item.createdAt)}</p>
-                    <p>{item.summary}</p>
-                    <p className="admin-path">{item.imageSrc}</p>
-                  </div>
-                </article>
-              ))}
+                  </article>
+                );
+              })}
             </div>
             </div>}
 

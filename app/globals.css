@@ -1273,20 +1273,17 @@ img {
 
 .tournament-event-content {
   position: relative;
-  z-index: 1;
+  z-index: 3;
   padding: 16px 18px 18px;
   display: grid;
   gap: 8px;
+  pointer-events: none;
 }
 
 .tournament-event-content h3 {
   margin: 0;
   color: #f2f6ff;
   font-size: 1.08rem;
-}
-
-.tournament-event-content p {
-  margin: 0;
 }
 
 .news-card {
@@ -1355,13 +1352,14 @@ img {
 
 .news-content {
   position: relative;
-  z-index: 1;
+  z-index: 3;
   display: flex;
   flex-direction: column;
   gap: 12px;
   min-width: 0;
   flex: 1 1 auto;
   padding: 18px 20px 20px;
+  pointer-events: none;
 }
 
 .news-topline {
@@ -1411,17 +1409,86 @@ img {
   color: var(--muted);
   margin: 0;
   line-height: 1.5;
+}
+
+.news-summary.rich-text-clamp {
   display: -webkit-box;
   -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
   overflow: hidden;
 }
 
-.news-summary {
-  -webkit-line-clamp: 4;
+.news-extra.rich-text-clamp {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
 }
 
-.news-extra {
+.tournament-event-summary,
+.tournament-event-extra {
+  margin: 0;
+}
+
+.tournament-event-summary.rich-text-clamp {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
+  overflow: hidden;
+}
+
+.tournament-event-extra.rich-text-clamp {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.rich-text {
+  color: var(--muted);
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.rich-text a {
+  color: #95e4ff;
+  text-decoration: underline;
+  text-decoration-color: rgba(149, 228, 255, 0.48);
+  text-underline-offset: 3px;
+}
+
+.rich-text a:hover {
+  color: #c8f2ff;
+  text-decoration-color: rgba(200, 242, 255, 0.78);
+}
+
+.rich-text strong {
+  color: #eef4ff;
+}
+
+.rich-text em {
+  color: #dbe8ff;
+}
+
+.rich-text code {
+  font-family: "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 0.92em;
+  color: #ffe4a8;
+  padding: 1px 5px;
+  border-radius: 6px;
+  background: rgba(255, 197, 77, 0.14);
+}
+
+.rich-text-lg {
+  font-size: clamp(1rem, 1.3vw, 1.12rem);
+  line-height: 1.7;
+}
+
+.news-content .rich-text a,
+.news-content .news-links,
+.news-content .news-links .news-link,
+.tournament-event-content .rich-text a {
+  pointer-events: auto;
 }
 
 .news-link {
@@ -1541,14 +1608,7 @@ img {
 }
 
 .news-detail-content {
-  display: grid;
-  gap: 12px;
-}
-
-.news-detail-content p {
   margin: 0;
-  color: var(--muted);
-  line-height: 1.65;
 }
 
 .table-list {
@@ -1787,6 +1847,18 @@ img {
 
 .form-field select {
   appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+.form-field select option {
+  color: #0f172a;
+  background-color: #ffffff;
+}
+
+.form-field select option:checked {
+  color: #ffffff;
+  background-color: #2b74c8;
 }
 
 .form-field input::placeholder,
@@ -1864,6 +1936,12 @@ img {
   min-height: 1.25rem;
   color: var(--accent-2);
   font-size: 0.9rem;
+}
+
+.form-field .form-note {
+  min-height: 0;
+  color: rgba(201, 217, 245, 0.82);
+  font-size: 0.82rem;
 }
 
 .form-note.error {
@@ -2092,6 +2170,14 @@ img {
   word-break: break-word;
 }
 
+.admin-rich-text {
+  margin: 0;
+}
+
+.admin-rich-text + .admin-rich-text {
+  margin-top: 6px;
+}
+
 .admin-edit-form {
   margin-top: 4px;
   padding-top: 10px;
@@ -2197,11 +2283,11 @@ img {
     font-size: 1.2rem;
   }
 
-  .news-summary {
+  .news-summary.rich-text-clamp {
     -webkit-line-clamp: 3;
   }
 
-  .news-extra {
+  .news-extra.rich-text-clamp {
     -webkit-line-clamp: 2;
   }
 

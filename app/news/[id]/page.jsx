@@ -2,6 +2,8 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getNewsItemById } from '@/lib/cms-storage';
 import ExpandableMedia from '@/components/ExpandableMedia';
+import RichTextContent from '@/components/RichTextContent';
+import { toRichTextPlainText } from '@/lib/rich-text';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,12 +26,6 @@ const getNewsId = (value) => {
   }
 };
 
-const splitParagraphs = (value) =>
-  getText(value)
-    .split(/\n+/)
-    .map((line) => line.trim())
-    .filter(Boolean);
-
 const getNewsMedia = (item) => {
   const mediaSrc = getText(item?.imageSrc) || '/images/fc26-news.jpg';
   const mediaLabel = getText(item?.imageAlt) || getText(item?.title) || 'Новость RUNA';
@@ -51,7 +47,7 @@ export async function generateMetadata({ params }) {
 
   return {
     title: `${item.title} — Новости RUNA`,
-    description: item.summary || 'Публикация RUNA Cyber Club',
+    description: toRichTextPlainText(item.summary) || toRichTextPlainText(item.content) || 'Публикация RUNA Cyber Club',
   };
 }
 
@@ -64,9 +60,9 @@ export default async function NewsDetailPage({ params }) {
     notFound();
   }
 
-  const contentParagraphs = splitParagraphs(item.content);
   const publishedDate = dateFormatter.format(new Date(item.publishedAt));
   const { mediaSrc, mediaLabel } = getNewsMedia(item);
+  const heroSummary = toRichTextPlainText(item.summary) || 'Публикация RUNA Cyber Club';
 
   return (
     <main>
@@ -74,7 +70,7 @@ export default async function NewsDetailPage({ params }) {
         <div className="container">
           <p className="kicker">Новости RUNA</p>
           <h1>{item.title}</h1>
-          <p>{item.summary}</p>
+          <p>{heroSummary}</p>
           <div className="hero-actions">
             <Link className="btn btn-outline" href="/news">
               Ко всем новостям
@@ -101,15 +97,10 @@ export default async function NewsDetailPage({ params }) {
             </div>
 
             <div className="news-detail-body">
-              <p className="news-detail-summary">{item.summary}</p>
-
-              {contentParagraphs.length > 0 && (
-                <div className="news-detail-content">
-                  {contentParagraphs.map((paragraph, index) => (
-                    <p key={`${item.id}-paragraph-${index}`}>{paragraph}</p>
-                  ))}
-                </div>
-              )}
+              <RichTextContent value={item.summary} className="news-detail-summary rich-text rich-text-lg" />
+              {item.content ? (
+                <RichTextContent value={item.content} className="news-detail-content rich-text rich-text-lg" />
+              ) : null}
             </div>
           </article>
         </div>
