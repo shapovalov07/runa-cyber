@@ -4,6 +4,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { clubCities } from '@/data/clubs';
 import { isVideoMediaSrc } from '@/lib/media';
 import RichTextContent from '@/components/RichTextContent';
+import RichTextEditor from '@/components/RichTextEditor';
+import { toRichTextPlainText } from '@/lib/rich-text';
 
 const dateFormatter = new Intl.DateTimeFormat('ru-RU', {
   day: '2-digit',
@@ -185,9 +187,7 @@ const ADMIN_PANEL_SECTION_OPTIONS = [
   { value: 'tournament-events', label: 'Мероприятия' },
   { value: 'history', label: 'История', ownerOnly: true },
 ];
-
-const RICH_TEXT_FORMAT_NOTE =
-  'Поддерживаются ссылки [текст](https://...), обычные URL, **жирный**, *курсив* и `моно`.';
+const hasRichTextValue = (value) => Boolean(getText(toRichTextPlainText(value)));
 
 const formatDate = (value) => {
   const date = new Date(value);
@@ -728,7 +728,7 @@ export default function AdminPanel() {
     setNewsMessage('');
 
     if (!ensureCredentials()) return;
-    if (!getText(newsForm.title) || !getText(newsForm.summary)) {
+    if (!getText(newsForm.title) || !hasRichTextValue(newsForm.summary)) {
       setNewsMessage('Для новости обязательно заполните заголовок и короткое описание.');
       return;
     }
@@ -830,7 +830,7 @@ export default function AdminPanel() {
 
     if (!ensureCredentials()) return;
     if (!id || editingNewsId !== id) return;
-    if (!getText(editNewsForm.title) || !getText(editNewsForm.summary)) {
+    if (!getText(editNewsForm.title) || !hasRichTextValue(editNewsForm.summary)) {
       setNewsMessage('Для новости обязательно заполните заголовок и короткое описание.');
       return;
     }
@@ -971,7 +971,7 @@ export default function AdminPanel() {
     setTournamentEventsMessage('');
 
     if (!ensureCredentials()) return;
-    if (!getText(tournamentEventForm.title) || !getText(tournamentEventForm.summary)) {
+    if (!getText(tournamentEventForm.title) || !hasRichTextValue(tournamentEventForm.summary)) {
       setTournamentEventsMessage('Заполните название и краткое описание мероприятия.');
       return;
     }
@@ -1046,7 +1046,7 @@ export default function AdminPanel() {
 
     if (!ensureCredentials()) return;
     if (!id || editingTournamentEventId !== id) return;
-    if (!getText(editTournamentEventForm.title) || !getText(editTournamentEventForm.summary)) {
+    if (!getText(editTournamentEventForm.title) || !hasRichTextValue(editTournamentEventForm.summary)) {
       setTournamentEventsMessage('Заполните название и краткое описание мероприятия.');
       return;
     }
@@ -1643,29 +1643,24 @@ export default function AdminPanel() {
                 />
               </label>
 
-              <label className="form-field full" htmlFor="news-summary">
-                <span>Короткое описание *</span>
-                <textarea
-                  id="news-summary"
-                  name="news-summary"
-                  value={newsForm.summary}
-                  onChange={(event) => setNewsForm((prev) => ({ ...prev, summary: event.target.value }))}
-                  placeholder="Кратко о событии (1-3 предложения)"
-                  required
-                />
-              </label>
+              <RichTextEditor
+                id="news-summary"
+                label="Короткое описание"
+                value={newsForm.summary}
+                onChange={(nextValue) => setNewsForm((prev) => ({ ...prev, summary: nextValue }))}
+                placeholder="Кратко о событии (1-3 предложения)"
+                minHeight={150}
+                required
+              />
 
-              <label className="form-field full" htmlFor="news-content">
-                <span>Дополнительный текст</span>
-                <textarea
-                  id="news-content"
-                  name="news-content"
-                  value={newsForm.content}
-                  onChange={(event) => setNewsForm((prev) => ({ ...prev, content: event.target.value }))}
-                  placeholder="Подробности новости, ссылки и выделения"
-                />
-                <p className="form-note">{RICH_TEXT_FORMAT_NOTE}</p>
-              </label>
+              <RichTextEditor
+                id="news-content"
+                label="Дополнительный текст"
+                value={newsForm.content}
+                onChange={(nextValue) => setNewsForm((prev) => ({ ...prev, content: nextValue }))}
+                placeholder="Подробности новости, ссылки и выделения"
+                minHeight={170}
+              />
 
               <div className="form-field full">
                 <span>Медиа новости (фото, GIF, видео)</span>
@@ -1873,29 +1868,24 @@ export default function AdminPanel() {
                 />
               </label>
 
-              <label className="form-field full" htmlFor="tournament-event-summary">
-                <span>Краткое описание *</span>
-                <textarea
-                  id="tournament-event-summary"
-                  name="tournament-event-summary"
-                  value={tournamentEventForm.summary}
-                  onChange={(event) => setTournamentEventForm((prev) => ({ ...prev, summary: event.target.value }))}
-                  placeholder="1-2 предложения о формате мероприятия"
-                  required
-                />
-              </label>
+              <RichTextEditor
+                id="tournament-event-summary"
+                label="Краткое описание"
+                value={tournamentEventForm.summary}
+                onChange={(nextValue) => setTournamentEventForm((prev) => ({ ...prev, summary: nextValue }))}
+                placeholder="1-2 предложения о формате мероприятия"
+                minHeight={140}
+                required
+              />
 
-              <label className="form-field full" htmlFor="tournament-event-content">
-                <span>Дополнительный текст</span>
-                <textarea
-                  id="tournament-event-content"
-                  name="tournament-event-content"
-                  value={tournamentEventForm.content}
-                  onChange={(event) => setTournamentEventForm((prev) => ({ ...prev, content: event.target.value }))}
-                  placeholder="Детали, ссылки на регистрацию, условия участия"
-                />
-                <p className="form-note">{RICH_TEXT_FORMAT_NOTE}</p>
-              </label>
+              <RichTextEditor
+                id="tournament-event-content"
+                label="Дополнительный текст"
+                value={tournamentEventForm.content}
+                onChange={(nextValue) => setTournamentEventForm((prev) => ({ ...prev, content: nextValue }))}
+                placeholder="Детали, ссылки на регистрацию, условия участия"
+                minHeight={170}
+              />
 
               <div className="form-field full">
                 <span>Медиа мероприятия (фото, GIF, видео)</span>
@@ -2013,26 +2003,24 @@ export default function AdminPanel() {
                           />
                         </label>
 
-                        <label className="form-field full" htmlFor={`news-edit-summary-${item.id}`}>
-                          <span>Короткое описание *</span>
-                          <textarea
-                            id={`news-edit-summary-${item.id}`}
-                            value={editNewsForm.summary}
-                            onChange={(event) => setEditNewsForm((prev) => ({ ...prev, summary: event.target.value }))}
-                            required
-                          />
-                        </label>
+                        <RichTextEditor
+                          id={`news-edit-summary-${item.id}`}
+                          label="Короткое описание"
+                          value={editNewsForm.summary}
+                          onChange={(nextValue) => setEditNewsForm((prev) => ({ ...prev, summary: nextValue }))}
+                          placeholder="Кратко о событии"
+                          minHeight={140}
+                          required
+                        />
 
-                        <label className="form-field full" htmlFor={`news-edit-content-${item.id}`}>
-                          <span>Дополнительный текст</span>
-                          <textarea
-                            id={`news-edit-content-${item.id}`}
-                            value={editNewsForm.content}
-                            onChange={(event) => setEditNewsForm((prev) => ({ ...prev, content: event.target.value }))}
-                            placeholder="Подробности новости, ссылки и выделения"
-                          />
-                          <p className="form-note">{RICH_TEXT_FORMAT_NOTE}</p>
-                        </label>
+                        <RichTextEditor
+                          id={`news-edit-content-${item.id}`}
+                          label="Дополнительный текст"
+                          value={editNewsForm.content}
+                          onChange={(nextValue) => setEditNewsForm((prev) => ({ ...prev, content: nextValue }))}
+                          placeholder="Подробности новости, ссылки и выделения"
+                          minHeight={160}
+                        />
 
                         <div className="form-field full">
                           <span>Заменить медиа (фото, GIF, видео)</span>
@@ -2252,30 +2240,28 @@ export default function AdminPanel() {
                             />
                           </label>
 
-                          <label className="form-field full" htmlFor={`tournament-event-edit-summary-${item.id}`}>
-                            <span>Краткое описание *</span>
-                            <textarea
-                              id={`tournament-event-edit-summary-${item.id}`}
-                              value={editTournamentEventForm.summary}
-                              onChange={(event) =>
-                                setEditTournamentEventForm((prev) => ({ ...prev, summary: event.target.value }))
-                              }
-                              required
-                            />
-                          </label>
+                          <RichTextEditor
+                            id={`tournament-event-edit-summary-${item.id}`}
+                            label="Краткое описание"
+                            value={editTournamentEventForm.summary}
+                            onChange={(nextValue) =>
+                              setEditTournamentEventForm((prev) => ({ ...prev, summary: nextValue }))
+                            }
+                            placeholder="Кратко о формате мероприятия"
+                            minHeight={140}
+                            required
+                          />
 
-                          <label className="form-field full" htmlFor={`tournament-event-edit-content-${item.id}`}>
-                            <span>Дополнительный текст</span>
-                            <textarea
-                              id={`tournament-event-edit-content-${item.id}`}
-                              value={editTournamentEventForm.content}
-                              onChange={(event) =>
-                                setEditTournamentEventForm((prev) => ({ ...prev, content: event.target.value }))
-                              }
-                              placeholder="Детали, ссылки на регистрацию, условия участия"
-                            />
-                            <p className="form-note">{RICH_TEXT_FORMAT_NOTE}</p>
-                          </label>
+                          <RichTextEditor
+                            id={`tournament-event-edit-content-${item.id}`}
+                            label="Дополнительный текст"
+                            value={editTournamentEventForm.content}
+                            onChange={(nextValue) =>
+                              setEditTournamentEventForm((prev) => ({ ...prev, content: nextValue }))
+                            }
+                            placeholder="Детали, ссылки на регистрацию, условия участия"
+                            minHeight={160}
+                          />
 
                           <div className="form-field full">
                             <span>Заменить медиа (фото, GIF, видео)</span>

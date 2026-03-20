@@ -3,12 +3,21 @@ import { NextResponse } from 'next/server';
 export const runtime = 'nodejs';
 
 const getText = (value) => (typeof value === 'string' ? value.trim() : '');
+const parseChatIds = (raw) =>
+  Array.from(
+    new Set(
+      getText(raw)
+        .split(/[,\n;\s]+/)
+        .map((item) => item.trim())
+        .filter(Boolean)
+    )
+  );
 
 export async function POST(request) {
   const token = process.env.TELEGRAM_BOT_TOKEN;
-  const chatId = process.env.TELEGRAM_CHAT_ID;
+  const chatIds = parseChatIds(process.env.TELEGRAM_CHAT_ID);
 
-  if (!token || !chatId) {
+  if (!token || chatIds.length === 0) {
     return NextResponse.json(
       { ok: false, error: 'Сервер не настроен: добавьте TELEGRAM_BOT_TOKEN и TELEGRAM_CHAT_ID.' },
       { status: 500 }
@@ -57,32 +66,55 @@ export async function POST(request) {
     `Время: ${new Date().toLocaleString('ru-RU', { timeZone: 'Europe/Moscow' })}`,
   ].join('\n');
 
-  const telegramResponse = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      chat_id: chatId,
-      text: messageText,
-      disable_web_page_preview: true,
-    }),
-  });
+  const sendResults = await Promise.all(
+    chatIds.map(async (chatId) => {
+      const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          chat_id: chatId,
+          text: messageText,
+          disable_web_page_preview: true,
+        }),
+      });
 
-  let telegramBody = null;
+      let body = null;
 
-  try {
-    telegramBody = await telegramResponse.json();
-  } catch {
-    telegramBody = null;
-  }
+      try {
+        body = await response.json();
+      } catch {
+        body = null;
+      }
 
-  if (!telegramResponse.ok || !telegramBody?.ok) {
+      return {
+        chatId,
+        ok: response.ok && Boolean(body?.ok),
+        status: response.status,
+        description: body?.description || '',
+      };
+    })
+  );
+
+  const failed = sendResults.filter((item) => !item.ok);
+  if (failed.length > 0) {
     return NextResponse.json(
-      { ok: false, error: 'Ошибка отправки в Telegram. Проверьте токен бота и chat_id.' },
+      {
+        ok: false,
+        error: `Ошибка отправки в Telegram для ${failed.length} чатов. Проверьте токен бота и chat_id.`,
+        failedChatIds: failed.map((item) => ({
+          chatId: item.chatId,
+          status: item.status,
+          description: item.description || 'Unknown error',
+        })),
+      },
       { status: 502 }
     );
   }
 
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({
+    ok: true,
+    sentTo: sendResults.map((item) => item.chatId),
+  });
 }

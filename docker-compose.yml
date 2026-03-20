@@ -13,6 +13,7 @@ services:
       PORT: 3030
       HOSTNAME: 0.0.0.0
     volumes:
-      - ./data/cms:/app/data/cms
-      - ./public/uploads:/app/public/uploads
+      # Local-only runtime storage to avoid accidental sync of local CMS/media to production.
+      - ./.runtime/local-cms:/app/data/cms
+      - ./.runtime/local-uploads:/app/public/uploads
     restart: unless-stopped

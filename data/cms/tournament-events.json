@@ -1,13 +1,5 @@
 [
   {
-    "id": "cca9420b-8cfc-4ca5-bca4-f2e45b1dc2a5",
-    "title": "test",
-    "summary": "test",
-    "imageSrc": "/uploads/tournament-events/1773696000811-22ea1eb7-f104-40d4-8ba1-4d7b79d896e0.svg",
-    "imageAlt": "Мероприятие RUNA",
-    "createdAt": "2026-03-16T21:20:00.814Z"
-  },
-  {
     "id": "event-club-cup",
     "title": "Клубный кубок",
     "summary": "Периодический офлайн-ивент с призами и бонусами от клуба.",

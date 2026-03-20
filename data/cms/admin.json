@@ -19,6 +19,26 @@
   ],
   "history": [
     {
+      "id": "d7551e4c-b1da-4f31-adae-e7e16c1c3692",
+      "action": "news.update",
+      "actorLogin": "admin",
+      "actorRole": "owner",
+      "targetType": "news",
+      "targetId": "c36cd8a8-eef1-40c0-b14c-c881cc245589",
+      "summary": "🔥 CRL SEASON 2 🔥 \"IT-куб\" × RUNA",
+      "createdAt": "2026-03-19T09:01:15.889Z"
+    },
+    {
+      "id": "dd18df6a-331e-450e-afc1-d53ffd241aa0",
+      "action": "tournament-event.delete",
+      "actorLogin": "admin",
+      "actorRole": "owner",
+      "targetType": "tournament-event",
+      "targetId": "cca9420b-8cfc-4ca5-bca4-f2e45b1dc2a5",
+      "summary": "test",
+      "createdAt": "2026-03-19T08:09:53.665Z"
+    },
+    {
       "id": "890922df-ca05-4273-b376-fab59355fa52",
       "action": "gallery.delete",
       "actorLogin": "admin",
