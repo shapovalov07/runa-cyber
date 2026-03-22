@@ -1,0 +1,26 @@
+services:
+  runa-cyber-club:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: runa-cyber-club
+    env_file:
+      - .env.local
+    environment:
+      NODE_ENV: production
+      PORT: 3030
+      HOSTNAME: 0.0.0.0
+    expose:
+      - "3030"
+    volumes:
+      # Local-only runtime storage to avoid accidental sync of local CMS/media to production.
+      - ./.runtime/local-cms:/app/data/cms
+      - ./.runtime/local-uploads:/app/public/uploads
+    restart: unless-stopped
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    external: true
+    name: proxy

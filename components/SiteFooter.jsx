@@ -45,7 +45,17 @@ export default function SiteFooter() {
 
         <div className="footer-bottom">
           <div>© {year} RUNA Cyber Club.</div>
-          <div className="footer-source">RUNA Cyber Club</div>
+          <div className="footer-source">
+            <span>Сайт разработан в</span>
+            <a
+              className="footer-source-link"
+              href="https://design-hope.ru/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              ДИЗАЙН НОРЕ
+            </a>
+          </div>
         </div>
       </div>
     </footer>

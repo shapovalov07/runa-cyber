@@ -562,9 +562,23 @@ img {
   flex-wrap: wrap;
 }
 
+.footer-source {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
 .footer-source a {
-  color: var(--accent-2);
+  color: #d7e2fb;
   font-weight: 700;
+  transition: color 0.2s ease, text-shadow 0.2s ease;
+}
+
+.footer-source a:hover,
+.footer-source a:focus-visible {
+  color: var(--accent-2);
+  text-shadow: 0 0 12px rgba(255, 197, 77, 0.28);
 }
 
 .franchise-form {

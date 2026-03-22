@@ -83,7 +83,7 @@ npm run dev
 - Загруженные фото галереи: `public/uploads/gallery/`
 - Загруженные фото мероприятий: `public/uploads/tournament-events/`
 
-## Docker (порт 3030)
+## Docker локально (порт 3030)
 
 1. Убедиться, что заполнен `.env.local`:
 
@@ -105,3 +105,29 @@ docker compose up --build -d
 ```bash
 docker compose down
 ```
+
+## Docker на сервере через Nginx Proxy Manager
+
+Используйте отдельный файл `docker-compose.server.yml`, если контейнер должен работать за Nginx Proxy Manager во внешней Docker-сети `proxy`.
+
+1. Создать сеть на сервере один раз:
+
+```bash
+docker network create proxy
+```
+
+2. Запустить контейнер:
+
+```bash
+docker compose -f docker-compose.server.yml up --build -d
+```
+
+3. Остановить контейнер:
+
+```bash
+docker compose -f docker-compose.server.yml down
+```
+
+В этом режиме контейнер не публикует порт наружу через `ports`, а только открывает `3030` внутри Docker-сети через `expose`, чтобы к нему мог подключаться Nginx Proxy Manager.
+
+В Nginx Proxy Manager в качестве `Forward Hostname / IP` укажите `runa-cyber-club`, а в качестве `Forward Port` укажите `3030`.
