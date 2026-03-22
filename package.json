@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "deploy:code": "bash ./scripts/deploy-code-only.sh",
+    "deploy:server": "bash ./scripts/deploy-server-image.sh"
   },
   "dependencies": {
     "next": "^16.1.6",

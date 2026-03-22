@@ -1,8 +1,6 @@
 services:
   runa-cyber-club:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ${DOCKER_IMAGE:-runa-cyber-club:prod}
     container_name: runa-cyber-club
     env_file:
       - .env.local
@@ -13,9 +11,9 @@ services:
     expose:
       - "3030"
     volumes:
-      # Local-only runtime storage to avoid accidental sync of local CMS/media to production.
-      - ./.runtime/local-cms:/app/data/cms
-      - ./.runtime/local-uploads:/app/public/uploads
+      # Server-only runtime storage keeps CMS data and uploaded media across deploys.
+      - ./.runtime/server-cms:/app/data/cms
+      - ./.runtime/server-uploads:/app/public/uploads
     restart: unless-stopped
     networks:
       - proxy

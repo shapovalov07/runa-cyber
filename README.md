@@ -110,22 +110,61 @@ docker compose down
 
 Используйте отдельный файл `docker-compose.server.yml`, если контейнер должен работать за Nginx Proxy Manager во внешней Docker-сети `proxy`.
 
-1. Создать сеть на сервере один раз:
+Серверный контейнер должен обновляться из заранее собранного Docker image, а не пересобираться на сервере. Это позволяет:
+
+- обновлять код отдельно от CMS-данных
+- не трогать новости, мероприятия и загруженные фото
+- не зависеть от тяжелой сборки на слабом сервере
+
+Данные админки хранятся на сервере отдельно и не попадают в git:
+
+- `./.runtime/server-cms` -> `/app/data/cms`
+- `./.runtime/server-uploads` -> `/app/public/uploads`
+
+При деплое контейнер пересоздается, но эти папки остаются на сервере, поэтому контент из админки не теряется.
+
+### Первый запуск на сервере
+
+Нужны:
+
+- заполненный `.env.local` на сервере
+- папка проекта на сервере
+- Docker и внешняя сеть `proxy`
+
+Если раньше сервер уже работал через `./.runtime/local-cms` и `./.runtime/local-uploads`, новый deploy-скрипт сам перенесет эти данные в `./.runtime/server-cms` и `./.runtime/server-uploads` при первом запуске.
+
+### Обычный деплой с локальной машины на сервер
+
+На локальной машине запустите:
 
 ```bash
-docker network create proxy
+DEPLOY_HOST=root@45.11.92.25 \
+DEPLOY_PATH=/root/runa-cyber/runa-cyber \
+npm run deploy:server
 ```
 
-2. Запустить контейнер:
+Опционально:
 
 ```bash
-docker compose -f docker-compose.server.yml up --build -d
+DEPLOY_PORT=22
+DEPLOY_IMAGE=runa-cyber-club:prod
+DEPLOY_PLATFORM=linux/amd64
 ```
 
-3. Остановить контейнер:
+Что делает `npm run deploy:server`:
+
+1. Собирает Docker image локально.
+2. Отправляет его на сервер через `docker load`.
+3. Создает сеть `proxy`, если ее еще нет.
+4. Поднимает контейнер через `docker-compose.server.yml` без сборки на сервере.
+5. Сохраняет серверные новости, мероприятия и загруженные фото в `./.runtime/server-*`.
+
+### Ручной запуск на сервере
+
+Если image уже загружен на сервер, контейнер можно перезапустить вручную:
 
 ```bash
-docker compose -f docker-compose.server.yml down
+DOCKER_IMAGE=runa-cyber-club:prod docker compose -f docker-compose.server.yml up -d --no-build --force-recreate --remove-orphans
 ```
 
 В этом режиме контейнер не публикует порт наружу через `ports`, а только открывает `3030` внутри Docker-сети через `expose`, чтобы к нему мог подключаться Nginx Proxy Manager.
