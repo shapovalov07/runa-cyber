@@ -1,5 +1,7 @@
 import FranchiseCalculator from '../../components/FranchiseCalculator';
 import FranchiseForm from '../../components/FranchiseForm';
+import FranchiseNetworkMap from '../../components/FranchiseNetworkMap';
+import FranchisePartnerSpotlight from '../../components/FranchisePartnerSpotlight';
 import {
   franchiseAboutGallery,
   franchiseBrandBlocks,
@@ -8,6 +10,7 @@ import {
   franchiseFaq,
   franchiseHeroStats,
   franchiseNetwork,
+  franchisePartnerVideo,
   franchiseRevenueStreams,
   franchiseRoadmap,
   franchiseSupport,
@@ -52,10 +55,22 @@ export default function FranchisePage() {
             </p>
 
             <div className="hero-actions">
-              <a className="btn btn-primary" href="#franchise-final-form">
+              <a
+                className="btn btn-primary"
+                href="#franchise-final-form"
+                data-metrika-event="franchise_cta_click"
+                data-metrika-source="hero_primary"
+                data-metrika-label="Получить расчет под мой город"
+              >
                 Получить расчет под мой город
               </a>
-              <a className="btn btn-outline" href="#franchise-gallery">
+              <a
+                className="btn btn-outline"
+                href="#franchise-gallery"
+                data-metrika-event="franchise_cta_click"
+                data-metrika-source="hero_secondary"
+                data-metrika-label="Посмотреть, как выглядит RUNA"
+              >
                 Посмотреть, как выглядит RUNA
               </a>
             </div>
@@ -84,7 +99,13 @@ export default function FranchisePage() {
           </div>
         </div>
         <div className="franchise-mobile-sticky-cta">
-          <a className="btn btn-primary" href="#franchise-final-form">
+          <a
+            className="btn btn-primary"
+            href="#franchise-final-form"
+            data-metrika-event="franchise_cta_click"
+            data-metrika-source="mobile_sticky_cta"
+            data-metrika-label="Получить расчет"
+          >
             Получить расчет
           </a>
         </div>
@@ -215,15 +236,7 @@ export default function FranchisePage() {
               <h2 className="section-title">9 клубов в сети и точки на этапе открытия</h2>
             </div>
 
-            <div className="franchise-network-list">
-              {franchiseNetwork.map((item) => (
-                <article className="franchise-network-item" key={`${item.city}-${item.address}`}>
-                  <strong>{item.city}</strong>
-                  <p>{item.address}</p>
-                  <span>{item.status}</span>
-                </article>
-              ))}
-            </div>
+            <FranchiseNetworkMap items={franchiseNetwork} />
           </div>
         </div>
       </section>
@@ -238,6 +251,7 @@ export default function FranchisePage() {
           <div className="franchise-cases-grid">
             {franchiseCases.map((item) => (
               <article className="card franchise-case-card" key={item.city}>
+                <img src={item.imageSrc} alt={item.city} loading="lazy" />
                 <p className="franchise-zone-accent">{item.status}</p>
                 <h3>{item.city}</h3>
                 <p className="admin-path">{item.address}</p>
@@ -246,17 +260,7 @@ export default function FranchisePage() {
             ))}
           </div>
 
-          <article className="card franchise-video-placeholder">
-            <div>
-              <p className="kicker">Видеоотзыв партнера — скоро</p>
-              <h3>Видеоистория Ильи из Ростова-на-Дону появится на сайте после открытия клуба</h3>
-              <p>
-                Илья расскажет, почему выбрал франшизу RUNA, как проходил запуск и какие планы по масштабированию
-                появились после старта проекта.
-              </p>
-            </div>
-            <div className="franchise-video-badge">PLAY</div>
-          </article>
+          <FranchisePartnerSpotlight video={franchisePartnerVideo} />
         </div>
       </section>
 

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { trackFranchiseEvent } from '../lib/franchise-analytics';
 
 const PHONE_MAX_LENGTH = 18;
 const BUDGET_OPTIONS = ['До 10 млн ₽', '10-15 млн ₽', '15-20 млн ₽', '20+ млн ₽'];
@@ -92,6 +93,7 @@ export default function FranchiseForm({
   const [message, setMessage] = useState('');
   const [isSuccessPopupOpen, setIsSuccessPopupOpen] = useState(false);
   const phoneInputRef = useRef(null);
+  const cityInputTrackedRef = useRef(false);
   const baseId = `franchise-${source.replace(/[^a-z0-9]+/gi, '-').toLowerCase() || 'form'}`;
 
   const updateField = (key, value) => {
@@ -173,11 +175,23 @@ export default function FranchiseForm({
         throw new Error(payload.error || 'Не удалось отправить заявку.');
       }
 
+      trackFranchiseEvent('franchise_form_submit', {
+        source,
+        format: getText(lockedFormat) || getText(form.format),
+      });
+      trackFranchiseEvent(`${source}_submit`, {
+        source,
+      });
+
       setStatus('success');
       setMessage(payload.message || 'Заявка сохранена. Команда RUNA свяжется с вами.');
       setForm(createInitialState(lockedFormat));
+      cityInputTrackedRef.current = false;
       setIsSuccessPopupOpen(true);
     } catch (error) {
+      trackFranchiseEvent('franchise_form_error', {
+        source,
+      });
       setStatus('error');
       setMessage(error.message || 'Ошибка отправки. Попробуйте снова.');
     }
@@ -238,7 +252,12 @@ export default function FranchiseForm({
 
   return (
     <>
-      <form className={`franchise-form ${compact ? 'franchise-form-compact' : ''} ${className}`.trim()} onSubmit={handleSubmit} noValidate>
+      <form
+        className={`franchise-form ${compact ? 'franchise-form-compact' : ''} ${className}`.trim()}
+        onSubmit={handleSubmit}
+        noValidate
+        data-metrika-source={source}
+      >
         {title || description ? (
           <div className="franchise-form-head">
             <div>
@@ -277,7 +296,15 @@ export default function FranchiseForm({
               placeholder="Ваш город"
               autoComplete="address-level2"
               value={form.city}
-              onChange={(event) => updateField('city', event.target.value)}
+              onChange={(event) => {
+                updateField('city', event.target.value);
+                if (source === 'city_check_form' && !cityInputTrackedRef.current && getText(event.target.value).length >= 2) {
+                  cityInputTrackedRef.current = true;
+                  trackFranchiseEvent('franchise_city_check_input', {
+                    source,
+                  });
+                }
+              }}
               required
             />
           </label>
@@ -393,11 +420,24 @@ export default function FranchiseForm({
         </label>
 
         <div className="form-actions">
-          <button className="btn btn-primary" type="submit" disabled={status === 'loading'}>
+          <button
+            className="btn btn-primary"
+            type="submit"
+            disabled={status === 'loading'}
+            data-metrika-event="franchise_cta_click"
+            data-metrika-source={source}
+            data-metrika-label={submitLabel}
+          >
             {status === 'loading' ? 'Отправка...' : submitLabel}
           </button>
           {showSecondaryAction ? (
-            <a className="btn btn-ghost" href="#franchise-final-form">
+            <a
+              className="btn btn-ghost"
+              href="#franchise-final-form"
+              data-metrika-event="franchise_cta_click"
+              data-metrika-source={`${source}_secondary`}
+              data-metrika-label="Перейти к полной заявке"
+            >
               Перейти к полной заявке
             </a>
           ) : null}

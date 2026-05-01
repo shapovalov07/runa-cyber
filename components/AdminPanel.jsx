@@ -358,6 +358,7 @@ export default function AdminPanel() {
   const [tournamentEventsBusy, setTournamentEventsBusy] = useState(false);
   const [franchiseLeadsBusy, setFranchiseLeadsBusy] = useState(false);
   const [franchiseLeadsExportBusy, setFranchiseLeadsExportBusy] = useState(false);
+  const [franchiseLeadResendId, setFranchiseLeadResendId] = useState('');
   const [adminUsersBusy, setAdminUsersBusy] = useState(false);
   const [adminHistoryBusy, setAdminHistoryBusy] = useState(false);
 
@@ -715,6 +716,7 @@ export default function AdminPanel() {
     }
     setFranchiseLeadsBusy(false);
     setFranchiseLeadsExportBusy(false);
+    setFranchiseLeadResendId('');
     setAdminUsersBusy(false);
     setAdminHistoryBusy(false);
     setTournamentEventsBusy(false);
@@ -1464,6 +1466,42 @@ export default function AdminPanel() {
     }
   };
 
+  const resendFranchiseLead = async (leadId) => {
+    setFranchiseLeadsMessage('');
+
+    if (!ensureCredentials()) return;
+
+    try {
+      setFranchiseLeadResendId(leadId);
+
+      const response = await fetch(`/api/admin/franchise-leads/${encodeURIComponent(leadId)}/resend`, {
+        method: 'POST',
+        headers: {
+          ...authHeaders,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({}),
+      });
+
+      const payload = await readResponse(response);
+
+      if (!response.ok || !payload.ok) {
+        throw new Error(payload.error || 'Не удалось повторно отправить интеграции.');
+      }
+
+      setFranchiseLeads((prev) => prev.map((lead) => (lead.id === leadId ? payload.lead : lead)));
+      setFranchiseLeadDrafts((prev) => ({
+        ...prev,
+        [leadId]: createFranchiseLeadDraft(payload.lead),
+      }));
+      setFranchiseLeadsMessage(`Интеграции заявки ${payload.lead.name || payload.lead.phone} повторно отправлены.`);
+    } catch (error) {
+      setFranchiseLeadsMessage(error.message || 'Ошибка повторной отправки интеграций.');
+    } finally {
+      setFranchiseLeadResendId('');
+    }
+  };
+
   const activeFranchiseLeadsCount = franchiseLeads.filter(
     (lead) => !['won', 'lost'].includes(normalizeFranchiseManagerStatus(lead.managerStatus))
   ).length;
@@ -2193,6 +2231,14 @@ export default function AdminPanel() {
                               disabled={franchiseLeadsBusy || !isDraftChanged}
                             >
                               {franchiseLeadsBusy ? 'Сохраняем...' : 'Сохранить'}
+                            </button>
+                            <button
+                              className="btn btn-outline"
+                              type="button"
+                              onClick={() => resendFranchiseLead(lead.id)}
+                              disabled={Boolean(franchiseLeadResendId) || franchiseLeadsBusy}
+                            >
+                              {franchiseLeadResendId === lead.id ? 'Повторяем...' : 'Повторить интеграции'}
                             </button>
                           </div>
                         </div>

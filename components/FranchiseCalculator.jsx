@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { franchiseCalculatorFormats } from '../data/franchise';
+import { trackFranchiseEvent } from '../lib/franchise-analytics';
 import FranchiseForm from './FranchiseForm';
 
 const METRIC_DEFINITIONS = [
@@ -38,7 +39,15 @@ export default function FranchiseCalculator() {
               key={item.slug}
               className={`franchise-calculator-tab ${item.slug === activeFormat.slug ? 'is-active' : ''}`}
               type="button"
-              onClick={() => setActiveSlug(item.slug)}
+              onClick={() => {
+                setActiveSlug(item.slug);
+                trackFranchiseEvent('franchise_calculator_change', {
+                  format: item.label,
+                });
+              }}
+              data-metrika-event="franchise_calculator_change"
+              data-metrika-source="calculator_switcher"
+              data-metrika-label={item.label}
             >
               {item.label}
             </button>

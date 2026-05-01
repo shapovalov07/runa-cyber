@@ -1,6 +1,7 @@
 import SiteFooter from '../components/SiteFooter';
 import SiteHeader from '../components/SiteHeader';
 import RevealObserver from '../components/RevealObserver';
+import YandexMetrika from '../components/YandexMetrika';
 import './globals.css';
 
 export const metadata = {
@@ -26,6 +27,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="ru" data-scroll-behavior="smooth">
       <body>
+        <YandexMetrika />
         <SiteHeader />
         {children}
         <SiteFooter />

@@ -2577,6 +2577,55 @@ img {
   line-height: 1.58;
 }
 
+.franchise-video-copy {
+  display: grid;
+  gap: 12px;
+  flex: 1 1 0;
+}
+
+.franchise-video-copy blockquote {
+  margin: 0;
+  padding-left: 16px;
+  border-left: 2px solid rgba(255, 197, 77, 0.45);
+  color: #e6efff;
+  line-height: 1.58;
+}
+
+.franchise-video-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.franchise-video-meta span {
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #d3dff7;
+  font-size: 0.85rem;
+}
+
+.franchise-video-media {
+  width: min(420px, 100%);
+  flex: 0 0 min(420px, 100%);
+}
+
+.franchise-video-media iframe,
+.franchise-video-media video,
+.franchise-video-poster-shell img {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(5, 8, 14, 0.88);
+}
+
+.franchise-video-poster-shell {
+  position: relative;
+}
+
 .franchise-video-badge {
   display: grid;
   place-items: center;
@@ -2591,6 +2640,15 @@ img {
   color: #ffd27d;
   font-weight: 800;
   letter-spacing: 0.18em;
+}
+
+.franchise-video-poster-shell .franchise-video-badge {
+  position: absolute;
+  right: 18px;
+  bottom: 18px;
+  width: 88px;
+  height: 88px;
+  font-size: 0.8rem;
 }
 
 .franchise-roadmap-layout {
@@ -2621,6 +2679,208 @@ img {
   display: grid;
   gap: 10px;
   min-height: 100%;
+}
+
+.franchise-case-card img {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.franchise-network-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
+  gap: 16px;
+}
+
+.franchise-network-stage-card,
+.franchise-network-detail-card {
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background:
+    radial-gradient(460px 220px at 100% 0%, rgba(49, 216, 255, 0.08), transparent 64%),
+    linear-gradient(180deg, rgba(11, 16, 26, 0.92), rgba(8, 12, 21, 0.98));
+  padding: 18px;
+}
+
+.franchise-network-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.franchise-network-filter {
+  appearance: none;
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.03);
+  color: #d6e2fa;
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.franchise-network-filter:hover,
+.franchise-network-filter.is-active {
+  background: linear-gradient(120deg, rgba(255, 106, 0, 0.18), rgba(255, 197, 77, 0.18));
+  border-color: rgba(255, 197, 77, 0.3);
+  transform: translateY(-1px);
+}
+
+.franchise-network-stage {
+  position: relative;
+  min-height: 400px;
+  border-radius: 22px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background:
+    radial-gradient(320px 160px at 25% 18%, rgba(255, 106, 0, 0.1), transparent 62%),
+    radial-gradient(420px 240px at 76% 24%, rgba(49, 216, 255, 0.08), transparent 64%),
+    linear-gradient(180deg, rgba(7, 11, 19, 0.94), rgba(6, 10, 18, 0.98));
+}
+
+.franchise-network-stage-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 28px 28px;
+  opacity: 0.45;
+}
+
+.franchise-network-node {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  min-width: 112px;
+  padding: 10px 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(11, 16, 26, 0.92);
+  color: #ecf4ff;
+  font: inherit;
+  font-weight: 700;
+  box-shadow: 0 14px 24px rgba(0, 0, 0, 0.24);
+  cursor: pointer;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.franchise-network-node span {
+  display: block;
+  font-size: 0.84rem;
+  line-height: 1.3;
+}
+
+.franchise-network-node:hover,
+.franchise-network-node.is-active {
+  transform: translate(-50%, -54%);
+  border-color: rgba(255, 197, 77, 0.45);
+  box-shadow: 0 18px 28px rgba(0, 0, 0, 0.32);
+}
+
+.franchise-network-node.is-own {
+  box-shadow: 0 14px 24px rgba(0, 0, 0, 0.24), 0 0 0 1px rgba(49, 216, 255, 0.12);
+}
+
+.franchise-network-node.is-franchise {
+  box-shadow: 0 14px 24px rgba(0, 0, 0, 0.24), 0 0 0 1px rgba(255, 197, 77, 0.1);
+}
+
+.franchise-network-node.is-opening {
+  box-shadow: 0 14px 24px rgba(0, 0, 0, 0.24), 0 0 0 1px rgba(255, 106, 0, 0.16);
+}
+
+.franchise-network-detail-card {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+}
+
+.franchise-network-detail-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.franchise-network-detail-head h3 {
+  margin: 4px 0 0;
+}
+
+.franchise-network-status {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.franchise-network-status.is-own {
+  color: #8fe7ff;
+  background: rgba(49, 216, 255, 0.09);
+}
+
+.franchise-network-status.is-franchise {
+  color: #ffd487;
+  background: rgba(255, 197, 77, 0.1);
+}
+
+.franchise-network-status.is-opening {
+  color: #ffb58a;
+  background: rgba(255, 106, 0, 0.1);
+}
+
+.franchise-network-metadata {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.franchise-network-metadata span {
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #d7e2fb;
+  font-size: 0.84rem;
+}
+
+.franchise-network-mini-list {
+  display: grid;
+  gap: 10px;
+}
+
+.franchise-network-mini-card {
+  display: grid;
+  gap: 6px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  color: #e8f1ff;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+
+.franchise-network-mini-card span {
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.franchise-network-mini-card.is-active,
+.franchise-network-mini-card:hover {
+  border-color: rgba(49, 216, 255, 0.24);
 }
 
 .franchise-city-check,
@@ -2930,6 +3190,10 @@ img {
     grid-template-columns: 1fr 1fr;
   }
 
+  .franchise-network-shell {
+    grid-template-columns: 1fr;
+  }
+
   .franchise-hero-copy h1 {
     font-size: clamp(2.2rem, 6vw, 3.8rem);
   }
@@ -2946,6 +3210,11 @@ img {
 
   .franchise-video-placeholder {
     align-items: flex-start;
+  }
+
+  .franchise-video-media {
+    width: 100%;
+    flex-basis: auto;
   }
 
   .grid-3 {
@@ -3078,13 +3347,32 @@ img {
   .franchise-brand-grid,
   .franchise-revenue-grid,
   .franchise-support-grid,
-  .franchise-calculator-grid {
+  .franchise-calculator-grid,
+  .franchise-network-shell {
     grid-template-columns: 1fr;
   }
 
   .franchise-term-row,
   .franchise-video-placeholder {
     flex-direction: column;
+  }
+
+  .franchise-network-detail-head {
+    flex-direction: column;
+  }
+
+  .franchise-network-stage {
+    min-height: 320px;
+  }
+
+  .franchise-network-node {
+    min-width: 96px;
+    padding: 8px 10px;
+  }
+
+  .franchise-network-filters {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
   }
 
   .franchise-city-check {
