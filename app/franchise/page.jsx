@@ -19,6 +19,23 @@ export const metadata = {
   title: 'Франшиза RUNA - премиальные компьютерные клубы нового поколения',
   description:
     'Откройте премиальный компьютерный клуб RUNA в своем городе. Инвестиции от 10 млн ₽, прибыль от 600 000 ₽, окупаемость от 15 месяцев, запуск под ключ и поддержка сети.',
+  openGraph: {
+    title: 'Франшиза RUNA - премиальные компьютерные клубы нового поколения',
+    description:
+      'Откройте премиальный компьютерный клуб RUNA в своем городе. Инвестиции от 10 млн ₽, прибыль от 600 000 ₽, окупаемость от 15 месяцев, запуск под ключ и поддержка сети.',
+    url: 'https://runa-cyber.ru/franchise',
+    siteName: 'RUNA Cyber Club',
+    locale: 'ru_RU',
+    type: 'website',
+    images: [
+      {
+        url: '/images/hero-franchise.jpg',
+        width: 1600,
+        height: 900,
+        alt: 'Франшиза RUNA Cyber Club',
+      },
+    ],
+  },
 };
 
 export default function FranchisePage() {
