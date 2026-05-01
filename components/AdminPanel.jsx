@@ -1,11 +1,11 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { clubCities } from '@/data/clubs';
-import { isVideoMediaSrc } from '@/lib/media';
-import RichTextContent from '@/components/RichTextContent';
-import RichTextEditor from '@/components/RichTextEditor';
-import { toRichTextPlainText } from '@/lib/rich-text';
+import { clubCities } from '../data/clubs';
+import { isVideoMediaSrc } from '../lib/media';
+import RichTextContent from './RichTextContent';
+import RichTextEditor from './RichTextEditor';
+import { toRichTextPlainText } from '../lib/rich-text';
 
 const dateFormatter = new Intl.DateTimeFormat('ru-RU', {
   day: '2-digit',
@@ -76,6 +76,8 @@ const HISTORY_ACTION_LABELS = {
   'admin.create': 'Создание администратора',
   'admin.delete': 'Удаление администратора',
   'admin.password_reset': 'Сброс пароля администратора',
+  'franchise-lead.update': 'Обновление заявки франшизы',
+  'franchise-lead.export': 'Экспорт заявок франшизы',
   'tournament-event.create': 'Создание мероприятия',
   'tournament-event.update': 'Редактирование мероприятия',
   'tournament-event.delete': 'Удаление мероприятия',
@@ -180,14 +182,48 @@ const createInitialAdminUserForm = () => ({
   role: 'admin',
 });
 
+const FRANCHISE_MANAGER_STATUS_OPTIONS = [
+  { value: 'new', label: 'Новая' },
+  { value: 'contacted', label: 'Связались' },
+  { value: 'qualified', label: 'Квалифицирована' },
+  { value: 'meeting', label: 'Встреча / созвон' },
+  { value: 'offer', label: 'Коммерческое предложение' },
+  { value: 'won', label: 'Партнер' },
+  { value: 'lost', label: 'Неактуально' },
+];
+const FRANCHISE_MANAGER_STATUS_VALUES = new Set(FRANCHISE_MANAGER_STATUS_OPTIONS.map((option) => option.value));
+const FRANCHISE_DELIVERY_STATUS_LABELS = {
+  pending: 'Ожидает',
+  sent: 'Отправлено',
+  failed: 'Ошибка',
+  skipped: 'Пропущено',
+};
+
 const ADMIN_PANEL_SECTION_OPTIONS = [
   { value: 'profile', label: 'Профиль' },
+  { value: 'franchise-leads', label: 'Заявки франшизы' },
   { value: 'news', label: 'Новости' },
   { value: 'gallery', label: 'Фото клуба' },
   { value: 'tournament-events', label: 'Мероприятия' },
   { value: 'history', label: 'История', ownerOnly: true },
 ];
 const hasRichTextValue = (value) => Boolean(getText(toRichTextPlainText(value)));
+
+const normalizeFranchiseManagerStatus = (value) => {
+  const status = getText(value).toLowerCase();
+  return FRANCHISE_MANAGER_STATUS_VALUES.has(status) ? status : 'new';
+};
+
+const getFranchiseManagerStatusLabel = (value) =>
+  FRANCHISE_MANAGER_STATUS_OPTIONS.find((option) => option.value === normalizeFranchiseManagerStatus(value))?.label || 'Новая';
+
+const getFranchiseDeliveryStatusLabel = (value) =>
+  FRANCHISE_DELIVERY_STATUS_LABELS[getText(value).toLowerCase()] || 'Неизвестно';
+
+const createFranchiseLeadDraft = (lead) => ({
+  managerStatus: normalizeFranchiseManagerStatus(lead?.managerStatus),
+  managerNote: getText(lead?.managerNote),
+});
 
 const formatDate = (value) => {
   const date = new Date(value);
@@ -303,6 +339,8 @@ export default function AdminPanel() {
   const [news, setNews] = useState([]);
   const [photos, setPhotos] = useState([]);
   const [tournamentEvents, setTournamentEvents] = useState([]);
+  const [franchiseLeads, setFranchiseLeads] = useState([]);
+  const [franchiseLeadDrafts, setFranchiseLeadDrafts] = useState({});
   const [adminUsers, setAdminUsers] = useState([]);
   const [adminHistory, setAdminHistory] = useState([]);
   const [galleryViewSection, setGalleryViewSection] = useState('home');
@@ -318,6 +356,8 @@ export default function AdminPanel() {
   const [newsBusy, setNewsBusy] = useState(false);
   const [galleryBusy, setGalleryBusy] = useState(false);
   const [tournamentEventsBusy, setTournamentEventsBusy] = useState(false);
+  const [franchiseLeadsBusy, setFranchiseLeadsBusy] = useState(false);
+  const [franchiseLeadsExportBusy, setFranchiseLeadsExportBusy] = useState(false);
   const [adminUsersBusy, setAdminUsersBusy] = useState(false);
   const [adminHistoryBusy, setAdminHistoryBusy] = useState(false);
 
@@ -326,6 +366,7 @@ export default function AdminPanel() {
   const [newsMessage, setNewsMessage] = useState('');
   const [galleryMessage, setGalleryMessage] = useState('');
   const [tournamentEventsMessage, setTournamentEventsMessage] = useState('');
+  const [franchiseLeadsMessage, setFranchiseLeadsMessage] = useState('');
   const [adminUsersMessage, setAdminUsersMessage] = useState('');
 
   const authHeaders = useMemo(
@@ -367,6 +408,12 @@ export default function AdminPanel() {
     },
     [galleryViewCitySlug, galleryViewSection, photos]
   );
+
+  const syncFranchiseLeadDrafts = (leads) => {
+    setFranchiseLeadDrafts(
+      Object.fromEntries((Array.isArray(leads) ? leads : []).map((lead) => [lead.id, createFranchiseLeadDraft(lead)]))
+    );
+  };
 
   useEffect(() => {
     if (availableAdminSections.some((section) => section.value === activeAdminSection)) return;
@@ -426,23 +473,41 @@ export default function AdminPanel() {
       setPhotos(Array.isArray(galleryPayload.photos) ? galleryPayload.photos : []);
       setTournamentEvents(Array.isArray(tournamentEventsPayload.items) ? tournamentEventsPayload.items : []);
 
+      const adminAuthHeaders = {
+        'x-admin-login': getText(sessionCredentials?.login),
+        'x-admin-password': getText(sessionCredentials?.password),
+      };
+
+      setFranchiseLeadsBusy(true);
+      try {
+        const leadsResponse = await fetch('/api/admin/franchise-leads?limit=300', {
+          cache: 'no-store',
+          headers: adminAuthHeaders,
+        });
+        const leadsPayload = await readResponse(leadsResponse);
+
+        if (!leadsResponse.ok || !leadsPayload.ok) {
+          throw new Error(leadsPayload.error || 'Не удалось получить заявки франшизы.');
+        }
+
+        const nextLeads = Array.isArray(leadsPayload.leads) ? leadsPayload.leads : [];
+        setFranchiseLeads(nextLeads);
+        syncFranchiseLeadDrafts(nextLeads);
+      } finally {
+        setFranchiseLeadsBusy(false);
+      }
+
       if (normalizeUserRole(sessionUser?.role) === 'owner') {
         setAdminHistoryBusy(true);
         try {
           const [usersResponse, historyResponse] = await Promise.all([
             fetch('/api/admin/users', {
               cache: 'no-store',
-              headers: {
-                'x-admin-login': getText(sessionCredentials?.login),
-                'x-admin-password': getText(sessionCredentials?.password),
-              },
+              headers: adminAuthHeaders,
             }),
             fetch('/api/admin/history?limit=200', {
               cache: 'no-store',
-              headers: {
-                'x-admin-login': getText(sessionCredentials?.login),
-                'x-admin-password': getText(sessionCredentials?.password),
-              },
+              headers: adminAuthHeaders,
             }),
           ]);
 
@@ -613,6 +678,8 @@ export default function AdminPanel() {
     setNews([]);
     setPhotos([]);
     setTournamentEvents([]);
+    setFranchiseLeads([]);
+    setFranchiseLeadDrafts({});
     setAdminUsers([]);
     setAdminHistory([]);
     setLoadError('');
@@ -620,6 +687,7 @@ export default function AdminPanel() {
     setNewsMessage('');
     setGalleryMessage('');
     setTournamentEventsMessage('');
+    setFranchiseLeadsMessage('');
     setAdminUsersMessage('');
     setEditingNewsId('');
     setEditNewsForm(createInitialNewsEditForm);
@@ -645,6 +713,8 @@ export default function AdminPanel() {
     if (editTournamentEventFileInputRef.current) {
       editTournamentEventFileInputRef.current.value = '';
     }
+    setFranchiseLeadsBusy(false);
+    setFranchiseLeadsExportBusy(false);
     setAdminUsersBusy(false);
     setAdminHistoryBusy(false);
     setTournamentEventsBusy(false);
@@ -720,6 +790,7 @@ export default function AdminPanel() {
     setNewsMessage('Сначала войдите в админку.');
     setGalleryMessage('Сначала войдите в админку.');
     setTournamentEventsMessage('Сначала войдите в админку.');
+    setFranchiseLeadsMessage('Сначала войдите в админку.');
     return false;
   };
 
@@ -1301,6 +1372,105 @@ export default function AdminPanel() {
     });
   };
 
+  const updateFranchiseLeadDraft = (leadId, key, value) => {
+    setFranchiseLeadDrafts((prev) => ({
+      ...prev,
+      [leadId]: {
+        ...createFranchiseLeadDraft(franchiseLeads.find((lead) => lead.id === leadId)),
+        ...prev[leadId],
+        [key]: value,
+      },
+    }));
+  };
+
+  const saveFranchiseLead = async (leadId) => {
+    setFranchiseLeadsMessage('');
+
+    if (!ensureCredentials()) return;
+
+    const draft = franchiseLeadDrafts[leadId];
+    if (!draft) {
+      setFranchiseLeadsMessage('Не удалось подготовить данные заявки для сохранения.');
+      return;
+    }
+
+    try {
+      setFranchiseLeadsBusy(true);
+
+      const response = await fetch(`/api/admin/franchise-leads/${encodeURIComponent(leadId)}`, {
+        method: 'PATCH',
+        headers: {
+          ...authHeaders,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          managerStatus: normalizeFranchiseManagerStatus(draft.managerStatus),
+          managerNote: getText(draft.managerNote),
+        }),
+      });
+
+      const payload = await readResponse(response);
+
+      if (!response.ok || !payload.ok) {
+        throw new Error(payload.error || 'Не удалось обновить заявку.');
+      }
+
+      setFranchiseLeads((prev) => prev.map((lead) => (lead.id === leadId ? payload.lead : lead)));
+      setFranchiseLeadDrafts((prev) => ({
+        ...prev,
+        [leadId]: createFranchiseLeadDraft(payload.lead),
+      }));
+      setFranchiseLeadsMessage(`Заявка ${payload.lead.name || payload.lead.phone} обновлена.`);
+    } catch (error) {
+      setFranchiseLeadsMessage(error.message || 'Ошибка обновления заявки.');
+    } finally {
+      setFranchiseLeadsBusy(false);
+    }
+  };
+
+  const exportFranchiseLeads = async (format) => {
+    setFranchiseLeadsMessage('');
+
+    if (!ensureCredentials()) return;
+
+    try {
+      setFranchiseLeadsExportBusy(true);
+
+      const response = await fetch(`/api/admin/franchise-leads/export?format=${encodeURIComponent(format)}`, {
+        method: 'GET',
+        headers: authHeaders,
+      });
+
+      if (!response.ok) {
+        const payload = await readResponse(response);
+        throw new Error(payload.error || 'Не удалось выгрузить заявки.');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `runa-franchise-leads.${format === 'csv' ? 'csv' : 'xlsx'}`;
+      document.body.append(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+
+      setFranchiseLeadsMessage(`Файл выгружен в формате ${format.toUpperCase()}.`);
+    } catch (error) {
+      setFranchiseLeadsMessage(error.message || 'Ошибка выгрузки заявок.');
+    } finally {
+      setFranchiseLeadsExportBusy(false);
+    }
+  };
+
+  const activeFranchiseLeadsCount = franchiseLeads.filter(
+    (lead) => !['won', 'lost'].includes(normalizeFranchiseManagerStatus(lead.managerStatus))
+  ).length;
+  const failedFranchiseIntegrationsCount = franchiseLeads.filter((lead) =>
+    ['telegram', 'email', 'bitrix'].some((key) => getText(lead?.integrations?.[key]?.status) === 'failed')
+  ).length;
+
   if (restoringSession) {
     return (
       <section className="section">
@@ -1402,6 +1572,8 @@ export default function AdminPanel() {
                 newsBusy ||
                 galleryBusy ||
                 tournamentEventsBusy ||
+                franchiseLeadsBusy ||
+                franchiseLeadsExportBusy ||
                 adminUsersBusy ||
                 adminHistoryBusy
               }
@@ -1418,6 +1590,8 @@ export default function AdminPanel() {
                 newsBusy ||
                 galleryBusy ||
                 tournamentEventsBusy ||
+                franchiseLeadsBusy ||
+                franchiseLeadsExportBusy ||
                 adminUsersBusy ||
                 adminHistoryBusy
               }
@@ -1952,11 +2126,143 @@ export default function AdminPanel() {
           </div>
         )}
 
-        {(activeAdminSection === 'news' ||
+        {(activeAdminSection === 'franchise-leads' ||
+          activeAdminSection === 'news' ||
           activeAdminSection === 'gallery' ||
           activeAdminSection === 'tournament-events' ||
           activeAdminSection === 'history') && (
           <div className="admin-grid admin-grid-single">
+            {activeAdminSection === 'franchise-leads' && (
+              <div className="card admin-card">
+                <div className="admin-item-head" style={{ marginBottom: 16 }}>
+                  <div>
+                    <h3>Заявки на франшизу</h3>
+                    <p className="admin-meta">
+                      Всего: {franchiseLeads.length} · В работе: {activeFranchiseLeadsCount} · Ошибки интеграций:{' '}
+                      {failedFranchiseIntegrationsCount}
+                    </p>
+                  </div>
+                  <div className="admin-item-actions">
+                    <button
+                      className="btn btn-outline"
+                      type="button"
+                      onClick={() => exportFranchiseLeads('xlsx')}
+                      disabled={franchiseLeadsExportBusy || franchiseLeadsBusy}
+                    >
+                      {franchiseLeadsExportBusy ? 'Готовим...' : 'Экспорт XLSX'}
+                    </button>
+                    <button
+                      className="btn btn-ghost"
+                      type="button"
+                      onClick={() => exportFranchiseLeads('csv')}
+                      disabled={franchiseLeadsExportBusy || franchiseLeadsBusy}
+                    >
+                      CSV
+                    </button>
+                  </div>
+                </div>
+
+                <p className={`form-note ${franchiseLeadsMessage && franchiseLeadsMessage.includes('Ошибка') ? 'error' : ''}`} aria-live="polite">
+                  {franchiseLeadsMessage}
+                </p>
+
+                {franchiseLeadsBusy ? <p className="admin-empty">Загружаем заявки...</p> : null}
+                <div className="admin-list">
+                  {franchiseLeads.length === 0 && <p className="admin-empty">Заявок на франшизу пока нет.</p>}
+                  {franchiseLeads.map((lead) => {
+                    const draft = franchiseLeadDrafts[lead.id] || createFranchiseLeadDraft(lead);
+                    const isDraftChanged =
+                      normalizeFranchiseManagerStatus(draft.managerStatus) !==
+                        normalizeFranchiseManagerStatus(lead.managerStatus) ||
+                      getText(draft.managerNote) !== getText(lead.managerNote);
+
+                    return (
+                      <article className="admin-item" key={lead.id}>
+                        <div className="admin-item-head">
+                          <div>
+                            <strong>{lead.name || 'Без имени'}</strong>
+                            <p className="admin-meta">
+                              {formatDateTime(lead.createdAt)} · {lead.city || 'Город не указан'} · {lead.phone}
+                            </p>
+                          </div>
+                          <div className="admin-item-actions">
+                            <button
+                              className="btn btn-primary"
+                              type="button"
+                              onClick={() => saveFranchiseLead(lead.id)}
+                              disabled={franchiseLeadsBusy || !isDraftChanged}
+                            >
+                              {franchiseLeadsBusy ? 'Сохраняем...' : 'Сохранить'}
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="form-grid admin-edit-form">
+                          <label className="form-field" htmlFor={`franchise-manager-status-${lead.id}`}>
+                            <span>Статус менеджера</span>
+                            <select
+                              id={`franchise-manager-status-${lead.id}`}
+                              value={draft.managerStatus}
+                              onChange={(event) =>
+                                updateFranchiseLeadDraft(lead.id, 'managerStatus', normalizeFranchiseManagerStatus(event.target.value))
+                              }
+                            >
+                              {FRANCHISE_MANAGER_STATUS_OPTIONS.map((option) => (
+                                <option key={option.value} value={option.value}>
+                                  {option.label}
+                                </option>
+                              ))}
+                            </select>
+                          </label>
+
+                          <label className="form-field full" htmlFor={`franchise-manager-note-${lead.id}`}>
+                            <span>Заметка менеджера</span>
+                            <textarea
+                              id={`franchise-manager-note-${lead.id}`}
+                              value={draft.managerNote}
+                              onChange={(event) => updateFranchiseLeadDraft(lead.id, 'managerNote', event.target.value)}
+                              placeholder="Что уже обсудили, что обещали отправить, когда следующий контакт"
+                            />
+                          </label>
+                        </div>
+
+                        <p>
+                          Email: {lead.email || 'не указан'} · Telegram: {lead.telegramUsername || 'не указан'} · Формат:{' '}
+                          {lead.format || 'не указан'} · Бюджет: {lead.budget || 'не указан'}
+                        </p>
+                        <p>Источник: {lead.source || 'не указан'}</p>
+                        <p>Статус: {getFranchiseManagerStatusLabel(lead.managerStatus)}</p>
+                        {lead.comment ? <p>Комментарий клиента: {lead.comment}</p> : null}
+                        {lead.pageUrl ? <p className="admin-path">{lead.pageUrl}</p> : null}
+                        {lead.referrer ? <p className="admin-path">Referrer: {lead.referrer}</p> : null}
+                        {(lead.utmSource || lead.utmMedium || lead.utmCampaign || lead.utmContent || lead.utmTerm) ? (
+                          <p className="admin-path">
+                            UTM: {lead.utmSource || '-'} / {lead.utmMedium || '-'} / {lead.utmCampaign || '-'} /{' '}
+                            {lead.utmContent || '-'} / {lead.utmTerm || '-'}
+                          </p>
+                        ) : null}
+
+                        <div className="admin-meta" style={{ display: 'grid', gap: 4 }}>
+                          <span>
+                            Telegram: {getFranchiseDeliveryStatusLabel(lead.integrations?.telegram?.status)}
+                            {lead.integrations?.telegram?.error ? ` · ${lead.integrations.telegram.error}` : ''}
+                          </span>
+                          <span>
+                            Email: {getFranchiseDeliveryStatusLabel(lead.integrations?.email?.status)}
+                            {lead.integrations?.email?.error ? ` · ${lead.integrations.email.error}` : ''}
+                          </span>
+                          <span>
+                            Bitrix: {getFranchiseDeliveryStatusLabel(lead.integrations?.bitrix?.status)}
+                            {lead.integrations?.bitrix?.error ? ` · ${lead.integrations.bitrix.error}` : ''}
+                          </span>
+                        </div>
+                      </article>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             {activeAdminSection === 'news' && <div className="card admin-card">
             <h3>Опубликованные новости</h3>
             <div className="admin-list">
