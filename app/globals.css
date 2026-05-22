@@ -5239,13 +5239,17 @@ img {
   min-height: 238px;
   padding: 30px 32px 28px;
   overflow: hidden;
-  color: #141414;
-  background: rgba(255, 255, 255, 0.96);
-  border: 1px solid rgba(255, 255, 255, 0.78);
+  color: #f4f7ff;
+  background:
+    radial-gradient(420px 210px at 100% 20%, rgba(183, 0, 255, 0.22), transparent 64%),
+    radial-gradient(360px 190px at 0% 100%, rgba(0, 234, 255, 0.18), transparent 66%),
+    linear-gradient(155deg, rgba(20, 20, 20, 0.98), rgba(13, 16, 38, 0.96));
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 8px;
   box-shadow:
     0 34px 90px rgba(0, 0, 0, 0.48),
-    0 0 0 1px rgba(0, 234, 255, 0.12);
+    0 0 0 1px rgba(0, 234, 255, 0.16);
+  backdrop-filter: blur(16px);
 }
 
 .cookie-notice::before {
@@ -5254,8 +5258,19 @@ img {
   inset: 0;
   pointer-events: none;
   background:
-    linear-gradient(135deg, rgba(0, 234, 255, 0.08), transparent 44%),
-    linear-gradient(315deg, rgba(183, 0, 255, 0.08), transparent 50%);
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 34px 34px;
+  opacity: 0.52;
+}
+
+.cookie-notice::after {
+  content: "";
+  position: absolute;
+  inset: 12px;
+  pointer-events: none;
+  border: 1px solid rgba(0, 234, 255, 0.2);
+  clip-path: polygon(0 0, calc(100% - 34px) 0, 100% 34px, 100% 100%, 34px 100%, 0 calc(100% - 34px));
 }
 
 .cookie-notice-copy,
@@ -5267,7 +5282,7 @@ img {
 .cookie-notice h2 {
   margin: 0 0 12px;
   max-width: 340px;
-  color: #141414;
+  color: #ffffff;
   font-family: var(--font-heading);
   font-size: 1.18rem;
   line-height: 1.2;
@@ -5277,7 +5292,7 @@ img {
 .cookie-notice p {
   margin: 0;
   max-width: 390px;
-  color: rgba(20, 20, 20, 0.78);
+  color: rgba(234, 236, 242, 0.78);
   font-size: 0.98rem;
   line-height: 1.48;
 }
@@ -5287,9 +5302,14 @@ img {
   right: 22px;
   bottom: 18px;
   width: 154px;
+  aspect-ratio: 155 / 186;
   height: auto;
   pointer-events: none;
-  opacity: 0.92;
+  opacity: 0.68;
+  background: linear-gradient(135deg, rgba(0, 234, 255, 0.95), rgba(183, 0, 255, 0.82));
+  mask: url("/images/cookie-notice.svg") center / contain no-repeat;
+  -webkit-mask: url("/images/cookie-notice.svg") center / contain no-repeat;
+  filter: drop-shadow(0 0 24px rgba(0, 234, 255, 0.22));
 }
 
 .cookie-notice-actions {
@@ -5305,8 +5325,8 @@ img {
   padding: 12px 24px;
   border: 1px solid rgba(0, 234, 255, 0.8);
   border-radius: 8px;
-  color: #0d1026;
-  background: rgba(255, 255, 255, 0.72);
+  color: #141414;
+  background: linear-gradient(120deg, #00eaff 0%, #eaecf2 100%);
   font: 700 0.96rem/1 var(--font-exo);
   cursor: pointer;
   transition:
@@ -5320,13 +5340,13 @@ img {
 .cookie-notice-button:focus-visible {
   color: #141414;
   border-color: rgba(0, 234, 255, 1);
-  background: linear-gradient(120deg, #00eaff 0%, #eaecf2 100%);
+  background: linear-gradient(120deg, #eaecf2 0%, #00eaff 100%);
   box-shadow: 0 0 22px rgba(0, 234, 255, 0.24);
   outline: none;
 }
 
 .cookie-notice-link {
-  color: rgba(20, 20, 20, 0.64);
+  color: rgba(234, 236, 242, 0.68);
   font-size: 0.96rem;
   font-weight: 600;
   text-decoration: underline;
@@ -5337,7 +5357,7 @@ img {
 
 .cookie-notice-link:hover,
 .cookie-notice-link:focus-visible {
-  color: #0d1026;
+  color: #ffffff;
   outline: none;
 }
 

@@ -38,7 +38,7 @@ export default function CookieNotice() {
           использовать сайт, вы соглашаетесь с использованием cookies.
         </p>
       </div>
-      <img className="cookie-notice-icon" src="/images/cookie-notice.svg" alt="" aria-hidden="true" />
+      <span className="cookie-notice-icon" aria-hidden="true" />
       <div className="cookie-notice-actions">
         <button className="cookie-notice-button" type="button" onClick={acceptCookies}>
           Понятно
