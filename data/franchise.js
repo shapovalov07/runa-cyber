@@ -257,7 +257,7 @@ export const franchiseNetwork = [
   {
     id: 'chelyabinsk-lesoparkovaya',
     city: 'Челябинск',
-    address: 'ул. Лесопарковая, 5, корп. 2',
+    address: 'ул. Лесопарковая, 5, корп. 1',
     status: 'Франчайзи',
     category: 'franchise',
     format: 'Вторая точка партнера',

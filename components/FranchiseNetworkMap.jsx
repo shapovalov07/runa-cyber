@@ -30,22 +30,22 @@ const CATEGORY_META = {
 };
 
 const CITY_MAP_META = {
-  Воронеж: { lon: 39.200269, lat: 51.660781 },
-  Саратов: { lon: 46.034158, lat: 51.533557 },
-  'Ростов-на-Дону': { lon: 39.720349, lat: 47.222078 },
-  Челябинск: { lon: 61.402554, lat: 55.159902 },
+  Воронеж: { lon: 39.200269, lat: 51.660781, zoom: 12 },
+  Саратов: { lon: 46.047767, lat: 51.525923, zoom: 14 },
+  'Ростов-на-Дону': { lon: 39.717809, lat: 47.226888, zoom: 13 },
+  Челябинск: { lon: 61.386096, lat: 55.155057, zoom: 12 },
 };
 
 const LOCATION_COORDS = {
-  'vrn-plekhanovskaya': { lon: 39.205, lat: 51.670, dx: -22, dy: -18 },
-  'vrn-moiseeva': { lon: 39.190, lat: 51.655, dx: -10, dy: 18 },
-  'vrn-nevskogo': { lon: 39.183, lat: 51.709, dx: 12, dy: -28 },
-  'vrn-dimitrova': { lon: 39.286, lat: 51.651, dx: 24, dy: 10 },
-  'saratov-lermontova': { lon: 46.045, lat: 51.53, dx: 0, dy: 0 },
-  'rostov-stanislavskogo': { lon: 39.712, lat: 47.222, dx: -18, dy: 10 },
-  'rostov-voroshilovsky': { lon: 39.715, lat: 47.231, dx: 18, dy: -12 },
-  'chelyabinsk-tsvillinga': { lon: 61.403, lat: 55.159, dx: -16, dy: 14 },
-  'chelyabinsk-lesoparkovaya': { lon: 61.375, lat: 55.149, dx: 16, dy: -14 },
+  'vrn-plekhanovskaya': { lon: 39.20409, lat: 51.657836, dx: -22, dy: -18 },
+  'vrn-moiseeva': { lon: 39.180262, lat: 51.652333, dx: -10, dy: 18 },
+  'vrn-nevskogo': { lon: 39.1665, lat: 51.717686, dx: 12, dy: -28 },
+  'vrn-dimitrova': { lon: 39.278247, lat: 51.661361, dx: 24, dy: 10 },
+  'saratov-lermontova': { lon: 46.047767, lat: 51.525923, dx: 0, dy: 0 },
+  'rostov-stanislavskogo': { lon: 39.72161, lat: 47.219146, dx: -18, dy: 10 },
+  'rostov-voroshilovsky': { lon: 39.714008, lat: 47.234629, dx: 18, dy: -12 },
+  'chelyabinsk-tsvillinga': { lon: 61.407175, lat: 55.157285, dx: -16, dy: 14 },
+  'chelyabinsk-lesoparkovaya': { lon: 61.365278, lat: 55.156667, dx: 16, dy: -14 },
 };
 
 const STATIC_MAP_SIZE = '650,450';
@@ -159,10 +159,31 @@ const buildCityQuery = (group) => {
 };
 
 const buildYandexSearchUrl = (group, activeLocation) => {
-  const query = activeLocation ? buildLocationQuery(activeLocation) : group?.city === 'Вся сеть RUNA' ? 'RUNA Cyber Club' : buildCityQuery(group);
-  const params = new URLSearchParams({
-    text: query || 'RUNA Cyber Club',
-  });
+  const query = activeLocation
+    ? buildLocationQuery(activeLocation)
+    : group?.city === 'Вся сеть RUNA'
+      ? 'RUNA Cyber Club'
+      : buildCityQuery(group);
+  const params = new URLSearchParams();
+
+  if (activeLocation) {
+    const cityMeta = CITY_MAP_META[getText(activeLocation.city)] || CITY_MAP_META['Воронеж'];
+    const point = LOCATION_COORDS[activeLocation.id] || cityMeta;
+    params.set('ll', `${point.lon},${point.lat}`);
+    params.set('mode', 'whatshere');
+    params.set('whatshere[point]', `${point.lon},${point.lat}`);
+    params.set('whatshere[zoom]', '17');
+    params.set('z', '17');
+    return `https://yandex.ru/maps/?${params.toString()}`;
+  }
+
+  if (group?.city && group.city !== 'Вся сеть RUNA') {
+    const cityMeta = CITY_MAP_META[getText(group.city)] || CITY_MAP_META['Воронеж'];
+    params.set('ll', `${cityMeta.lon},${cityMeta.lat}`);
+    params.set('z', String(cityMeta.zoom || 12));
+  }
+
+  params.set('text', query || 'RUNA Cyber Club');
 
   return `https://yandex.ru/maps/?${params.toString()}`;
 };
@@ -222,7 +243,7 @@ const loadYandexMapsApi = () => {
 
 const buildStaticYandexMapUrl = (items, activeCity) => {
   const cityCenter = activeCity !== 'all' ? CITY_MAP_META[activeCity] : null;
-  const center = cityCenter ? { ...cityCenter, zoom: 12 } : ALL_NETWORK_MAP_CENTER;
+  const center = cityCenter ? { ...cityCenter, zoom: cityCenter.zoom || 12 } : ALL_NETWORK_MAP_CENTER;
   const points = items
     .map((item) => {
       const cityMeta = CITY_MAP_META[getText(item?.city)] || CITY_MAP_META['Воронеж'];
