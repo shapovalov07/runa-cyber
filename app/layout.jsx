@@ -1,5 +1,6 @@
 import SiteFooter from '../components/SiteFooter';
 import SiteHeader from '../components/SiteHeader';
+import CookieNotice from '../components/CookieNotice';
 import RevealObserver from '../components/RevealObserver';
 import YandexMetrika from '../components/YandexMetrika';
 import { headers } from 'next/headers';
@@ -36,6 +37,7 @@ export default async function RootLayout({ children }) {
         {!isFranchiseHost && <SiteHeader />}
         {children}
         {!isFranchiseHost && <SiteFooter />}
+        <CookieNotice />
         <RevealObserver />
       </body>
     </html>
