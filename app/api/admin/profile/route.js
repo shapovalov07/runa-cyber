@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { updateAdminProfile } from '@/lib/admin-auth';
+import { updateAdminProfile } from '../../../../lib/admin-auth';
 
 export const runtime = 'nodejs';
 

@@ -5,6 +5,10 @@ export const dynamic = 'force-dynamic';
 export const metadata = {
   title: 'Админка',
   description: 'Панель управления контентом и заявками франшизы RUNA Cyber Club.',
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export default function AdminPage() {

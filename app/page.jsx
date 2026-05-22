@@ -1,7 +1,7 @@
 import Link from 'next/link';
-import ClubPhotosSection from '@/components/ClubPhotosSection';
-import NewsSection from '@/components/NewsSection';
-import { totalCities, totalClubs } from '@/data/clubs';
+import ClubPhotosSection from '../components/ClubPhotosSection';
+import NewsSection from '../components/NewsSection';
+import { totalCities, totalClubs } from '../data/clubs';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,8 +23,8 @@ export default function HomePage() {
         </video>
         <div className="page-hero-overlay" aria-hidden="true" />
         <div className="container">
-          <p className="kicker">Сеть RUNA Cyber Club</p>
-          <h1>Киберклубы RUNA: единый стандарт игры в разных городах</h1>
+          <p className="kicker">RUNA Cyber Club</p>
+          <h1>RUNA: киберпространство для игры, команды и событий</h1>
           <p>
             {totalClubs} клубов в {totalCities} городах, где каждая сессия ощущается как турнир: high-FPS ПК, PS5-зоны,
             ночные активности и сервис, к которому хочется возвращаться.

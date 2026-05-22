@@ -1,8 +1,22 @@
+'use client';
+
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { contactLinks, footerDescription, navLinks } from './site-config';
 
 export default function SiteFooter() {
+  const pathname = usePathname();
+  const [isFranchiseHost, setIsFranchiseHost] = useState(false);
   const year = new Date().getFullYear();
+
+  useEffect(() => {
+    setIsFranchiseHost(window.location.hostname === 'franchise.runa-cyber.ru');
+  }, []);
+
+  if (pathname === '/franchise' || isFranchiseHost) {
+    return null;
+  }
 
   return (
     <footer className="site-footer">

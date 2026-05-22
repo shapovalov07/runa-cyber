@@ -1,5 +1,7 @@
 import FranchiseCalculator from '../../components/FranchiseCalculator';
+import FranchiseFaqList from '../../components/FranchiseFaqList';
 import FranchiseForm from '../../components/FranchiseForm';
+import FranchiseImageCarousel from '../../components/FranchiseImageCarousel';
 import FranchiseNetworkMap from '../../components/FranchiseNetworkMap';
 import FranchisePartnerSpotlight from '../../components/FranchisePartnerSpotlight';
 import {
@@ -42,13 +44,41 @@ export const metadata = {
 };
 
 export default function FranchisePage() {
+  const year = new Date().getFullYear();
+
   return (
     <main className="franchise-landing">
+      <div className="franchise-standalone-header">
+        <div className="container franchise-standalone-header-row">
+          <a className="franchise-standalone-brand" href="#franchise-top" aria-label="RUNA Franchise">
+            <img src="/images/runa-logo-header-wordmark.png" alt="RUNA Cyber Club" />
+          </a>
+
+          <nav className="franchise-standalone-nav" aria-label="Навигация лендинга франшизы">
+            <a href="https://runa-cyber.ru/">Главная</a>
+            <a href="#franchise-calculator">Калькулятор</a>
+            <a href="#franchise-terms">Условия</a>
+            <a href="#franchise-network">Сеть</a>
+            <a href="#franchise-faq">FAQ</a>
+          </nav>
+
+          <a
+            className="btn btn-primary franchise-standalone-cta"
+            href="#franchise-final-form"
+            data-metrika-event="franchise_cta_click"
+            data-metrika-source="landing_header"
+            data-metrika-label="Получить расчет"
+          >
+            Получить расчет
+          </a>
+        </div>
+      </div>
+
       <section className="franchise-hero">
-        <div className="container franchise-hero-grid">
+        <div className="container franchise-hero-grid" id="franchise-top">
           <div className="franchise-hero-copy">
             <p className="kicker">RUNA Franchise</p>
-            <h1>Откройте клуб, в который хочется возвращаться — и бизнес, который можно масштабировать.</h1>
+            <h1>Откройте RUNA Cyber Club в своем городе</h1>
             <p className="franchise-hero-lead">
               RUNA — премиальная сеть компьютерных клубов нового поколения. Запустите клуб с продуманным дизайном,
               сильной бизнес-моделью, поддержкой команды и расчетом под ваш город.
@@ -122,17 +152,7 @@ export default function FranchisePage() {
             </p>
           </div>
 
-          <div className="franchise-gallery-grid">
-            {franchiseAboutGallery.map((item) => (
-              <article className="franchise-gallery-card" key={item.title}>
-                <img src={item.src} alt={item.alt} loading="lazy" />
-                <div className="franchise-gallery-card-copy">
-                  <strong>{item.title}</strong>
-                  <p>{item.description}</p>
-                </div>
-              </article>
-            ))}
-          </div>
+          <FranchiseImageCarousel items={franchiseAboutGallery} />
         </div>
       </section>
 
@@ -202,7 +222,7 @@ export default function FranchisePage() {
         </div>
       </section>
 
-      <section className="section">
+      <section className="section" id="franchise-calculator">
         <div className="container">
           <div className="franchise-section-head">
             <p className="kicker">Калькулятор</p>
@@ -212,8 +232,8 @@ export default function FranchisePage() {
         </div>
       </section>
 
-      <section className="section">
-        <div className="container franchise-two-column">
+      <section className="section" id="franchise-terms">
+        <div className="container">
           <div className="card franchise-terms-card">
             <div className="franchise-section-head franchise-section-head-tight">
               <p className="kicker">Условия франшизы</p>
@@ -229,8 +249,12 @@ export default function FranchisePage() {
               ))}
             </div>
           </div>
+        </div>
+      </section>
 
-          <div className="card franchise-network-card">
+      <section className="section" id="franchise-network">
+        <div className="container">
+          <div className="card franchise-network-card franchise-network-card-standalone">
             <div className="franchise-section-head franchise-section-head-tight">
               <p className="kicker">Карта сети</p>
               <h2 className="section-title">9 клубов в сети и точки на этапе открытия</h2>
@@ -264,7 +288,7 @@ export default function FranchisePage() {
         </div>
       </section>
 
-      <section className="section">
+      <section className="section" id="franchise-roadmap">
         <div className="container franchise-two-column franchise-roadmap-layout">
           <div>
             <div className="franchise-section-head franchise-section-head-tight">
@@ -282,7 +306,7 @@ export default function FranchisePage() {
             </div>
           </div>
 
-          <div>
+          <div className="franchise-roadmap-form-sticky">
             <FranchiseForm
               source="turnkey_form"
               title="Обсудить запуск под ключ"
@@ -297,7 +321,7 @@ export default function FranchisePage() {
         </div>
       </section>
 
-      <section className="section">
+      <section className="section franchise-support-section" id="franchise-support">
         <div className="container">
           <div className="franchise-section-head">
             <p className="kicker">Поддержка после открытия</p>
@@ -308,12 +332,15 @@ export default function FranchisePage() {
             </p>
           </div>
 
-          <div className="franchise-support-grid">
-            {franchiseSupport.map((item) => (
-              <article className="franchise-support-card" key={item}>
-                <span>{item}</span>
-              </article>
-            ))}
+          <div className="franchise-support-panel">
+            <div className="franchise-support-grid">
+              {franchiseSupport.map((item, index) => (
+                <article className="franchise-support-card" key={item}>
+                  <strong>{String(index + 1).padStart(2, '0')}</strong>
+                  <span>{item}</span>
+                </article>
+              ))}
+            </div>
           </div>
 
           <div className="franchise-brand-grid">
@@ -332,7 +359,7 @@ export default function FranchisePage() {
         </div>
       </section>
 
-      <section className="section">
+      <section className="section" id="franchise-city-check">
         <div className="container franchise-city-check">
           <div className="franchise-section-head franchise-section-head-tight">
             <p className="kicker">Эксклюзив на город</p>
@@ -356,21 +383,14 @@ export default function FranchisePage() {
         </div>
       </section>
 
-      <section className="section">
+      <section className="section" id="franchise-faq">
         <div className="container">
           <div className="franchise-section-head">
             <p className="kicker">FAQ</p>
             <h2 className="section-title">Ключевые вопросы перед запуском</h2>
           </div>
 
-          <div className="franchise-faq-list">
-            {franchiseFaq.map((item) => (
-              <details className="franchise-faq-item" key={item.question}>
-                <summary>{item.question}</summary>
-                <p>{item.answer}</p>
-              </details>
-            ))}
-          </div>
+          <FranchiseFaqList items={franchiseFaq} />
         </div>
       </section>
 
@@ -397,6 +417,70 @@ export default function FranchisePage() {
           />
         </div>
       </section>
+
+      <footer className="franchise-standalone-footer">
+        <div className="container franchise-footer-shell">
+          <div className="franchise-footer-top">
+            <div className="franchise-footer-brand">
+              <a href="#franchise-top" aria-label="Наверх к началу лендинга">
+                <img src="/images/runa-logo-provided-crop.png" alt="RUNA Cyber Club" />
+              </a>
+              <p>
+                Франшиза RUNA для партнеров, инвесторов и предпринимателей, которые хотят открыть премиальный
+                компьютерный клуб в своем городе.
+              </p>
+            </div>
+
+            <div className="franchise-footer-col">
+              <h3>Разделы</h3>
+              <nav className="franchise-footer-links" aria-label="Навигация подвала">
+                <a href="#franchise-gallery">О франшизе</a>
+                <a href="#franchise-calculator">Калькулятор</a>
+                <a href="#franchise-terms">Условия</a>
+                <a href="#franchise-network">Карта сети</a>
+                <a href="#franchise-faq">FAQ</a>
+              </nav>
+            </div>
+
+            <div className="franchise-footer-col">
+              <h3>Связь</h3>
+              <div className="franchise-footer-links">
+                <a
+                  href="#franchise-final-form"
+                  data-metrika-event="franchise_cta_click"
+                  data-metrika-source="landing_footer"
+                  data-metrika-label="Получить расчет"
+                >
+                  Получить расчет
+                </a>
+                <a
+                  href="#franchise-top"
+                  data-metrika-event="franchise_cta_click"
+                  data-metrika-source="landing_footer"
+                  data-metrika-label="Вернуться наверх"
+                >
+                  Вернуться наверх
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <div className="franchise-footer-bottom">
+            <div>© {year} RUNA Franchise.</div>
+            <div className="footer-source">
+              <span>Сайт разработан в</span>
+              <a
+                className="footer-source-link"
+                href="https://design-hope.ru/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                ДИЗАЙН НОРЕ
+              </a>
+            </div>
+          </div>
+        </div>
+      </footer>
     </main>
   );
 }

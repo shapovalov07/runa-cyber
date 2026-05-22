@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createAdminUser, getAdminCredentialsFromRequest, getAdminUsers } from '@/lib/admin-auth';
+import { createAdminUser, getAdminCredentialsFromRequest, getAdminUsers } from '../../../../lib/admin-auth';
 
 export const runtime = 'nodejs';
 

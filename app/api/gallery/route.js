@@ -8,8 +8,8 @@ import {
   isGalleryClubCitySlug,
   isGallerySection,
   saveGalleryUpload,
-} from '@/lib/cms-storage';
-import { appendAdminHistory, verifyAdminCredentials } from '@/lib/admin-auth';
+} from '../../../lib/cms-storage';
+import { appendAdminHistory, verifyAdminCredentials } from '../../../lib/admin-auth';
 
 export const runtime = 'nodejs';
 
