@@ -6,8 +6,8 @@ import {
   removeManagedTournamentEventUpload,
   saveTournamentEventUpload,
   updateTournamentEvent,
-} from '@/lib/cms-storage';
-import { appendAdminHistory, getAdminCredentialsFromRequest, verifyAdminCredentials } from '@/lib/admin-auth';
+} from '../../../../lib/cms-storage';
+import { appendAdminHistory, getAdminCredentialsFromRequest, verifyAdminCredentials } from '../../../../lib/admin-auth';
 
 export const runtime = 'nodejs';
 const MAX_UPLOAD_SIZE_BYTES = 40 * 1024 * 1024;

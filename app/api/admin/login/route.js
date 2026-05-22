@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { verifyAdminCredentials } from '@/lib/admin-auth';
+import { verifyAdminCredentials } from '../../../../lib/admin-auth';
 
 export const runtime = 'nodejs';
 

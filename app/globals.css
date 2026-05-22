@@ -1,17 +1,55 @@
+@font-face {
+  font-family: "Satoshi";
+  src: url("/fonts/satoshi/Satoshi-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Satoshi";
+  src: url("/fonts/satoshi/Satoshi-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-display: swap;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Satoshi";
+  src: url("/fonts/satoshi/Satoshi-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-display: swap;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Satoshi";
+  src: url("/fonts/satoshi/Satoshi-Black.woff2") format("woff2");
+  font-weight: 900;
+  font-display: swap;
+  font-style: normal;
+}
+
 :root {
-  --font-exo: "Segoe UI", "Inter", "Roboto", "Helvetica Neue", Arial, sans-serif;
-  --font-orbitron: "Segoe UI", "Inter", "Roboto", "Helvetica Neue", Arial, sans-serif;
-  --bg: #05070b;
-  --bg-soft: #10131b;
-  --surface: #121723;
-  --surface-2: #1a1f2d;
+  --font-exo: "Inter", "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
+  --font-orbitron: "Satoshi", "Inter", "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
+  --bg: #141414;
+  --bg-soft: #0d1026;
+  --surface: #141414;
+  --surface-2: #0d1026;
   --text: #f4f7ff;
   --muted: #aab4cb;
-  --accent: #ff6a00;
-  --accent-2: #ffc54d;
-  --cyan: #31d8ff;
+  --accent: #00eaff;
+  --accent-2: #b700ff;
+  --cyan: #00eaff;
+  --fuchsia: #b700ff;
+  --light-grey: #eaecf2;
+  --beige: #ddcdbd;
+  --line: rgba(255, 255, 255, 0.76);
+  --accent-soft: #00eaff;
+  --font-heading: var(--font-orbitron);
   --danger: #ff3b3b;
-  --radius: 20px;
+  --radius: 8px;
   --shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
 }
 
@@ -28,9 +66,9 @@ body {
   font-family: var(--font-exo), "Segoe UI", sans-serif;
   color: var(--text);
   background:
-    radial-gradient(1400px 700px at 85% -10%, rgba(255, 106, 0, 0.2), transparent 55%),
-    radial-gradient(1000px 560px at -10% 8%, rgba(49, 216, 255, 0.12), transparent 60%),
-    linear-gradient(160deg, #04050a 0%, #080b13 46%, #06090f 100%);
+    radial-gradient(1100px 560px at 78% -10%, rgba(183, 0, 255, 0.22), transparent 56%),
+    radial-gradient(920px 520px at -8% 8%, rgba(0, 234, 255, 0.18), transparent 62%),
+    linear-gradient(160deg, #141414 0%, #0d1026 52%, #141414 100%);
   min-height: 100vh;
 }
 
@@ -40,10 +78,13 @@ body::before {
   inset: 0;
   pointer-events: none;
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-  background-size: 32px 32px;
-  opacity: 0.35;
+    radial-gradient(circle at 12% 18%, rgba(255, 255, 255, 0.22) 0 1px, transparent 1.5px),
+    radial-gradient(circle at 72% 34%, rgba(255, 255, 255, 0.18) 0 1px, transparent 1.5px),
+    radial-gradient(circle at 44% 78%, rgba(255, 255, 255, 0.14) 0 1px, transparent 1.5px),
+    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: 180px 180px, 230px 230px, 260px 260px, 42px 42px, 42px 42px;
+  opacity: 0.42;
   z-index: -1;
 }
 
@@ -1009,10 +1050,9 @@ img {
 }
 
 .carousel-dots {
-  --dot-size: 14px;
+  --dot-size: 12px;
+  --dot-hit-size: 24px;
   --dot-gap: 8px;
-  --dot-active-width: 42px;
-  --dot-slot-width: 30px;
   position: relative;
   display: flex;
   justify-content: center;
@@ -1027,11 +1067,11 @@ img {
   z-index: 0;
   display: block;
   flex: 0 0 auto;
-  width: var(--dot-slot-width);
-  height: var(--dot-size);
+  width: var(--dot-hit-size);
+  height: var(--dot-hit-size);
   padding: 0;
   border: 0;
-  border-radius: 999px;
+  border-radius: 50%;
   background: transparent;
   appearance: none;
   -webkit-appearance: none;
@@ -1046,16 +1086,17 @@ img {
   top: 50%;
   width: var(--dot-size);
   height: var(--dot-size);
+  aspect-ratio: 1 / 1;
   border: 1px solid rgba(255, 197, 77, 0.62);
-  border-radius: 999px;
+  border-radius: 50%;
   background: rgba(255, 197, 77, 0.22);
   transform: translate(-50%, -50%);
   transition:
-    width 0.32s cubic-bezier(0.22, 1, 0.36, 1),
     background 0.24s ease,
     border-color 0.24s ease,
     box-shadow 0.24s ease,
-    opacity 0.24s ease;
+    opacity 0.24s ease,
+    transform 0.24s ease;
 }
 
 .carousel-dot:hover::before {
@@ -1064,10 +1105,10 @@ img {
 }
 
 .carousel-dot.is-active::before {
-  width: var(--dot-active-width);
   border-color: rgba(255, 197, 77, 0.98);
   background: linear-gradient(120deg, var(--accent) 0%, var(--accent-2) 100%);
   box-shadow: 0 0 14px rgba(255, 106, 0, 0.4);
+  transform: translate(-50%, -50%) scale(1.16);
 }
 
 .carousel-dot:focus-visible {
@@ -1861,6 +1902,14 @@ img {
   grid-column: 1 / -1;
 }
 
+.form-field-honeypot {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
 .form-field > span {
   font-size: 0.93rem;
   font-weight: 600;
@@ -2153,6 +2202,67 @@ img {
   position: relative;
 }
 
+.franchise-standalone-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  padding: 0;
+  background: rgba(5, 8, 14, 0.82);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+  backdrop-filter: blur(14px);
+}
+
+.franchise-standalone-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 14px 0;
+}
+
+.franchise-standalone-brand {
+  display: inline-flex;
+  align-items: center;
+}
+
+.franchise-standalone-brand img {
+  width: 180px;
+  height: auto;
+  display: block;
+  filter: drop-shadow(0 0 12px rgba(255, 196, 77, 0.2));
+}
+
+.franchise-standalone-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.franchise-standalone-nav a {
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 0.92rem;
+  text-decoration: none;
+  letter-spacing: 0.02em;
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  transition: 0.22s ease;
+}
+
+.franchise-standalone-nav a:hover {
+  color: var(--text);
+  border-color: rgba(255, 196, 77, 0.4);
+  background: rgba(255, 106, 0, 0.12);
+}
+
+.franchise-standalone-cta {
+  min-height: 42px;
+  padding: 12px 18px;
+  white-space: nowrap;
+}
+
 .franchise-landing .kicker {
   margin: 0;
   color: #ffd487;
@@ -2165,29 +2275,32 @@ img {
 .franchise-hero {
   position: relative;
   overflow: clip;
-  padding: 92px 0 72px;
+  isolation: isolate;
+  padding: 86px 0 70px;
+  scroll-margin-top: 92px;
 }
 
 .franchise-hero::before {
   content: "";
   position: absolute;
-  inset: 12px;
-  border-radius: 36px;
+  inset: 14px;
+  border-radius: calc(var(--radius) + 8px);
   background:
-    linear-gradient(125deg, rgba(5, 8, 16, 0.92) 10%, rgba(8, 12, 22, 0.72) 48%, rgba(4, 7, 13, 0.95) 100%),
-    radial-gradient(700px 420px at 80% 18%, rgba(255, 57, 140, 0.18), transparent 58%),
-    radial-gradient(700px 420px at 8% 8%, rgba(49, 216, 255, 0.16), transparent 56%),
+    linear-gradient(105deg, rgba(5, 7, 11, 0.92) 22%, rgba(5, 7, 11, 0.58) 60%, rgba(5, 7, 11, 0.94) 100%),
+    radial-gradient(740px 360px at 86% 12%, rgba(255, 106, 0, 0.18), transparent 58%),
+    radial-gradient(700px 420px at 8% 8%, rgba(49, 216, 255, 0.12), transparent 56%),
     url('/images/hero-franchise.jpg') center / cover no-repeat;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.42);
+  box-shadow: var(--shadow);
+  z-index: -1;
 }
 
 .franchise-hero-grid {
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: minmax(0, 1.12fr) minmax(340px, 420px);
-  gap: 28px;
+  grid-template-columns: minmax(0, 1fr) minmax(340px, 410px);
+  gap: 24px;
   align-items: start;
 }
 
@@ -2199,19 +2312,20 @@ img {
 
 .franchise-hero-copy h1 {
   margin: 0;
-  max-width: 900px;
-  font-size: clamp(2.4rem, 5.4vw, 4.9rem);
-  line-height: 0.97;
-  letter-spacing: -0.04em;
+  max-width: 850px;
+  font-family: var(--font-orbitron), sans-serif;
+  font-size: clamp(1.9rem, 5vw, 3.4rem);
+  line-height: 1.05;
+  letter-spacing: 0;
   text-wrap: balance;
 }
 
 .franchise-hero-lead {
   margin: 0;
   max-width: 720px;
-  color: #d3ddf3;
-  font-size: clamp(1.03rem, 2.2vw, 1.18rem);
-  line-height: 1.62;
+  color: #d5dcee;
+  font-size: clamp(1rem, 2.7vw, 1.15rem);
+  line-height: 1.5;
 }
 
 .franchise-hero-stats {
@@ -2225,10 +2339,14 @@ img {
   overflow: hidden;
   display: grid;
   gap: 8px;
-  padding: 18px 20px;
-  border-radius: 22px;
-  background: linear-gradient(180deg, rgba(17, 22, 35, 0.84), rgba(10, 14, 24, 0.88));
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  min-height: 112px;
+  padding: 18px;
+  border-radius: calc(var(--radius) + 2px);
+  background:
+    radial-gradient(280px 130px at 100% 0%, rgba(49, 216, 255, 0.14), transparent 64%),
+    linear-gradient(170deg, rgba(18, 23, 35, 0.92), rgba(13, 17, 28, 0.92));
+  border: 1px solid rgba(255, 204, 120, 0.2);
+  box-shadow: 0 16px 38px rgba(0, 0, 0, 0.25);
 }
 
 .franchise-hero-stat::after {
@@ -2243,8 +2361,11 @@ img {
 }
 
 .franchise-hero-stat strong {
-  font-size: clamp(1.25rem, 3vw, 1.74rem);
-  letter-spacing: -0.03em;
+  color: #ffd067;
+  font-family: var(--font-orbitron), sans-serif;
+  font-size: clamp(1.18rem, 2.3vw, 1.55rem);
+  letter-spacing: 0;
+  text-shadow: 0 0 18px rgba(255, 176, 70, 0.22);
 }
 
 .franchise-hero-stat span {
@@ -2261,6 +2382,15 @@ img {
   display: none;
 }
 
+#franchise-calculator,
+#franchise-terms,
+#franchise-network,
+#franchise-roadmap,
+#franchise-faq,
+#franchise-final-form {
+  scroll-margin-top: 92px;
+}
+
 .franchise-section-head {
   display: grid;
   gap: 10px;
@@ -2271,37 +2401,84 @@ img {
   margin-bottom: 18px;
 }
 
-.franchise-gallery-grid {
+.franchise-gallery-carousel {
+  position: relative;
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 16px;
 }
 
-.franchise-gallery-card {
-  overflow: hidden;
-  border-radius: 24px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: linear-gradient(180deg, rgba(16, 22, 35, 0.82), rgba(8, 12, 20, 0.92));
-  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.28);
+.franchise-gallery-track {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(280px, calc((100% - 54px) / 4));
+  gap: 18px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  padding: 2px 2px 8px;
 }
 
-.franchise-gallery-card img {
+.franchise-gallery-track::-webkit-scrollbar {
+  display: none;
+}
+
+.franchise-gallery-slide {
+  margin: 0;
+  overflow: hidden;
+  border-radius: var(--radius);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(12, 18, 30, 0.72);
+  box-shadow: var(--shadow);
+  scroll-snap-align: start;
+}
+
+.franchise-gallery-slide img {
+  display: block;
   width: 100%;
   aspect-ratio: 4 / 5;
   object-fit: cover;
+  transition: transform 0.36s ease, filter 0.36s ease;
 }
 
-.franchise-gallery-card-copy {
-  display: grid;
-  gap: 8px;
-  padding: 16px 16px 18px;
+.franchise-gallery-slide:hover img {
+  transform: scale(1.025);
+  filter: saturate(1.08);
 }
 
-.franchise-gallery-card-copy strong {
-  font-size: 1.05rem;
+.franchise-gallery-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 9px;
 }
 
-.franchise-gallery-card-copy p,
+.franchise-gallery-controls button {
+  width: 10px;
+  height: 10px;
+  aspect-ratio: 1 / 1;
+  flex: 0 0 auto;
+  display: block;
+  padding: 0;
+  border-radius: 50%;
+  border: 0;
+  background: rgba(214, 226, 250, 0.26);
+  appearance: none;
+  -webkit-appearance: none;
+  font-size: 0;
+  line-height: 0;
+  cursor: pointer;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08);
+  transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.franchise-gallery-controls button:hover {
+  transform: scale(1.2);
+  background: #ffd487;
+  box-shadow: 0 0 0 6px rgba(255, 197, 77, 0.1);
+}
+
 .franchise-zone-card p,
 .franchise-case-card p,
 .franchise-brand-card p {
@@ -2323,7 +2500,11 @@ img {
 .franchise-brand-card,
 .franchise-terms-card,
 .franchise-network-card {
-  padding: 26px;
+  padding: 22px;
+}
+
+.franchise-network-card-standalone {
+  padding: 28px;
 }
 
 .franchise-compare-card h3,
@@ -2331,7 +2512,7 @@ img {
 .franchise-case-card h3,
 .franchise-brand-card h3,
 .franchise-video-placeholder h3 {
-  margin: 0 0 10px;
+  margin: 0;
   font-size: 1.22rem;
 }
 
@@ -2345,12 +2526,29 @@ img {
   line-height: 1.55;
 }
 
+.franchise-compare-card {
+  display: grid;
+  align-content: start;
+  gap: 22px;
+  padding: 34px 36px;
+}
+
+.franchise-compare-card ul {
+  padding-left: 0;
+  list-style: none;
+  gap: 16px;
+}
+
 .franchise-zones-grid,
 .franchise-cases-grid,
 .franchise-brand-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
+}
+
+.franchise-zones-grid,
+.franchise-cases-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .franchise-zone-card {
@@ -2375,15 +2573,71 @@ img {
   gap: 14px;
 }
 
-.franchise-revenue-card,
-.franchise-support-card {
-  padding: 18px 18px 20px;
-  border-radius: 20px;
+.franchise-support-section .franchise-section-head {
+  max-width: 980px;
+}
+
+.franchise-support-panel {
+  margin-top: 32px;
+  padding: 18px;
+  border-radius: calc(var(--radius) + 6px);
   border: 1px solid rgba(255, 255, 255, 0.08);
   background:
-    linear-gradient(180deg, rgba(12, 17, 28, 0.88), rgba(9, 13, 22, 0.96)),
-    radial-gradient(320px 180px at 100% 0%, rgba(255, 106, 0, 0.08), transparent 60%);
-  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.18);
+    radial-gradient(520px 260px at 8% 0%, rgba(49, 216, 255, 0.1), transparent 62%),
+    linear-gradient(180deg, rgba(12, 18, 30, 0.68), rgba(8, 12, 21, 0.82));
+}
+
+.franchise-support-grid {
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.franchise-revenue-card,
+.franchise-support-card {
+  padding: 18px;
+  border-radius: var(--radius);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background:
+    radial-gradient(320px 160px at 100% 0%, rgba(255, 106, 0, 0.1), transparent 62%),
+    linear-gradient(170deg, rgba(18, 23, 35, 0.92), rgba(13, 17, 28, 0.94));
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.2);
+}
+
+.franchise-support-card {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  min-height: 176px;
+  padding: 18px 16px;
+  grid-column: span 3;
+}
+
+.franchise-support-card:nth-child(n + 5) {
+  grid-column: span 4;
+}
+
+.franchise-support-card::before {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 2px;
+  background: linear-gradient(90deg, rgba(49, 216, 255, 0.8), rgba(255, 197, 77, 0.72));
+  opacity: 0.58;
+}
+
+.franchise-support-card strong {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 13px;
+  background: linear-gradient(140deg, rgba(49, 216, 255, 0.14), rgba(255, 106, 0, 0.14));
+  color: #f5f8ff;
+  font-family: var(--font-orbitron), sans-serif;
+  font-size: 0.88rem;
 }
 
 .franchise-revenue-card span,
@@ -2394,22 +2648,26 @@ img {
   line-height: 1.5;
 }
 
+.franchise-support-card span {
+  font-size: 0.94rem;
+}
+
 .franchise-calculator-shell {
   display: grid;
-  grid-template-columns: minmax(0, 1.12fr) minmax(340px, 420px);
+  grid-template-columns: minmax(0, 1fr) minmax(340px, 410px);
   gap: 18px;
   align-items: start;
 }
 
 .franchise-calculator-panel {
-  padding: 28px;
-  border-radius: 30px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 24px;
+  border-radius: calc(var(--radius) + 4px);
+  border: 1px solid rgba(255, 204, 120, 0.18);
   background:
-    radial-gradient(500px 220px at 0% 0%, rgba(49, 216, 255, 0.11), transparent 68%),
-    radial-gradient(460px 220px at 100% 100%, rgba(255, 106, 0, 0.16), transparent 68%),
-    linear-gradient(160deg, rgba(10, 16, 27, 0.98), rgba(8, 12, 20, 0.96));
-  box-shadow: 0 24px 54px rgba(0, 0, 0, 0.26);
+    radial-gradient(540px 220px at -6% -12%, rgba(49, 216, 255, 0.13), transparent 58%),
+    radial-gradient(500px 270px at 108% 112%, rgba(255, 124, 26, 0.14), transparent 62%),
+    linear-gradient(154deg, rgba(6, 14, 28, 0.98), rgba(3, 10, 23, 0.98) 56%, rgba(2, 8, 19, 1));
+  box-shadow: var(--shadow);
 }
 
 .franchise-calculator-head {
@@ -2420,8 +2678,10 @@ img {
 
 .franchise-calculator-head h3 {
   margin: 0;
-  font-size: clamp(1.42rem, 2.6vw, 2rem);
-  line-height: 1.08;
+  font-family: var(--font-orbitron), sans-serif;
+  font-size: clamp(1.35rem, 2.6vw, 2rem);
+  line-height: 1.16;
+  letter-spacing: 0;
 }
 
 .franchise-calculator-head p:last-child,
@@ -2442,7 +2702,7 @@ img {
   appearance: none;
   padding: 12px 16px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.16);
   background: rgba(255, 255, 255, 0.04);
   color: #d7e3fb;
   font: inherit;
@@ -2453,8 +2713,8 @@ img {
 
 .franchise-calculator-tab:hover,
 .franchise-calculator-tab.is-active {
-  border-color: rgba(49, 216, 255, 0.46);
-  background: linear-gradient(120deg, rgba(49, 216, 255, 0.16), rgba(255, 106, 0, 0.14));
+  border-color: rgba(255, 196, 77, 0.46);
+  background: rgba(255, 106, 0, 0.12);
   transform: translateY(-1px);
 }
 
@@ -2476,7 +2736,7 @@ img {
 
 .franchise-calculator-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 0.92fr);
   gap: 14px;
   margin-bottom: 16px;
 }
@@ -2484,10 +2744,12 @@ img {
 .franchise-calculator-card {
   display: grid;
   gap: 8px;
+  min-height: 126px;
   padding: 18px;
-  border-radius: 22px;
+  border-radius: var(--radius);
   border: 1px solid rgba(255, 255, 255, 0.09);
   background: rgba(255, 255, 255, 0.03);
+  align-content: center;
 }
 
 .franchise-calculator-card span {
@@ -2496,12 +2758,20 @@ img {
 }
 
 .franchise-calculator-card strong {
+  font-family: var(--font-orbitron), sans-serif;
   font-size: clamp(1.4rem, 3.6vw, 2.1rem);
-  letter-spacing: -0.04em;
+  letter-spacing: 0;
+}
+
+.franchise-calculator-card.is-compact {
+  min-height: 0;
+}
+
+.franchise-calculator-card.is-compact strong {
+  font-size: clamp(1.45rem, 2.8vw, 2rem);
 }
 
 .franchise-calculator-card.is-featured {
-  grid-column: 1 / -1;
   background:
     radial-gradient(420px 220px at 100% 0%, rgba(255, 106, 0, 0.16), transparent 60%),
     linear-gradient(140deg, rgba(14, 21, 34, 0.96), rgba(9, 14, 24, 0.96));
@@ -2510,7 +2780,13 @@ img {
 
 .franchise-calculator-card.is-featured strong {
   color: #fff0b5;
-  font-size: clamp(2rem, 4.5vw, 3.1rem);
+  font-size: clamp(1.85rem, 3.9vw, 2.6rem);
+}
+
+.franchise-calculator-form-sticky {
+  position: sticky;
+  top: 106px;
+  align-self: start;
 }
 
 .franchise-terms-list,
@@ -2655,6 +2931,12 @@ img {
   align-items: start;
 }
 
+.franchise-roadmap-form-sticky {
+  position: sticky;
+  top: 106px;
+  align-self: start;
+}
+
 .franchise-roadmap-step {
   display: grid;
   grid-template-columns: 44px minmax(0, 1fr);
@@ -2681,6 +2963,91 @@ img {
   min-height: 100%;
 }
 
+.franchise-brand-grid {
+  margin-top: 24px;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 22px;
+}
+
+.franchise-brand-card {
+  position: relative;
+  overflow: hidden;
+  grid-column: span 6;
+  display: grid;
+  grid-template-columns: minmax(220px, 0.82fr) minmax(260px, 1.18fr);
+  gap: 28px;
+  align-items: start;
+  padding: 32px;
+  min-height: 286px;
+  border-color: rgba(255, 255, 255, 0.09);
+  background:
+    radial-gradient(460px 220px at 100% 0%, rgba(49, 216, 255, 0.13), transparent 64%),
+    radial-gradient(360px 190px at 0% 100%, rgba(255, 106, 0, 0.08), transparent 68%),
+    linear-gradient(145deg, rgba(16, 23, 37, 0.96), rgba(8, 12, 21, 0.98));
+}
+
+.franchise-brand-card:nth-child(1),
+.franchise-brand-card:nth-child(4) {
+  grid-column: span 7;
+}
+
+.franchise-brand-card:nth-child(2),
+.franchise-brand-card:nth-child(3) {
+  grid-column: span 5;
+  grid-template-columns: 1fr;
+}
+
+.franchise-brand-card::after {
+  content: "";
+  position: absolute;
+  left: 32px;
+  right: 32px;
+  bottom: 0;
+  height: 2px;
+  background: linear-gradient(90deg, rgba(49, 216, 255, 0.72), rgba(255, 197, 77, 0.55), transparent);
+  opacity: 0.74;
+}
+
+.franchise-brand-card h3 {
+  margin: 0;
+  max-width: 14ch;
+  font-size: clamp(1.45rem, 2vw, 2.02rem);
+  line-height: 1.08;
+}
+
+.franchise-brand-card ul {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  list-style: none;
+}
+
+.franchise-brand-card li {
+  padding: 9px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  color: #d9e4f8;
+  font-size: 0.9rem;
+  line-height: 1.2;
+}
+
+.franchise-brand-card p {
+  grid-column: 2;
+  margin-top: 4px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 1rem;
+}
+
+.franchise-brand-card:nth-child(2) p,
+.franchise-brand-card:nth-child(3) p {
+  grid-column: auto;
+}
+
 .franchise-case-card img {
   width: 100%;
   aspect-ratio: 16 / 10;
@@ -2691,36 +3058,44 @@ img {
 
 .franchise-network-shell {
   display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
-  gap: 16px;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
 }
 
-.franchise-network-stage-card,
-.franchise-network-detail-card {
+.franchise-network-stage-card {
   border-radius: 22px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   background:
     radial-gradient(460px 220px at 100% 0%, rgba(49, 216, 255, 0.08), transparent 64%),
     linear-gradient(180deg, rgba(11, 16, 26, 0.92), rgba(8, 12, 21, 0.98));
-  padding: 18px;
+  padding: 24px;
+}
+
+.franchise-network-stage-card {
+  display: grid;
+  gap: 20px;
+}
+
+.franchise-network-toolbar {
+  display: grid;
+  gap: 14px;
 }
 
 .franchise-network-filters {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  margin-bottom: 14px;
 }
 
 .franchise-network-filter {
   appearance: none;
-  padding: 10px 14px;
+  padding: 12px 16px;
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.12);
   background: rgba(255, 255, 255, 0.03);
   color: #d6e2fa;
   font: inherit;
-  font-size: 0.86rem;
+  font-size: 0.88rem;
   font-weight: 700;
   cursor: pointer;
   transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
@@ -2728,84 +3103,455 @@ img {
 
 .franchise-network-filter:hover,
 .franchise-network-filter.is-active {
-  background: linear-gradient(120deg, rgba(255, 106, 0, 0.18), rgba(255, 197, 77, 0.18));
-  border-color: rgba(255, 197, 77, 0.3);
+  background: linear-gradient(120deg, rgba(49, 216, 255, 0.18), rgba(255, 106, 0, 0.14));
+  border-color: rgba(49, 216, 255, 0.26);
   transform: translateY(-1px);
+}
+
+.franchise-network-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+}
+
+.franchise-network-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #b7c3dd;
+  font-size: 0.82rem;
+}
+
+.franchise-network-legend-item i {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: block;
+}
+
+.franchise-network-legend-item.is-own i {
+  background: #63d8ff;
+  box-shadow: 0 0 0 6px rgba(49, 216, 255, 0.12);
+}
+
+.franchise-network-legend-item.is-franchise i {
+  background: #ffcd77;
+  box-shadow: 0 0 0 6px rgba(255, 197, 77, 0.1);
+}
+
+.franchise-network-legend-item.is-opening i {
+  background: #ff975d;
+  box-shadow: 0 0 0 6px rgba(255, 106, 0, 0.1);
 }
 
 .franchise-network-stage {
   position: relative;
-  min-height: 400px;
-  border-radius: 22px;
+  min-height: 560px;
+  border-radius: calc(var(--radius) + 4px);
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.08);
   background:
-    radial-gradient(320px 160px at 25% 18%, rgba(255, 106, 0, 0.1), transparent 62%),
-    radial-gradient(420px 240px at 76% 24%, rgba(49, 216, 255, 0.08), transparent 64%),
     linear-gradient(180deg, rgba(7, 11, 19, 0.94), rgba(6, 10, 18, 0.98));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02);
 }
 
-.franchise-network-stage-grid {
+.franchise-network-stage::before {
   position: absolute;
   inset: 0;
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-  background-size: 28px 28px;
-  opacity: 0.45;
+  content: '';
+  z-index: 1;
+  background:
+    linear-gradient(90deg, rgba(6, 10, 18, 0.34) 0%, rgba(6, 10, 18, 0.04) 48%, rgba(6, 10, 18, 0.24) 100%),
+    linear-gradient(180deg, rgba(6, 10, 18, 0.18) 0%, transparent 44%, rgba(6, 10, 18, 0.32) 100%);
+  pointer-events: none;
 }
 
-.franchise-network-node {
+.franchise-network-stage::after {
+  content: '';
   position: absolute;
-  transform: translate(-50%, -50%);
-  min-width: 112px;
-  padding: 10px 12px;
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(11, 16, 26, 0.92);
-  color: #ecf4ff;
-  font: inherit;
-  font-weight: 700;
-  box-shadow: 0 14px 24px rgba(0, 0, 0, 0.24);
+  inset: 0;
+  z-index: 2;
+  background:
+    radial-gradient(420px 220px at 12% 8%, rgba(255, 106, 0, 0.08), transparent 72%),
+    radial-gradient(360px 240px at 92% 14%, rgba(49, 216, 255, 0.08), transparent 74%);
+  pointer-events: none;
+}
+
+.franchise-network-yandex-map {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  object-fit: cover;
+  background: #0b111c;
+  filter: saturate(0.88) contrast(1.02) brightness(0.78);
+}
+
+.franchise-network-live-map {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  opacity: 0;
+  pointer-events: none;
+  background: #0b111c;
+  transition: opacity 0.25s ease;
+}
+
+.franchise-network-live-map > ymaps {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.franchise-network-stage.is-live .franchise-network-yandex-map {
+  opacity: 0;
+}
+
+.franchise-network-stage.is-live .franchise-network-live-map {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.franchise-network-stage.is-live::before {
+  background:
+    linear-gradient(90deg, rgba(6, 10, 18, 0.2) 0%, rgba(6, 10, 18, 0.02) 48%, rgba(6, 10, 18, 0.16) 100%),
+    linear-gradient(180deg, rgba(6, 10, 18, 0.08) 0%, transparent 44%, rgba(6, 10, 18, 0.18) 100%);
+}
+
+.franchise-network-map-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.franchise-network-location-pin {
+  position: absolute;
+  z-index: 5;
+  transform: translate(calc(-50% + var(--pin-offset-x, 0px)), calc(-100% + var(--pin-offset-y, 0px)));
+  width: 34px;
+  height: 44px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
   cursor: pointer;
-  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  pointer-events: auto;
 }
 
-.franchise-network-node span {
-  display: block;
+.franchise-network-location-core {
+  position: absolute;
+  left: 50%;
+  top: 2px;
+  width: 27px;
+  height: 27px;
+  border-radius: 50% 50% 50% 0;
+  border: 3px solid rgba(255, 255, 255, 0.94);
+  background: #e53935;
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.34),
+    0 0 0 6px rgba(229, 57, 53, 0.12);
+  transform: translateX(-50%) rotate(-45deg);
+  transform-origin: 50% 50%;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.franchise-network-location-core::after {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  content: '';
+  border-radius: 50%;
+  background: #ffffff;
+  transform: translate(-50%, -50%);
+}
+
+.franchise-network-location-label {
+  position: absolute;
+  left: 34px;
+  top: 18px;
+  display: grid;
+  gap: 2px;
+  min-width: 160px;
+  max-width: 210px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(8, 12, 20, 0.9);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  pointer-events: none;
+  text-align: left;
+  transform: translateY(-50%) translateX(-6px);
+  transition: opacity 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+}
+
+.franchise-network-location-pin.is-west-label .franchise-network-location-label {
+  left: auto;
+  right: 34px;
+  transform: translateY(-50%) translateX(6px);
+}
+
+.franchise-network-location-pin.is-north-label .franchise-network-location-label {
+  top: auto;
+  bottom: 42px;
+  transform: translateX(-50%) translateY(6px);
+}
+
+.franchise-network-location-pin.is-north-label:not(.is-west-label) .franchise-network-location-label {
+  left: 50%;
+}
+
+.franchise-network-location-pin.is-west-label.is-north-label .franchise-network-location-label {
+  right: 0;
+}
+
+.franchise-network-location-label strong {
+  color: #f5f8ff;
+  font-size: 0.88rem;
+  line-height: 1.1;
+}
+
+.franchise-network-location-label em {
+  color: #aebbd3;
+  font-size: 0.74rem;
+  font-style: normal;
+  line-height: 1.25;
+}
+
+.franchise-network-location-pin:hover,
+.franchise-network-location-pin.is-active {
+  z-index: 7;
+}
+
+.franchise-network-location-pin:hover .franchise-network-location-core,
+.franchise-network-location-pin.is-active .franchise-network-location-core {
+  background: #d93025;
+  transform: translateX(-50%) rotate(-45deg) scale(1.08);
+  box-shadow:
+    0 3px 8px rgba(0, 0, 0, 0.38),
+    0 0 0 8px rgba(229, 57, 53, 0.16);
+}
+
+.franchise-network-location-pin:hover .franchise-network-location-label,
+.franchise-network-location-pin.is-active .franchise-network-location-label {
+  opacity: 1;
+  border-color: rgba(49, 216, 255, 0.24);
+  transform: translateY(-50%) translateX(0);
+}
+
+.franchise-network-location-pin.is-west-label:hover .franchise-network-location-label,
+.franchise-network-location-pin.is-west-label.is-active .franchise-network-location-label {
+  transform: translateY(-50%) translateX(0);
+}
+
+.franchise-network-location-pin.is-north-label:hover .franchise-network-location-label,
+.franchise-network-location-pin.is-north-label.is-active .franchise-network-location-label {
+  transform: translateX(-50%) translateY(0);
+}
+
+.franchise-network-location-pin.is-west-label.is-north-label:hover .franchise-network-location-label,
+.franchise-network-location-pin.is-west-label.is-north-label.is-active .franchise-network-location-label {
+  transform: translateY(0);
+}
+
+.franchise-network-map-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 42px 42px;
+  opacity: 0.08;
+  pointer-events: none;
+}
+
+.franchise-network-map-panel {
+  position: absolute;
+  left: 20px;
+  top: 20px;
+  z-index: 4;
+  display: grid;
+  gap: 4px;
+  max-width: min(330px, calc(100% - 40px));
+  padding: 16px 18px;
+  border-radius: var(--radius);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(8, 12, 20, 0.9);
+  box-shadow: 0 18px 38px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(12px);
+}
+
+.franchise-network-map-panel span {
+  color: var(--accent-soft);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.franchise-network-map-panel strong {
+  color: #f5f8ff;
+  font-family: var(--font-heading);
+  font-size: clamp(1.2rem, 2vw, 1.55rem);
+}
+
+.franchise-network-map-panel em {
+  color: #b9c6df;
+  font-size: 0.86rem;
+  font-style: normal;
+  line-height: 1.45;
+}
+
+.franchise-network-map-link {
+  position: absolute;
+  right: 20px;
+  bottom: 20px;
+  z-index: 4;
+  display: inline-flex;
+  align-items: center;
+  min-height: 42px;
+  padding: 11px 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(49, 216, 255, 0.2);
+  background: rgba(12, 34, 47, 0.86);
+  color: #c9f5ff;
+  font-weight: 900;
   font-size: 0.84rem;
-  line-height: 1.3;
+  text-decoration: none;
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.24);
+  backdrop-filter: blur(12px);
+  transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
 }
 
-.franchise-network-node:hover,
-.franchise-network-node.is-active {
-  transform: translate(-50%, -54%);
-  border-color: rgba(255, 197, 77, 0.45);
-  box-shadow: 0 18px 28px rgba(0, 0, 0, 0.32);
+.franchise-network-map-link:hover {
+  transform: translateY(-1px);
+  border-color: rgba(49, 216, 255, 0.38);
+  background: rgba(14, 44, 62, 0.92);
 }
 
-.franchise-network-node.is-own {
-  box-shadow: 0 14px 24px rgba(0, 0, 0, 0.24), 0 0 0 1px rgba(49, 216, 255, 0.12);
+.franchise-network-city-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
 }
 
-.franchise-network-node.is-franchise {
-  box-shadow: 0 14px 24px rgba(0, 0, 0, 0.24), 0 0 0 1px rgba(255, 197, 77, 0.1);
+.franchise-network-city-pin {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2px 10px;
+  align-items: center;
+  min-height: 74px;
+  padding: 14px;
+  border-radius: var(--radius);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  color: #dce6f8;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
 }
 
-.franchise-network-node.is-opening {
-  box-shadow: 0 14px 24px rgba(0, 0, 0, 0.24), 0 0 0 1px rgba(255, 106, 0, 0.16);
+.franchise-network-city-pin span {
+  grid-row: 1 / span 2;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #63d8ff;
+  box-shadow: 0 0 0 7px rgba(99, 216, 255, 0.1);
+}
+
+.franchise-network-city-pin strong {
+  font-size: 0.9rem;
+  line-height: 1.1;
+}
+
+.franchise-network-city-pin em {
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-style: normal;
+}
+
+.franchise-network-city-pin.is-franchise span {
+  background: #ffcd77;
+  box-shadow: 0 0 0 7px rgba(255, 197, 77, 0.1);
+}
+
+.franchise-network-city-pin.is-opening span {
+  background: #ff975d;
+  box-shadow: 0 0 0 7px rgba(255, 106, 0, 0.1);
+}
+
+.franchise-network-city-pin.is-mixed span {
+  background: linear-gradient(135deg, #63d8ff, #ffcd77);
+}
+
+.franchise-network-city-pin:hover,
+.franchise-network-city-pin.is-active {
+  border-color: rgba(49, 216, 255, 0.24);
+  background:
+    linear-gradient(180deg, rgba(15, 22, 35, 0.94), rgba(10, 14, 24, 0.98)),
+    radial-gradient(220px 120px at 100% 0%, rgba(49, 216, 255, 0.1), transparent 66%);
+  transform: translateY(-1px);
 }
 
 .franchise-network-detail-card {
   display: grid;
-  gap: 14px;
+  gap: 18px;
   align-content: start;
+  min-height: 100%;
+}
+
+.franchise-network-club-card {
+  display: grid;
+  gap: 18px;
+}
+
+.franchise-network-club-image {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #0b111c;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.28);
+}
+
+.franchise-network-detail-summary {
+  display: grid;
+  gap: 6px;
+  padding: 18px 20px;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background:
+    linear-gradient(180deg, rgba(15, 22, 35, 0.94), rgba(10, 14, 24, 0.96)),
+    radial-gradient(240px 120px at 100% 0%, rgba(49, 216, 255, 0.08), transparent 66%);
+}
+
+.franchise-network-detail-summary strong {
+  font-size: 1.2rem;
+  color: #f3f7ff;
+}
+
+.franchise-network-detail-summary span,
+.franchise-network-detail-copy {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.62;
 }
 
 .franchise-network-detail-head {
   display: flex;
   justify-content: space-between;
-  gap: 12px;
+  gap: 14px;
   align-items: flex-start;
 }
 
@@ -2823,6 +3569,11 @@ img {
   letter-spacing: 0.06em;
   text-transform: uppercase;
   border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.franchise-network-status.is-mixed {
+  color: #d8f5ff;
+  background: rgba(118, 227, 255, 0.08);
 }
 
 .franchise-network-status.is-own {
@@ -2855,32 +3606,179 @@ img {
   font-size: 0.84rem;
 }
 
+.franchise-network-club-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.franchise-network-club-meta span {
+  display: grid;
+  gap: 6px;
+  min-height: 96px;
+  align-content: start;
+  padding: 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background:
+    linear-gradient(180deg, rgba(15, 22, 35, 0.94), rgba(10, 14, 24, 0.96)),
+    radial-gradient(220px 120px at 100% 0%, rgba(49, 216, 255, 0.08), transparent 68%);
+  color: #d9e4f8;
+  line-height: 1.42;
+}
+
+.franchise-network-club-meta strong {
+  color: var(--muted);
+  font-size: 0.74rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.franchise-network-club-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.franchise-network-club-metrics span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 204, 120, 0.14);
+  background: rgba(255, 204, 120, 0.06);
+  color: #ffe0a1;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.franchise-network-detail-link {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: fit-content;
+  min-height: 44px;
+  padding: 11px 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(49, 216, 255, 0.2);
+  background: rgba(12, 34, 47, 0.86);
+  color: #c9f5ff;
+  font-weight: 900;
+  font-size: 0.84rem;
+  text-decoration: none;
+  transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.franchise-network-detail-link:hover {
+  transform: translateY(-1px);
+  border-color: rgba(49, 216, 255, 0.38);
+  background: rgba(14, 44, 62, 0.92);
+}
+
 .franchise-network-mini-list {
   display: grid;
-  gap: 10px;
+  gap: 12px;
 }
 
 .franchise-network-mini-card {
   display: grid;
-  gap: 6px;
-  padding: 12px 14px;
-  border-radius: 16px;
+  gap: 12px;
+  padding: 0;
+  border-radius: 20px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   background: rgba(255, 255, 255, 0.03);
   color: #e8f1ff;
   text-align: left;
   font: inherit;
+  transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+  overflow: hidden;
+}
+
+.franchise-network-mini-select {
+  display: grid;
+  gap: 10px;
+  width: 100%;
+  padding: 18px 20px 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
   cursor: pointer;
 }
 
-.franchise-network-mini-card span {
+.franchise-network-mini-head {
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.franchise-network-mini-head strong {
+  font-size: 1rem;
+}
+
+.franchise-network-mini-status {
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.franchise-network-mini-status.is-own {
+  color: #8fe7ff;
+  background: rgba(49, 216, 255, 0.08);
+}
+
+.franchise-network-mini-status.is-franchise {
+  color: #ffd487;
+  background: rgba(255, 197, 77, 0.08);
+}
+
+.franchise-network-mini-status.is-opening {
+  color: #ffb58a;
+  background: rgba(255, 106, 0, 0.08);
+}
+
+.franchise-network-mini-select > span,
+.franchise-network-mini-select > em {
   color: var(--muted);
   font-size: 0.88rem;
 }
 
-.franchise-network-mini-card.is-active,
-.franchise-network-mini-card:hover {
-  border-color: rgba(49, 216, 255, 0.24);
+.franchise-network-mini-select > em {
+  font-style: normal;
+  color: #d7e2fb;
+}
+
+.franchise-network-mini-card > a {
+  display: inline-flex;
+  width: fit-content;
+  margin: 0 20px 18px;
+  color: #9eeeff;
+  font-size: 0.84rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.franchise-network-mini-card > a:hover {
+  color: #ffffff;
+}
+
+.franchise-network-mini-card:hover,
+.franchise-network-mini-card.is-active {
+  border-color: rgba(49, 216, 255, 0.22);
+  background:
+    linear-gradient(180deg, rgba(12, 18, 31, 0.97), rgba(10, 14, 24, 0.98)),
+    radial-gradient(240px 120px at 100% 0%, rgba(49, 216, 255, 0.08), transparent 66%);
+  transform: translateY(-1px);
 }
 
 .franchise-city-check,
@@ -2890,33 +3788,116 @@ img {
 }
 
 .franchise-city-check {
-  padding: 34px;
-  border-radius: 30px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 28px;
+  border-radius: calc(var(--radius) + 4px);
+  border: 1px solid rgba(255, 204, 120, 0.16);
   background:
     radial-gradient(520px 220px at 10% 0%, rgba(49, 216, 255, 0.1), transparent 66%),
     radial-gradient(620px 260px at 100% 100%, rgba(255, 106, 0, 0.14), transparent 68%),
     linear-gradient(170deg, rgba(10, 16, 28, 0.96), rgba(7, 11, 19, 0.98));
+  box-shadow: var(--shadow);
 }
 
-.franchise-faq-item summary {
-  cursor: pointer;
-  list-style: none;
-  font-weight: 700;
+.franchise-faq-item {
+  overflow: hidden;
+  transition: border-color 0.28s ease, background 0.28s ease, box-shadow 0.28s ease;
+}
+
+.franchise-faq-item.is-open {
+  border-color: rgba(49, 216, 255, 0.24);
+  background:
+    radial-gradient(460px 160px at 100% 0%, rgba(49, 216, 255, 0.07), transparent 66%),
+    rgba(255, 255, 255, 0.035);
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.18);
+}
+
+.franchise-faq-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
   color: #f4f7ff;
+  font: inherit;
+  font-weight: 800;
+  text-align: left;
+  cursor: pointer;
 }
 
-.franchise-faq-item summary::-webkit-details-marker {
-  display: none;
+.franchise-faq-trigger i {
+  position: relative;
+  flex: 0 0 34px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.035);
+  transition: transform 0.28s ease, border-color 0.28s ease, background 0.28s ease;
 }
 
-.franchise-faq-item[open] {
-  border-color: rgba(49, 216, 255, 0.22);
+.franchise-faq-trigger i::before,
+.franchise-faq-trigger i::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 13px;
+  height: 2px;
+  border-radius: 999px;
+  background: #dce7ff;
+  transform: translate(-50%, -50%);
+  transition: transform 0.28s ease, background 0.28s ease;
 }
 
-.franchise-faq-item p {
+.franchise-faq-trigger i::after {
+  transform: translate(-50%, -50%) rotate(90deg);
+}
+
+.franchise-faq-item.is-open .franchise-faq-trigger i {
+  border-color: rgba(255, 197, 77, 0.34);
+  background: rgba(255, 197, 77, 0.08);
+  transform: rotate(180deg);
+}
+
+.franchise-faq-item.is-open .franchise-faq-trigger i::before,
+.franchise-faq-item.is-open .franchise-faq-trigger i::after {
+  background: #ffd487;
+}
+
+.franchise-faq-item.is-open .franchise-faq-trigger i::after {
+  transform: translate(-50%, -50%) rotate(0deg);
+}
+
+.franchise-faq-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition: grid-template-rows 0.34s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.24s ease;
+}
+
+.franchise-faq-item.is-open .franchise-faq-panel {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.franchise-faq-panel-inner {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.franchise-faq-panel p {
+  margin: 0;
   padding-top: 12px;
   line-height: 1.58;
+  transform: translateY(-6px);
+  transition: transform 0.34s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.franchise-faq-item.is-open .franchise-faq-panel p {
+  transform: translateY(0);
 }
 
 .franchise-form-head h3 {
@@ -2932,6 +3913,96 @@ img {
 
 .franchise-form-compact {
   padding: 22px;
+}
+
+.franchise-standalone-footer {
+  padding: 44px 0 36px;
+}
+
+.franchise-footer-shell {
+  position: relative;
+  overflow: hidden;
+  padding: 56px 58px 42px;
+  border-radius: calc(var(--radius) + 6px);
+  background:
+    radial-gradient(560px 280px at 0% 0%, rgba(49, 216, 255, 0.11), transparent 66%),
+    radial-gradient(560px 280px at 100% 0%, rgba(255, 106, 0, 0.13), transparent 64%),
+    linear-gradient(170deg, rgba(18, 23, 35, 0.95), rgba(8, 12, 21, 0.96));
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: var(--shadow);
+}
+
+.franchise-footer-shell::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 86px 86px;
+  opacity: 0.42;
+}
+
+.franchise-footer-top {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(320px, 1.35fr) minmax(180px, 0.42fr) minmax(220px, 0.48fr);
+  gap: 64px;
+  align-items: start;
+}
+
+.franchise-footer-brand img {
+  width: 188px;
+  height: auto;
+  display: block;
+  margin-bottom: 32px;
+}
+
+.franchise-footer-brand p {
+  margin: 0;
+  max-width: 560px;
+  color: #aeb9d0;
+  line-height: 1.65;
+}
+
+.franchise-footer-col h3 {
+  margin: 0 0 18px;
+  color: #ffd487;
+  font-size: 0.85rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.franchise-footer-links {
+  display: grid;
+  gap: 13px;
+}
+
+.franchise-footer-links a {
+  display: inline-flex;
+  width: fit-content;
+  color: #d9e4f8;
+  font-weight: 800;
+  text-decoration: none;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.franchise-footer-links a:hover {
+  color: #ffd487;
+  transform: translateX(2px);
+}
+
+.franchise-footer-bottom {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 42px;
+  padding-top: 26px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  color: #8f9bb3;
+  font-size: 0.88rem;
 }
 
 .admin-layout {
@@ -3177,6 +4248,34 @@ img {
   transform: translateY(0);
 }
 
+@media (max-width: 1180px) {
+  .franchise-support-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .franchise-brand-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .franchise-brand-card,
+  .franchise-brand-card:nth-child(1),
+  .franchise-brand-card:nth-child(2),
+  .franchise-brand-card:nth-child(3),
+  .franchise-brand-card:nth-child(4) {
+    grid-column: auto;
+    grid-template-columns: 1fr;
+  }
+
+  .franchise-brand-card p {
+    grid-column: auto;
+  }
+
+  .franchise-support-card,
+  .franchise-support-card:nth-child(n + 5) {
+    grid-column: auto;
+  }
+}
+
 @media (max-width: 980px) {
   .franchise-hero-grid,
   .franchise-calculator-shell,
@@ -3184,14 +4283,45 @@ img {
   .franchise-zones-grid,
   .franchise-cases-grid,
   .franchise-brand-grid,
-  .franchise-gallery-grid,
   .franchise-revenue-grid,
   .franchise-support-grid {
     grid-template-columns: 1fr 1fr;
   }
 
+  .franchise-gallery-track {
+    grid-auto-columns: minmax(260px, calc((100% - 18px) / 2));
+  }
+
   .franchise-network-shell {
     grid-template-columns: 1fr;
+  }
+
+  .franchise-brand-card {
+    min-height: 0;
+  }
+
+  .franchise-roadmap-form-sticky {
+    position: static;
+  }
+
+  .franchise-calculator-form-sticky {
+    position: static;
+  }
+
+  .franchise-network-card-standalone {
+    padding: 28px;
+  }
+
+  .franchise-network-stage {
+    min-height: 460px;
+  }
+
+  .franchise-network-city-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .franchise-network-detail-card {
+    padding: 24px;
   }
 
   .franchise-hero-copy h1 {
@@ -3204,7 +4334,7 @@ img {
   }
 
   .franchise-hero-form,
-  .franchise-calculator-form {
+  .franchise-calculator-form-sticky {
     max-width: 100%;
   }
 
@@ -3319,8 +4449,41 @@ img {
 }
 
 @media (max-width: 720px) {
+  .franchise-standalone-header {
+    position: relative;
+  }
+
+  .franchise-standalone-header-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .franchise-standalone-brand img {
+    width: 150px;
+  }
+
+  .franchise-standalone-nav {
+    order: 3;
+    width: 100%;
+    justify-content: flex-start;
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+
+  .franchise-standalone-nav a {
+    white-space: nowrap;
+  }
+
+  .franchise-standalone-cta {
+    min-height: 38px;
+    padding: 10px 14px;
+    font-size: 0.82rem;
+  }
+
   .franchise-hero {
-    padding: 74px 0 92px;
+    padding: 42px 0 92px;
   }
 
   .franchise-hero::before {
@@ -3339,7 +4502,6 @@ img {
   }
 
   .franchise-hero-stats,
-  .franchise-gallery-grid,
   .franchise-compare-grid,
   .franchise-two-column,
   .franchise-zones-grid,
@@ -3352,6 +4514,18 @@ img {
     grid-template-columns: 1fr;
   }
 
+  .franchise-calculator-card {
+    min-height: 116px;
+  }
+
+  .franchise-gallery-track {
+    grid-auto-columns: minmax(240px, 82%);
+  }
+
+  .franchise-gallery-controls {
+    justify-content: flex-start;
+  }
+
   .franchise-term-row,
   .franchise-video-placeholder {
     flex-direction: column;
@@ -3361,18 +4535,71 @@ img {
     flex-direction: column;
   }
 
-  .franchise-network-stage {
-    min-height: 320px;
+  .franchise-network-club-meta {
+    grid-template-columns: 1fr;
   }
 
-  .franchise-network-node {
-    min-width: 96px;
-    padding: 8px 10px;
+  .franchise-network-detail-link {
+    width: 100%;
+  }
+
+  .franchise-network-stage {
+    min-height: 380px;
+  }
+
+  .franchise-network-map-panel {
+    left: 14px;
+    right: 14px;
+    top: 14px;
+    max-width: none;
+    padding: 14px 15px;
+  }
+
+  .franchise-network-map-link {
+    right: 14px;
+    bottom: 14px;
+    left: 14px;
+    justify-content: center;
+  }
+
+  .franchise-network-city-strip {
+    grid-template-columns: 1fr;
   }
 
   .franchise-network-filters {
     display: grid;
     grid-template-columns: 1fr 1fr;
+  }
+
+  .franchise-network-filter {
+    width: 100%;
+    padding: 13px 14px;
+    font-size: 0.82rem;
+    text-align: center;
+  }
+
+  .franchise-network-legend {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .franchise-network-marker-label {
+    min-width: 118px;
+    padding: 10px 12px;
+    border-radius: 16px;
+  }
+
+  .franchise-network-marker-label strong {
+    font-size: 0.88rem;
+  }
+
+  .franchise-network-marker-label em {
+    font-size: 0.72rem;
+  }
+
+  .franchise-network-mini-head {
+    flex-direction: column;
   }
 
   .franchise-city-check {
@@ -3400,6 +4627,19 @@ img {
     width: min(92vw, 360px);
     pointer-events: auto;
     box-shadow: 0 18px 36px rgba(0, 0, 0, 0.42);
+  }
+
+  .franchise-footer-shell {
+    padding: 26px;
+  }
+
+  .franchise-footer-top {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .franchise-footer-bottom {
+    flex-direction: column;
   }
 
   .news-list {
@@ -3513,9 +4753,8 @@ img {
 
   .carousel-dots {
     --dot-size: 12px;
+    --dot-hit-size: 22px;
     --dot-gap: 7px;
-    --dot-active-width: 34px;
-    --dot-slot-width: 24px;
   }
 
   .photo-lightbox-shell {
@@ -3630,5 +4869,363 @@ img {
 
   .gallery-file-status {
     width: 100%;
+  }
+}
+
+/* RUNA brandbook visual layer */
+.site-header,
+.franchise-standalone-header {
+  background: rgba(20, 20, 20, 0.82);
+  border-bottom-color: rgba(255, 255, 255, 0.28);
+}
+
+.brand-logo,
+.franchise-standalone-brand img,
+.footer-brand-logo {
+  filter: brightness(0) invert(1) drop-shadow(0 0 14px rgba(0, 234, 255, 0.18));
+}
+
+.nav a,
+.franchise-standalone-nav a {
+  border-radius: 999px;
+  color: rgba(234, 236, 242, 0.76);
+}
+
+.nav a:hover,
+.nav a.active,
+.franchise-standalone-nav a:hover {
+  color: #ffffff;
+  border-color: rgba(0, 234, 255, 0.62);
+  background: rgba(0, 234, 255, 0.08);
+}
+
+.page-hero,
+.franchise-hero {
+  min-height: min(760px, calc(100vh - 74px));
+  display: grid;
+  align-items: center;
+}
+
+.page-hero::before,
+.page-hero-overlay,
+.franchise-hero::before,
+.footer-shell,
+.franchise-form,
+.franchise-calculator-panel,
+.franchise-network-stage-card,
+.franchise-network-stage,
+.card {
+  border-color: rgba(255, 255, 255, 0.26);
+  box-shadow:
+    0 28px 70px rgba(0, 0, 0, 0.42),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.045);
+}
+
+.page-hero::before,
+.page-hero-overlay,
+.franchise-hero::before,
+.footer-shell {
+  clip-path: polygon(0 0, calc(100% - 64px) 0, 100% 64px, 100% 100%, 64px 100%, 0 calc(100% - 64px));
+  border-radius: 0;
+}
+
+.page-hero::after,
+.franchise-hero::after,
+.footer-shell::after,
+.franchise-network-stage::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  background:
+    linear-gradient(#ffffff, #ffffff) 0 0 / 100% 1px no-repeat,
+    linear-gradient(#ffffff, #ffffff) 0 0 / 1px 100% no-repeat,
+    linear-gradient(#ffffff, #ffffff) 100% 100% / 100% 1px no-repeat,
+    linear-gradient(#ffffff, #ffffff) 100% 100% / 1px 100% no-repeat;
+  opacity: 0.18;
+}
+
+.page-hero::after,
+.franchise-hero::after {
+  inset: 24px;
+  z-index: 0;
+  clip-path: polygon(0 0, calc(100% - 64px) 0, 100% 64px, 100% 100%, 64px 100%, 0 calc(100% - 64px));
+}
+
+.page-hero-overlay {
+  background:
+    linear-gradient(105deg, rgba(20, 20, 20, 0.94) 18%, rgba(13, 16, 38, 0.48) 58%, rgba(20, 20, 20, 0.92) 100%),
+    radial-gradient(820px 360px at 74% 14%, rgba(183, 0, 255, 0.22), transparent 64%),
+    radial-gradient(720px 380px at 8% 88%, rgba(0, 234, 255, 0.22), transparent 62%);
+}
+
+.page-hero::before {
+  background:
+    linear-gradient(105deg, rgba(20, 20, 20, 0.94) 18%, rgba(13, 16, 38, 0.48) 58%, rgba(20, 20, 20, 0.92) 100%),
+    radial-gradient(820px 360px at 74% 14%, rgba(183, 0, 255, 0.2), transparent 64%),
+    radial-gradient(720px 380px at 8% 88%, rgba(0, 234, 255, 0.18), transparent 62%),
+    var(--hero-image, none) center / cover no-repeat;
+}
+
+.franchise-hero::before {
+  background:
+    linear-gradient(105deg, rgba(20, 20, 20, 0.95) 18%, rgba(13, 16, 38, 0.58) 58%, rgba(20, 20, 20, 0.94) 100%),
+    radial-gradient(840px 390px at 82% 12%, rgba(183, 0, 255, 0.24), transparent 60%),
+    radial-gradient(720px 420px at 10% 86%, rgba(0, 234, 255, 0.18), transparent 58%),
+    url('/images/hero-franchise.jpg') center / cover no-repeat;
+}
+
+.kicker,
+.page-hero .kicker,
+.franchise-landing .kicker,
+.form-kicker,
+.club-card-segment-title,
+.news-date,
+.table-list th,
+.footer-col h3 {
+  color: var(--cyan);
+  letter-spacing: 0.16em;
+}
+
+.page-hero h1,
+.franchise-hero-copy h1,
+.section-title,
+.stat-value,
+.franchise-hero-stat strong,
+.franchise-calculator-head h3,
+.franchise-calculator-card strong,
+.franchise-network-map-panel strong {
+  font-family: var(--font-orbitron);
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.page-hero h1,
+.franchise-hero-copy h1 {
+  max-width: 900px;
+  font-size: clamp(2.05rem, 5vw, 4.3rem);
+  line-height: 1.04;
+  overflow-wrap: anywhere;
+  hyphens: auto;
+}
+
+.page-hero p,
+.franchise-hero-lead,
+.section-lead,
+.card p,
+.card li {
+  color: rgba(234, 236, 242, 0.78);
+}
+
+.btn {
+  min-height: 44px;
+  border-radius: 999px;
+  letter-spacing: 0.01em;
+}
+
+.btn-primary {
+  color: #141414;
+  background: linear-gradient(120deg, #00eaff 0%, #eaecf2 100%);
+}
+
+.btn-primary:hover {
+  box-shadow: 0 0 22px rgba(0, 234, 255, 0.24) !important;
+}
+
+.btn-outline,
+.page-hero .hero-actions .btn-outline {
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.32) !important;
+  background: rgba(20, 20, 20, 0.42);
+}
+
+.btn-outline:hover,
+.page-hero .hero-actions .btn-outline:hover {
+  color: #ffffff;
+  border-color: rgba(183, 0, 255, 0.7) !important;
+  background: rgba(183, 0, 255, 0.12);
+}
+
+.card,
+.stat,
+.home-stats-grid .home-stat,
+.feature-card,
+.club-card,
+.news-card,
+.tournament-event-card,
+.franchise-hero-stat,
+.franchise-compare-card,
+.franchise-zone-card,
+.franchise-case-card,
+.franchise-brand-card,
+.franchise-revenue-card,
+.franchise-support-card,
+.franchise-calculator-card,
+.franchise-term-row,
+.franchise-network-item,
+.franchise-roadmap-step,
+.franchise-faq-item,
+.franchise-network-detail-summary,
+.franchise-network-city-pin {
+  border-radius: 8px;
+  border-color: rgba(255, 255, 255, 0.18);
+  background:
+    radial-gradient(520px 240px at 100% 0%, rgba(183, 0, 255, 0.09), transparent 62%),
+    radial-gradient(480px 220px at 0% 100%, rgba(0, 234, 255, 0.08), transparent 66%),
+    linear-gradient(155deg, rgba(20, 20, 20, 0.94), rgba(13, 16, 38, 0.9));
+}
+
+.home-stat-kicker,
+.badge,
+.feature-badge,
+.news-badge,
+.clubs-picker-link,
+.franchise-network-status,
+.franchise-calculator-caption span,
+.franchise-brand-card li,
+.franchise-video-meta span,
+.form-chip {
+  border-color: rgba(0, 234, 255, 0.34);
+  background: rgba(0, 234, 255, 0.075);
+  color: #d8fbff;
+}
+
+.stat-value,
+.home-stats-grid .home-stat .stat-value,
+.franchise-hero-stat strong,
+.franchise-calculator-card.is-featured strong,
+.franchise-zone-accent,
+.franchise-network-item span,
+.club-meta-list a,
+.info-strip a,
+.footer-links a:hover,
+.footer-source-link:hover,
+.footer-source-link:focus-visible {
+  color: var(--cyan);
+  text-shadow: 0 0 22px rgba(0, 234, 255, 0.22);
+}
+
+.home-stat-cities,
+.home-stat-formats {
+  --home-stat-accent-rgb: 183, 0, 255;
+  --home-stat-edge-rgb: 183, 0, 255;
+}
+
+.feature-badge,
+.clubs-picker-link:hover,
+.clubs-picker-link.is-active,
+.franchise-calculator-tab:hover,
+.franchise-calculator-tab.is-active,
+.franchise-network-filter:hover,
+.franchise-network-filter.is-active {
+  border-color: rgba(183, 0, 255, 0.48);
+  background: rgba(183, 0, 255, 0.12);
+  color: #f5dcff;
+}
+
+.clubs-picker-link.is-active {
+  color: #141414;
+  border-color: rgba(0, 234, 255, 0.96);
+  background: linear-gradient(120deg, #00eaff 0%, #b700ff 100%);
+}
+
+.carousel-dot::before {
+  border-color: rgba(0, 234, 255, 0.62);
+  background: rgba(0, 234, 255, 0.18);
+}
+
+.carousel-dot:hover::before {
+  border-color: rgba(0, 234, 255, 0.9);
+  background: rgba(0, 234, 255, 0.34);
+}
+
+.carousel-dot.is-active::before {
+  border-color: rgba(0, 234, 255, 0.98);
+  background: linear-gradient(120deg, #00eaff 0%, #b700ff 100%);
+  box-shadow: 0 0 14px rgba(0, 234, 255, 0.38);
+}
+
+.news-card:hover,
+.tournament-event-card:hover,
+.tournament-event-card:focus-within,
+.photo-slide:hover,
+.photo-tile:hover,
+.stat:hover,
+.home-stats-grid .home-stat:hover {
+  border-color: rgba(0, 234, 255, 0.62);
+  box-shadow:
+    0 26px 58px rgba(0, 0, 0, 0.46),
+    0 0 34px rgba(0, 234, 255, 0.13);
+}
+
+.franchise-form,
+.form-field input,
+.form-field textarea,
+.form-field select,
+.rich-editor,
+.submit-success-popup-card {
+  border-color: rgba(255, 255, 255, 0.2);
+  background:
+    radial-gradient(620px 220px at 100% 0%, rgba(183, 0, 255, 0.1), transparent 64%),
+    linear-gradient(160deg, rgba(20, 20, 20, 0.94), rgba(13, 16, 38, 0.92));
+}
+
+.form-field input:focus,
+.form-field textarea:focus,
+.form-field select:focus,
+.rich-editor:focus-within {
+  border-color: rgba(0, 234, 255, 0.9);
+  box-shadow: 0 0 0 3px rgba(0, 234, 255, 0.14);
+}
+
+.franchise-gallery-slide,
+.media-card,
+.photo-slide,
+.photo-tile,
+.news-detail-cover,
+.franchise-case-card img,
+.franchise-network-club-image,
+.franchise-video-media iframe,
+.franchise-video-media video,
+.franchise-video-poster-shell img {
+  border-radius: 8px;
+}
+
+.footer-shell {
+  position: relative;
+  background:
+    radial-gradient(700px 280px at -8% 0%, rgba(0, 234, 255, 0.13), transparent 65%),
+    radial-gradient(620px 280px at 108% -6%, rgba(183, 0, 255, 0.16), transparent 65%),
+    linear-gradient(180deg, rgba(20, 20, 20, 0.96), rgba(13, 16, 38, 0.9));
+}
+
+.footer-shell::after {
+  inset: 0;
+  clip-path: inherit;
+}
+
+.menu-toggle {
+  border-color: rgba(255, 255, 255, 0.28);
+  border-radius: 8px;
+}
+
+@media (max-width: 720px) {
+  .page-hero::before,
+  .page-hero-overlay,
+  .franchise-hero::before,
+  .footer-shell {
+    clip-path: none;
+  }
+
+  .page-hero::after,
+  .franchise-hero::after {
+    inset: 12px;
+    clip-path: none;
+  }
+
+  .page-hero h1,
+  .franchise-hero-copy h1 {
+    font-size: 2.74rem;
+    line-height: 1.08;
   }
 }

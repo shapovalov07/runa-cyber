@@ -39,6 +39,10 @@ export async function POST(request) {
   const pageUrl = getText(payload?.pageUrl || request.headers.get('origin'));
   const utmFromUrl = extractUtmFromUrl(pageUrl);
 
+  if (getText(payload?.website)) {
+    return NextResponse.json({ ok: true, message: 'Заявка сохранена. Команда RUNA свяжется с вами.' }, { status: 202 });
+  }
+
   let lead;
 
   try {

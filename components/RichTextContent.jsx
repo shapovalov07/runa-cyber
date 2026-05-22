@@ -1,4 +1,4 @@
-import { toRichTextHtml } from '@/lib/rich-text';
+import { toRichTextHtml } from '../lib/rich-text';
 
 const getText = (value) => (typeof value === 'string' ? value : '');
 

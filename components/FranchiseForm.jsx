@@ -18,6 +18,7 @@ const createInitialState = (lockedFormat = '') => ({
   budget: '',
   format: getText(lockedFormat),
   comment: '',
+  website: '',
   consent: false,
 });
 
@@ -161,6 +162,7 @@ export default function FranchiseForm({
         },
         body: JSON.stringify({
           ...form,
+          website: form.website,
           format: getText(lockedFormat) || getText(form.format),
           source,
           pageUrl: typeof window !== 'undefined' ? window.location.href : '',
@@ -264,15 +266,23 @@ export default function FranchiseForm({
               {title ? <h3>{title}</h3> : null}
               {description ? <p>{description}</p> : null}
             </div>
-            {getText(lockedFormat) ? <span className="form-chip">Выбран формат: {lockedFormat}</span> : null}
-          </div>
-        ) : getText(lockedFormat) ? (
-          <div className="form-chips">
-            <span className="form-chip">Выбран формат: {lockedFormat}</span>
           </div>
         ) : null}
 
         <div className="form-grid">
+          <label className="form-field form-field-honeypot" htmlFor={`${baseId}-website`} aria-hidden="true">
+            <span>Сайт</span>
+            <input
+              id={`${baseId}-website`}
+              name={`${baseId}-website`}
+              type="text"
+              tabIndex={-1}
+              autoComplete="off"
+              value={form.website}
+              onChange={(event) => updateField('website', event.target.value)}
+            />
+          </label>
+
           <label className="form-field" htmlFor={`${baseId}-name`}>
             <span>Имя *</span>
             <input

@@ -1,4 +1,4 @@
-const routes = ['', '/clubs', '/tournaments', '/news', '/franchise', '/contacts', '/admin'];
+const routes = ['', '/clubs', '/tournaments', '/news', '/franchise', '/contacts'];
 
 export default function sitemap() {
   const now = new Date();

@@ -1,5 +1,5 @@
-import ContactsByCity from '@/components/ContactsByCity';
-import { clubCities } from '@/data/clubs';
+import ContactsByCity from '../../components/ContactsByCity';
+import { clubCities } from '../../data/clubs';
 
 export const metadata = {
   title: 'Контакты',

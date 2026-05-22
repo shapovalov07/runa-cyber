@@ -1,7 +1,7 @@
-import { getNewsList } from '@/lib/cms-storage';
+import { getNewsList } from '../lib/cms-storage';
 import Link from 'next/link';
-import NewsCardMedia from '@/components/NewsCardMedia';
-import RichTextContent from '@/components/RichTextContent';
+import NewsCardMedia from './NewsCardMedia';
+import RichTextContent from './RichTextContent';
 
 const dateFormatter = new Intl.DateTimeFormat('ru-RU', {
   day: '2-digit',

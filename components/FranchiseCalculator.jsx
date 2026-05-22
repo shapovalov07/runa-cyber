@@ -6,11 +6,11 @@ import { trackFranchiseEvent } from '../lib/franchise-analytics';
 import FranchiseForm from './FranchiseForm';
 
 const METRIC_DEFINITIONS = [
-  { key: 'investment', label: 'Инвестиции' },
-  { key: 'revenue', label: 'Выручка' },
-  { key: 'expenses', label: 'Расходы' },
-  { key: 'profit', label: 'Прибыль', featured: true },
-  { key: 'payback', label: 'Окупаемость' },
+  { key: 'investment', label: 'Инвестиции', size: 'large' },
+  { key: 'revenue', label: 'Выручка / мес.', size: 'large' },
+  { key: 'expenses', label: 'Расходы / мес.', size: 'compact' },
+  { key: 'profit', label: 'Прибыль / мес.', featured: true, size: 'large' },
+  { key: 'payback', label: 'Окупаемость', size: 'compact' },
 ];
 
 export default function FranchiseCalculator() {
@@ -64,7 +64,7 @@ export default function FranchiseCalculator() {
           {METRIC_DEFINITIONS.map((metric) => (
             <article
               key={metric.key}
-              className={`franchise-calculator-card ${metric.featured ? 'is-featured' : ''}`}
+              className={`franchise-calculator-card ${metric.featured ? 'is-featured' : ''} is-${metric.size}`}
             >
               <span>{metric.label}</span>
               <strong>{activeFormat[metric.key]}</strong>
@@ -78,7 +78,7 @@ export default function FranchiseCalculator() {
         </p>
       </div>
 
-      <div className="franchise-calculator-form">
+      <div className="franchise-calculator-form-sticky">
         <FranchiseForm
           source="calculator_form"
           title="Получить расчет под мой город"

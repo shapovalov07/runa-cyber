@@ -1,6 +1,6 @@
-import ClubsSelector from '@/components/ClubsSelector';
-import { clubCities, totalCities, totalClubs } from '@/data/clubs';
-import { getGalleryPhotos } from '@/lib/cms-storage';
+import ClubsSelector from '../../components/ClubsSelector';
+import { clubCities, totalCities, totalClubs } from '../../data/clubs';
+import { getGalleryPhotos } from '../../lib/cms-storage';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,8 +27,8 @@ export default async function ClubsPage() {
             <a className="btn btn-primary" href="/contacts">
               Связаться с клубом
             </a>
-            <a className="btn btn-outline" href="/franchise">
-              Открыть клуб по франшизе
+            <a className="btn btn-outline" href="/tournaments">
+              Смотреть турниры
             </a>
           </div>
         </div>

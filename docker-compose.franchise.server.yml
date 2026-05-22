@@ -1,0 +1,24 @@
+services:
+  runa-cyber-franchise:
+    image: ${DOCKER_IMAGE:-runa-cyber-club:prod}
+    container_name: runa-cyber-franchise
+    env_file:
+      - .env.local
+    environment:
+      NODE_ENV: production
+      PORT: 3030
+      HOSTNAME: 0.0.0.0
+    expose:
+      - "3030"
+    volumes:
+      # Keep franchise leads and shared uploads in the same storage as the main site when desired.
+      - ${CMS_VOLUME_PATH:-./.runtime/server-cms}:/app/data/cms
+      - ${UPLOADS_VOLUME_PATH:-./.runtime/server-uploads}:/app/public/uploads
+    restart: unless-stopped
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    external: true
+    name: proxy

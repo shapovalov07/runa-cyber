@@ -6,8 +6,8 @@ import {
   isManagedTournamentEventUpload,
   removeManagedTournamentEventUpload,
   saveTournamentEventUpload,
-} from '@/lib/cms-storage';
-import { appendAdminHistory, getAdminCredentialsFromRequest, verifyAdminCredentials } from '@/lib/admin-auth';
+} from '../../../lib/cms-storage';
+import { appendAdminHistory, getAdminCredentialsFromRequest, verifyAdminCredentials } from '../../../lib/admin-auth';
 
 export const runtime = 'nodejs';
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import PhotoCarousel from '@/components/PhotoCarousel';
+import PhotoCarousel from './PhotoCarousel';
 
 const getText = (value) => (typeof value === 'string' ? value.trim() : '');
 const normalizeCitySlug = (value) => getText(value).toLowerCase();

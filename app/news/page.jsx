@@ -1,4 +1,4 @@
-import NewsSection from '@/components/NewsSection';
+import NewsSection from '../../components/NewsSection';
 
 export const dynamic = 'force-dynamic';
 
