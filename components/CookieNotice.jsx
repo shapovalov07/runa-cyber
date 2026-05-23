@@ -22,6 +22,14 @@ export default function CookieNotice() {
     setIsVisible(!hasAcceptedCookieNotice());
   }, [pathname]);
 
+  useEffect(() => {
+    document.documentElement.classList.toggle('has-cookie-notice', isVisible);
+
+    return () => {
+      document.documentElement.classList.remove('has-cookie-notice');
+    };
+  }, [isVisible]);
+
   const acceptCookies = () => {
     document.cookie = `${COOKIE_NAME}=1; Max-Age=${COOKIE_MAX_AGE_SECONDS}; Path=/; SameSite=Lax`;
     setIsVisible(false);
