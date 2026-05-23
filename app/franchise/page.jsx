@@ -128,18 +128,19 @@ export default function FranchisePage() {
             />
           </div>
         </div>
-        <div className="franchise-mobile-sticky-cta">
-          <a
-            className="btn btn-primary"
-            href="#franchise-final-form"
-            data-metrika-event="franchise_cta_click"
-            data-metrika-source="mobile_sticky_cta"
-            data-metrika-label="Получить расчет"
-          >
-            Получить расчет
-          </a>
-        </div>
       </section>
+
+      <div className="franchise-mobile-sticky-cta">
+        <a
+          className="btn btn-primary"
+          href="#franchise-final-form"
+          data-metrika-event="franchise_cta_click"
+          data-metrika-source="mobile_sticky_cta"
+          data-metrika-label="Получить расчет"
+        >
+          Получить расчет
+        </a>
+      </div>
 
       <section className="section" id="franchise-gallery">
         <div className="container">
