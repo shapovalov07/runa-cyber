@@ -5190,6 +5190,43 @@ img {
   box-shadow: 0 0 0 3px rgba(0, 234, 255, 0.14);
 }
 
+.admin-section-buttons .clubs-picker-link:hover {
+  color: #f4f7ff;
+  border-color: rgba(206, 213, 226, 0.56);
+  background: rgba(206, 213, 226, 0.1);
+}
+
+.admin-section-buttons .clubs-picker-link.is-active {
+  color: #141414;
+  border-color: rgba(234, 236, 242, 0.9);
+  background: linear-gradient(120deg, #dfe3ea 0%, #8f98a6 100%);
+  box-shadow: 0 0 18px rgba(206, 213, 226, 0.18);
+}
+
+.admin-card.card,
+.admin-item {
+  border-color: rgba(206, 213, 226, 0.18);
+  background:
+    radial-gradient(520px 220px at 100% 0%, rgba(206, 213, 226, 0.1), transparent 64%),
+    linear-gradient(160deg, rgba(16, 18, 24, 0.96), rgba(8, 11, 18, 0.96));
+}
+
+.admin-card .admin-meta,
+.admin-card .form-note {
+  color: #b8c0cc !important;
+  text-shadow: none;
+}
+
+.admin-card .form-field input,
+.admin-card .form-field textarea,
+.admin-card .form-field select,
+.admin-card .rich-editor {
+  border-color: rgba(206, 213, 226, 0.28);
+  background:
+    radial-gradient(520px 220px at 100% 0%, rgba(206, 213, 226, 0.08), transparent 64%),
+    linear-gradient(160deg, rgba(22, 25, 32, 0.92), rgba(10, 13, 19, 0.94));
+}
+
 .franchise-gallery-slide,
 .media-card,
 .photo-slide,
