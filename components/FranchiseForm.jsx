@@ -5,7 +5,6 @@ import { trackFranchiseEvent } from '../lib/franchise-analytics';
 
 const PHONE_MAX_LENGTH = 18;
 const BUDGET_OPTIONS = ['До 10 млн ₽', '10-15 млн ₽', '15-20 млн ₽', '20+ млн ₽'];
-const FORMAT_OPTIONS = ['20 ПК', '25 ПК', '30 ПК', '35 ПК', '40 ПК'];
 
 const getText = (value) => (typeof value === 'string' ? value.trim() : '');
 
@@ -84,7 +83,6 @@ export default function FranchiseForm({
   compact = false,
   className = '',
   showBudget = !compact,
-  showFormat = !compact,
   showComment = !compact,
   lockedFormat = '',
   showSecondaryAction = true,
@@ -384,25 +382,6 @@ export default function FranchiseForm({
             </label>
           ) : null}
 
-          {showFormat && !getText(lockedFormat) ? (
-            <label className="form-field" htmlFor={`${baseId}-format`}>
-              <span>Формат клуба</span>
-              <select
-                id={`${baseId}-format`}
-                name={`${baseId}-format`}
-                value={form.format}
-                onChange={(event) => updateField('format', event.target.value)}
-              >
-                <option value="">Выберите формат</option>
-                {FORMAT_OPTIONS.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </select>
-            </label>
-          ) : null}
-
           {showComment ? (
             <label className="form-field full" htmlFor={`${baseId}-comment`}>
               <span>Комментарий</span>
@@ -468,7 +447,7 @@ export default function FranchiseForm({
           />
           <div className="submit-success-popup-card">
             <h3 id={`${baseId}-success-title`}>Заявка отправлена</h3>
-            <p>Спасибо. Команда RUNA свяжется с вами для обсуждения города, формата клуба и расчета модели.</p>
+            <p>Спасибо. Команда RUNA свяжется с вами для обсуждения города, бюджета и расчета модели.</p>
             <button className="btn btn-primary" type="button" onClick={closeSuccessPopup}>
               Понятно
             </button>

@@ -82,11 +82,10 @@ export default function FranchiseCalculator() {
         <FranchiseForm
           source="calculator_form"
           title="Получить расчет под мой город"
-          description="Оставьте контакты, и команда RUNA подготовит расчет под ваш формат и локацию."
+          description="Оставьте контакты, и команда RUNA подготовит расчет под вашу локацию."
           submitLabel="Получить расчет"
           compact
           showBudget
-          showFormat={false}
           showComment={false}
           lockedFormat={activeFormat.label}
         />

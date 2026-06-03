@@ -119,11 +119,10 @@ export default function FranchisePage() {
             <FranchiseForm
               source="hero_form"
               title="Получить расчет под мой город"
-              description="Оставьте контакты, и команда RUNA свяжется с вами, чтобы обсудить город, бюджет и формат."
+              description="Оставьте контакты, и команда RUNA свяжется с вами, чтобы обсудить город и бюджет."
               submitLabel="Получить расчет"
               compact
               showBudget={false}
-              showFormat={false}
               showComment={false}
             />
           </div>
@@ -161,7 +160,7 @@ export default function FranchisePage() {
         <div className="container">
           <div className="franchise-section-head">
             <p className="kicker">Позиционирование</p>
-            <h2 className="section-title">Мы создаем не потоковый компьютерный зал, а место, куда хочется возвращаться</h2>
+            <h2 className="section-title">Мы создаем не обычный компьютерный зал, а место, куда хочется возвращаться</h2>
           </div>
 
           <div className="franchise-compare-grid">
@@ -311,11 +310,10 @@ export default function FranchisePage() {
             <FranchiseForm
               source="turnkey_form"
               title="Обсудить запуск под ключ"
-              description="Оставьте контакты, и мы разберем ваш город, помещение и подходящий формат клуба."
+              description="Оставьте контакты, и мы разберем ваш город, помещение и подходящую модель запуска."
               submitLabel="Обсудить запуск"
               compact
               showBudget
-              showFormat
               showComment={false}
             />
           </div>
@@ -378,7 +376,6 @@ export default function FranchisePage() {
             submitLabel="Проверить город"
             compact
             showBudget={false}
-            showFormat={false}
             showComment={false}
           />
         </div>
@@ -401,7 +398,7 @@ export default function FranchisePage() {
             <p className="kicker">Финальная заявка</p>
             <h2 className="section-title">Получите расчет клуба RUNA под ваш город</h2>
             <p className="section-lead">
-              Оставьте контакты — команда RUNA свяжется с вами, уточнит город, бюджет, формат и подготовит
+              Оставьте контакты — команда RUNA свяжется с вами, уточнит город и бюджет, затем подготовит
               индивидуальный расчет.
             </p>
           </div>
@@ -412,7 +409,6 @@ export default function FranchisePage() {
             description="Заполните поля, и мы вернемся с предметным расчетом по вашей локации."
             submitLabel="Получить расчет"
             showBudget
-            showFormat
             showComment
             showSecondaryAction={false}
           />
