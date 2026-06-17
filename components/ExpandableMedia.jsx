@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { isVideoMediaSrc } from '@/lib/media';
+import { isVideoMediaSrc } from '../lib/media';
 
 const getText = (value) => (typeof value === 'string' ? value.trim() : '');
 

@@ -1,8 +1,8 @@
 import Link from 'next/link';
-import PhotoCarousel from '@/components/PhotoCarousel';
-import { getGalleryPhotos, getTournamentEvents } from '@/lib/cms-storage';
-import { isVideoMediaSrc } from '@/lib/media';
-import RichTextContent from '@/components/RichTextContent';
+import PhotoCarousel from '../../components/PhotoCarousel';
+import { getGalleryPhotos, getTournamentEvents } from '../../lib/cms-storage';
+import { isVideoMediaSrc } from '../../lib/media';
+import RichTextContent from '../../components/RichTextContent';
 
 export const dynamic = 'force-dynamic';
 

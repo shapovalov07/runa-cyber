@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { isVideoMediaSrc } from '@/lib/media';
+import { isVideoMediaSrc } from '../lib/media';
 
 const getText = (value) => (typeof value === 'string' ? value.trim() : '');
 

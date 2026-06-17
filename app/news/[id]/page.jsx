@@ -1,9 +1,9 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { getNewsItemById } from '@/lib/cms-storage';
-import ExpandableMedia from '@/components/ExpandableMedia';
-import RichTextContent from '@/components/RichTextContent';
-import { toRichTextPlainText } from '@/lib/rich-text';
+import { getNewsItemById } from '../../../lib/cms-storage';
+import ExpandableMedia from '../../../components/ExpandableMedia';
+import RichTextContent from '../../../components/RichTextContent';
+import { toRichTextPlainText } from '../../../lib/rich-text';
 
 export const dynamic = 'force-dynamic';
 

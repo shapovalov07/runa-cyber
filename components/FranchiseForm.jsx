@@ -1,17 +1,25 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-
-const initialState = {
-  name: '',
-  city: '',
-  phone: '',
-  budget: '',
-  comment: '',
-  consent: false,
-};
+import { trackFranchiseEvent } from '../lib/franchise-analytics';
 
 const PHONE_MAX_LENGTH = 18;
+const BUDGET_OPTIONS = ['До 10 млн ₽', '10-15 млн ₽', '15-20 млн ₽', '20+ млн ₽'];
+
+const getText = (value) => (typeof value === 'string' ? value.trim() : '');
+
+const createInitialState = (lockedFormat = '') => ({
+  name: '',
+  phone: '',
+  email: '',
+  city: '',
+  telegramUsername: '',
+  budget: '',
+  format: getText(lockedFormat),
+  comment: '',
+  website: '',
+  consent: false,
+});
 
 const formatPhone = (input) => {
   const digitsOnly = input.replace(/\D/g, '');
@@ -65,12 +73,27 @@ const getCaretPositionForDigits = (formattedPhone, digitsBeforeCaret) => {
   return formattedPhone.length;
 };
 
-export default function FranchiseForm() {
-  const [form, setForm] = useState(initialState);
+const validateEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/u.test(getText(value));
+
+export default function FranchiseForm({
+  source = 'final_form',
+  title = '',
+  description = '',
+  submitLabel = 'Получить расчет',
+  compact = false,
+  className = '',
+  showBudget = !compact,
+  showComment = !compact,
+  lockedFormat = '',
+  showSecondaryAction = true,
+}) {
+  const [form, setForm] = useState(() => createInitialState(lockedFormat));
   const [status, setStatus] = useState('idle');
   const [message, setMessage] = useState('');
   const [isSuccessPopupOpen, setIsSuccessPopupOpen] = useState(false);
   const phoneInputRef = useRef(null);
+  const cityInputTrackedRef = useRef(false);
+  const baseId = `franchise-${source.replace(/[^a-z0-9]+/gi, '-').toLowerCase() || 'form'}`;
 
   const updateField = (key, value) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -79,6 +102,11 @@ export default function FranchiseForm() {
   const closeSuccessPopup = () => {
     setIsSuccessPopupOpen(false);
   };
+
+  useEffect(() => {
+    if (!getText(lockedFormat)) return;
+    setForm((prev) => ({ ...prev, format: getText(lockedFormat) }));
+  }, [lockedFormat]);
 
   useEffect(() => {
     if (!isSuccessPopupOpen) return undefined;
@@ -96,9 +124,9 @@ export default function FranchiseForm() {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (!form.name.trim() || !form.city.trim() || !form.phone.trim()) {
+    if (!getText(form.name) || !getText(form.city) || !getText(form.phone) || !getText(form.email)) {
       setStatus('error');
-      setMessage('Заполните обязательные поля: Имя, Город и Телефон.');
+      setMessage('Заполните обязательные поля: Имя, Город, Телефон и Email.');
       return;
     }
 
@@ -106,6 +134,12 @@ export default function FranchiseForm() {
     if (digits.length !== 11 || !digits.startsWith('7')) {
       setStatus('error');
       setMessage('Введите телефон в формате +7 (999) 999-99-99.');
+      return;
+    }
+
+    if (!validateEmail(form.email)) {
+      setStatus('error');
+      setMessage('Проверьте email.');
       return;
     }
 
@@ -124,20 +158,40 @@ export default function FranchiseForm() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          ...form,
+          website: form.website,
+          format: getText(lockedFormat) || getText(form.format),
+          source,
+          pageUrl: typeof window !== 'undefined' ? window.location.href : '',
+          referrer: typeof document !== 'undefined' ? document.referrer : '',
+          userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : '',
+        }),
       });
 
-      const payload = await response.json();
+      const payload = await response.json().catch(() => ({}));
 
       if (!response.ok || !payload.ok) {
         throw new Error(payload.error || 'Не удалось отправить заявку.');
       }
 
+      trackFranchiseEvent('franchise_form_submit', {
+        source,
+        format: getText(lockedFormat) || getText(form.format),
+      });
+      trackFranchiseEvent(`${source}_submit`, {
+        source,
+      });
+
       setStatus('success');
-      setMessage('Заявка отправлена в Telegram. Команда свяжется с вами.');
-      setForm(initialState);
+      setMessage(payload.message || 'Заявка сохранена. Команда RUNA свяжется с вами.');
+      setForm(createInitialState(lockedFormat));
+      cityInputTrackedRef.current = false;
       setIsSuccessPopupOpen(true);
     } catch (error) {
+      trackFranchiseEvent('franchise_form_error', {
+        source,
+      });
       setStatus('error');
       setMessage(error.message || 'Ошибка отправки. Попробуйте снова.');
     }
@@ -198,13 +252,40 @@ export default function FranchiseForm() {
 
   return (
     <>
-      <form className="franchise-form reveal" onSubmit={handleSubmit} noValidate>
+      <form
+        className={`franchise-form ${compact ? 'franchise-form-compact' : ''} ${className}`.trim()}
+        onSubmit={handleSubmit}
+        noValidate
+        data-metrika-source={source}
+      >
+        {title || description ? (
+          <div className="franchise-form-head">
+            <div>
+              {title ? <h3>{title}</h3> : null}
+              {description ? <p>{description}</p> : null}
+            </div>
+          </div>
+        ) : null}
+
         <div className="form-grid">
-          <label className="form-field" htmlFor="name">
+          <label className="form-field form-field-honeypot" htmlFor={`${baseId}-website`} aria-hidden="true">
+            <span>Сайт</span>
+            <input
+              id={`${baseId}-website`}
+              name={`${baseId}-website`}
+              type="text"
+              tabIndex={-1}
+              autoComplete="off"
+              value={form.website}
+              onChange={(event) => updateField('website', event.target.value)}
+            />
+          </label>
+
+          <label className="form-field" htmlFor={`${baseId}-name`}>
             <span>Имя *</span>
             <input
-              id="name"
-              name="name"
+              id={`${baseId}-name`}
+              name={`${baseId}-name`}
               type="text"
               placeholder="Ваше имя"
               autoComplete="name"
@@ -214,26 +295,34 @@ export default function FranchiseForm() {
             />
           </label>
 
-          <label className="form-field" htmlFor="city">
+          <label className="form-field" htmlFor={`${baseId}-city`}>
             <span>Город *</span>
             <input
-              id="city"
-              name="city"
+              id={`${baseId}-city`}
+              name={`${baseId}-city`}
               type="text"
               placeholder="Ваш город"
               autoComplete="address-level2"
               value={form.city}
-              onChange={(event) => updateField('city', event.target.value)}
+              onChange={(event) => {
+                updateField('city', event.target.value);
+                if (source === 'city_check_form' && !cityInputTrackedRef.current && getText(event.target.value).length >= 2) {
+                  cityInputTrackedRef.current = true;
+                  trackFranchiseEvent('franchise_city_check_input', {
+                    source,
+                  });
+                }
+              }}
               required
             />
           </label>
 
-          <label className="form-field" htmlFor="phone">
+          <label className="form-field" htmlFor={`${baseId}-phone`}>
             <span>Телефон *</span>
             <input
               ref={phoneInputRef}
-              id="phone"
-              name="phone"
+              id={`${baseId}-phone`}
+              name={`${baseId}-phone`}
               type="tel"
               placeholder="+7 (999) 123-45-67"
               autoComplete="tel"
@@ -247,38 +336,70 @@ export default function FranchiseForm() {
             />
           </label>
 
-          <label className="form-field" htmlFor="budget">
-            <span>Ориентировочный бюджет</span>
-            <select
-              id="budget"
-              name="budget"
-              value={form.budget}
-              onChange={(event) => updateField('budget', event.target.value)}
-            >
-              <option value="">Выберите диапазон</option>
-              <option value="До 3 млн ₽">До 3 млн ₽</option>
-              <option value="3-6 млн ₽">3-6 млн ₽</option>
-              <option value="6-10 млн ₽">6-10 млн ₽</option>
-              <option value="10+ млн ₽">10+ млн ₽</option>
-            </select>
+          <label className="form-field" htmlFor={`${baseId}-email`}>
+            <span>Email *</span>
+            <input
+              id={`${baseId}-email`}
+              name={`${baseId}-email`}
+              type="email"
+              placeholder="mail@example.com"
+              autoComplete="email"
+              value={form.email}
+              onChange={(event) => updateField('email', event.target.value)}
+              required
+            />
           </label>
 
-          <label className="form-field full" htmlFor="comment">
-            <span>Комментарий</span>
-            <textarea
-              id="comment"
-              name="comment"
-              placeholder="Кратко о локации, сроках, ожиданиях"
-              value={form.comment}
-              onChange={(event) => updateField('comment', event.target.value)}
-            ></textarea>
+          <label className="form-field full" htmlFor={`${baseId}-telegram`}>
+            <span>Telegram username</span>
+            <input
+              id={`${baseId}-telegram`}
+              name={`${baseId}-telegram`}
+              type="text"
+              placeholder="@username"
+              autoComplete="username"
+              value={form.telegramUsername}
+              onChange={(event) => updateField('telegramUsername', event.target.value)}
+            />
           </label>
+
+          {showBudget ? (
+            <label className="form-field" htmlFor={`${baseId}-budget`}>
+              <span>Ориентировочный бюджет</span>
+              <select
+                id={`${baseId}-budget`}
+                name={`${baseId}-budget`}
+                value={form.budget}
+                onChange={(event) => updateField('budget', event.target.value)}
+              >
+                <option value="">Выберите диапазон</option>
+                {BUDGET_OPTIONS.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : null}
+
+          {showComment ? (
+            <label className="form-field full" htmlFor={`${baseId}-comment`}>
+              <span>Комментарий</span>
+              <textarea
+                id={`${baseId}-comment`}
+                name={`${baseId}-comment`}
+                placeholder="Кратко о городе, локации, сроках и ожиданиях"
+                value={form.comment}
+                onChange={(event) => updateField('comment', event.target.value)}
+              />
+            </label>
+          ) : null}
         </div>
 
-        <label className="form-consent" htmlFor="consent">
+        <label className="form-consent" htmlFor={`${baseId}-consent`}>
           <input
-            id="consent"
-            name="consent"
+            id={`${baseId}-consent`}
+            name={`${baseId}-consent`}
             type="checkbox"
             checked={form.consent}
             onChange={(event) => updateField('consent', event.target.checked)}
@@ -288,12 +409,27 @@ export default function FranchiseForm() {
         </label>
 
         <div className="form-actions">
-          <button className="btn btn-primary" type="submit" disabled={status === 'loading'}>
-            {status === 'loading' ? 'Отправка...' : 'Отправить заявку'}
+          <button
+            className="btn btn-primary"
+            type="submit"
+            disabled={status === 'loading'}
+            data-metrika-event="franchise_cta_click"
+            data-metrika-source={source}
+            data-metrika-label={submitLabel}
+          >
+            {status === 'loading' ? 'Отправка...' : submitLabel}
           </button>
-          <a className="btn btn-ghost" href="https://vk.com/im?sel=-229523120" target="_blank" rel="noopener noreferrer">
-            Написать в VK
-          </a>
+          {showSecondaryAction ? (
+            <a
+              className="btn btn-ghost"
+              href="#franchise-final-form"
+              data-metrika-event="franchise_cta_click"
+              data-metrika-source={`${source}_secondary`}
+              data-metrika-label="Перейти к полной заявке"
+            >
+              Перейти к полной заявке
+            </a>
+          ) : null}
         </div>
 
         <p className={`form-note ${status === 'error' ? 'error' : ''}`} aria-live="polite">
@@ -302,7 +438,7 @@ export default function FranchiseForm() {
       </form>
 
       {isSuccessPopupOpen ? (
-        <div className="submit-success-popup" role="dialog" aria-modal="true" aria-labelledby="submit-success-title">
+        <div className="submit-success-popup" role="dialog" aria-modal="true" aria-labelledby={`${baseId}-success-title`}>
           <button
             className="submit-success-popup-backdrop"
             type="button"
@@ -310,8 +446,8 @@ export default function FranchiseForm() {
             aria-label="Закрыть уведомление"
           />
           <div className="submit-success-popup-card">
-            <h3 id="submit-success-title">Заявка отправлена</h3>
-            <p>Спасибо! Мы получили вашу заявку и свяжемся с вами в ближайшее время.</p>
+            <h3 id={`${baseId}-success-title`}>Заявка отправлена</h3>
+            <p>Спасибо. Команда RUNA свяжется с вами для обсуждения города, бюджета и расчета модели.</p>
             <button className="btn btn-primary" type="button" onClick={closeSuccessPopup}>
               Понятно
             </button>

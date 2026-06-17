@@ -1,29 +1,33 @@
 import { NextResponse } from 'next/server';
+import { createFranchiseLead, updateFranchiseLeadIntegrations } from '../../../lib/franchise-leads';
+import { deliverFranchiseLead } from '../../../lib/franchise-integrations';
 
 export const runtime = 'nodejs';
 
 const getText = (value) => (typeof value === 'string' ? value.trim() : '');
-const parseChatIds = (raw) =>
-  Array.from(
-    new Set(
-      getText(raw)
-        .split(/[,\n;\s]+/)
-        .map((item) => item.trim())
-        .filter(Boolean)
-    )
-  );
 
-export async function POST(request) {
-  const token = process.env.TELEGRAM_BOT_TOKEN;
-  const chatIds = parseChatIds(process.env.TELEGRAM_CHAT_ID);
-
-  if (!token || chatIds.length === 0) {
-    return NextResponse.json(
-      { ok: false, error: 'Сервер не настроен: добавьте TELEGRAM_BOT_TOKEN и TELEGRAM_CHAT_ID.' },
-      { status: 500 }
-    );
+const extractUtmFromUrl = (value) => {
+  const urlValue = getText(value);
+  if (!urlValue) {
+    return {};
   }
 
+  try {
+    const url = new URL(urlValue);
+    return {
+      utmSource: getText(url.searchParams.get('utm_source')),
+      utmMedium: getText(url.searchParams.get('utm_medium')),
+      utmCampaign: getText(url.searchParams.get('utm_campaign')),
+      utmContent: getText(url.searchParams.get('utm_content')),
+      utmTerm: getText(url.searchParams.get('utm_term')),
+    };
+  } catch {
+    return {};
+  }
+};
+
+
+export async function POST(request) {
   let payload;
 
   try {
@@ -32,89 +36,59 @@ export async function POST(request) {
     return NextResponse.json({ ok: false, error: 'Невалидный JSON в заявке.' }, { status: 400 });
   }
 
-  const name = getText(payload?.name);
-  const city = getText(payload?.city);
-  const phone = getText(payload?.phone);
-  const budget = getText(payload?.budget);
-  const comment = getText(payload?.comment);
-  const consent = Boolean(payload?.consent);
+  const pageUrl = getText(payload?.pageUrl || request.headers.get('origin'));
+  const utmFromUrl = extractUtmFromUrl(pageUrl);
 
-  if (!name || !city || !phone) {
+  if (getText(payload?.website)) {
+    return NextResponse.json({ ok: true, message: 'Заявка сохранена. Команда RUNA свяжется с вами.' }, { status: 202 });
+  }
+
+  let lead;
+
+  try {
+    lead = await createFranchiseLead({
+      ...payload,
+      source: getText(payload?.source) || 'franchise-form',
+      pageUrl,
+      referrer: getText(payload?.referrer || request.headers.get('referer')),
+      userAgent: getText(payload?.userAgent || request.headers.get('user-agent')),
+      utmSource: getText(payload?.utmSource) || utmFromUrl.utmSource,
+      utmMedium: getText(payload?.utmMedium) || utmFromUrl.utmMedium,
+      utmCampaign: getText(payload?.utmCampaign) || utmFromUrl.utmCampaign,
+      utmContent: getText(payload?.utmContent) || utmFromUrl.utmContent,
+      utmTerm: getText(payload?.utmTerm) || utmFromUrl.utmTerm,
+    });
+  } catch (error) {
     return NextResponse.json(
-      { ok: false, error: 'Заполните обязательные поля: Имя, Город, Телефон.' },
+      {
+        ok: false,
+        error: getText(error?.message) || 'Не удалось сохранить заявку.',
+      },
       { status: 400 }
     );
   }
 
-  const digits = phone.replace(/\D/g, '');
-  if (digits.length !== 11 || !digits.startsWith('7')) {
-    return NextResponse.json({ ok: false, error: 'Проверьте телефон: формат +7 (999) 999-99-99.' }, { status: 400 });
-  }
+  const deliveries = await deliverFranchiseLead(lead);
 
-  if (!consent) {
-    return NextResponse.json({ ok: false, error: 'Не подтверждено согласие на обработку данных.' }, { status: 400 });
-  }
-
-  const messageText = [
-    '🟡 Новая заявка на франшизу RUNA',
-    `Имя: ${name}`,
-    `Город: ${city}`,
-    `Телефон: ${phone}`,
-    `Бюджет: ${budget || 'не указан'}`,
-    `Комментарий: ${comment || 'нет'}`,
-    `Страница: ${request.headers.get('origin') || 'неизвестно'}`,
-    `Время: ${new Date().toLocaleString('ru-RU', { timeZone: 'Europe/Moscow' })}`,
-  ].join('\n');
-
-  const sendResults = await Promise.all(
-    chatIds.map(async (chatId) => {
-      const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          chat_id: chatId,
-          text: messageText,
-          disable_web_page_preview: true,
-        }),
-      });
-
-      let body = null;
-
-      try {
-        body = await response.json();
-      } catch {
-        body = null;
-      }
-
-      return {
-        chatId,
-        ok: response.ok && Boolean(body?.ok),
-        status: response.status,
-        description: body?.description || '',
-      };
-    })
-  );
-
-  const failed = sendResults.filter((item) => !item.ok);
-  if (failed.length > 0) {
-    return NextResponse.json(
-      {
-        ok: false,
-        error: `Ошибка отправки в Telegram для ${failed.length} чатов. Проверьте токен бота и chat_id.`,
-        failedChatIds: failed.map((item) => ({
-          chatId: item.chatId,
-          status: item.status,
-          description: item.description || 'Unknown error',
-        })),
-      },
-      { status: 502 }
-    );
-  }
-
-  return NextResponse.json({
-    ok: true,
-    sentTo: sendResults.map((item) => item.chatId),
+  const updatedLead = await updateFranchiseLeadIntegrations(lead.id, {
+    telegram: deliveries.telegram,
+    email: deliveries.email,
+    bitrix: deliveries.bitrix,
   });
+
+  const warnings = [deliveries.telegram, deliveries.email, deliveries.bitrix]
+    .filter((item) => item.status === 'failed')
+    .map((item) => item.error)
+    .filter(Boolean);
+
+  return NextResponse.json(
+    {
+      ok: true,
+      leadId: lead.id,
+      message: 'Заявка сохранена. Команда RUNA свяжется с вами.',
+      warnings,
+      integrations: updatedLead?.integrations || deliveries,
+    },
+    { status: 201 }
+  );
 }

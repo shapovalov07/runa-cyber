@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useId, useMemo, useRef } from 'react';
-import { toRichTextHtml } from '@/lib/rich-text';
+import { toRichTextHtml } from '../lib/rich-text';
 
 const getText = (value) => (typeof value === 'string' ? value : '');
 const HAS_HTML_TAG_PATTERN = /<\/?[a-z][^>]*>/i;

@@ -1,5 +1,5 @@
-import PhotoCarousel from '@/components/PhotoCarousel';
-import { getGalleryPhotos } from '@/lib/cms-storage';
+import PhotoCarousel from './PhotoCarousel';
+import { getGalleryPhotos } from '../lib/cms-storage';
 
 const fallbackPhotosBySection = {
   home: [

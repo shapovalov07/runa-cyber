@@ -8,10 +8,19 @@ import { navLinks } from './site-config';
 export default function SiteHeader() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [isFranchiseHost, setIsFranchiseHost] = useState(false);
 
   useEffect(() => {
     setOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    setIsFranchiseHost(window.location.hostname === 'franchise.runa-cyber.ru');
+  }, []);
+
+  if (pathname === '/franchise' || isFranchiseHost) {
+    return null;
+  }
 
   return (
     <header className="site-header">
@@ -32,12 +41,14 @@ export default function SiteHeader() {
 
         <nav className={`nav ${open ? 'open' : ''}`} aria-label="Основная навигация">
           {navLinks.map((item) => {
-            const active = pathname === item.href;
+            const active = !item.external && pathname === item.href;
             return (
               <Link
                 key={item.href}
                 href={item.href}
                 className={active ? 'active' : ''}
+                target={item.external ? '_blank' : undefined}
+                rel={item.external ? 'noopener noreferrer' : undefined}
               >
                 {item.label}
               </Link>

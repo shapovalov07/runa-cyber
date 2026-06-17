@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { deleteAdminUser, getAdminCredentialsFromRequest, resetAdminUserPassword } from '@/lib/admin-auth';
+import { deleteAdminUser, getAdminCredentialsFromRequest, resetAdminUserPassword } from '../../../../../lib/admin-auth';
 
 export const runtime = 'nodejs';
 

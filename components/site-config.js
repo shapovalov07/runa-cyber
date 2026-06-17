@@ -2,8 +2,8 @@ export const navLinks = [
   { href: '/', label: 'Главная' },
   { href: '/clubs', label: 'Наши клубы' },
   { href: '/tournaments', label: 'Кибертурниры' },
-  { href: '/franchise', label: 'Франшиза' },
   { href: '/contacts', label: 'Контакты' },
+  { href: 'https://franchise.runa-cyber.ru/', label: 'Франшиза', external: true },
 ];
 
 export const contactLinks = [
@@ -11,4 +11,4 @@ export const contactLinks = [
 ];
 
 export const footerDescription =
-  'Информационный сайт сети RUNA Cyber Club: клубы, турниры, новости, контакты и франшиза.';
+  'Информационный сайт сети RUNA Cyber Club: клубы, турниры, новости и контакты.';
